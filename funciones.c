@@ -22,7 +22,7 @@ a_minusculas (char *restrict operando)
 
 // guarda todos los caracteres distintos de cada entrada
 int
-procesar_letras (char *restrict operando, char **restrict letras)
+procesar_letras (const char *restrict operando, char **restrict const letras)
 {
 	do
 		{
@@ -47,8 +47,9 @@ procesar_letras (char *restrict operando, char **restrict letras)
 }
 
 void
-guardar_operando (const char *restrict operando, char ***restrict operandos,
-									int *restrict cantidad_operandos)
+guardar_operando (const char *restrict const operando,
+									char ***restrict const operandos,
+									int *restrict const cantidad_operandos)
 {
 	(*cantidad_operandos)++;
 	*operandos =
@@ -59,9 +60,9 @@ guardar_operando (const char *restrict operando, char ***restrict operandos,
 
 // guarda el operador
 void
-guardar_operador (const char *restrict operador,
+guardar_operador (const char *restrict const operador,
 									char **restrict operadores,
-									const int *restrict cantidad_operandos)
+									const int *restrict const cantidad_operandos)
 {
 	if (*operadores == NULL)
 		{
@@ -74,36 +75,34 @@ guardar_operador (const char *restrict operador,
 }
 
 void
-generar_poblacion_inicial (char *individuos,
-													 char *restrict letras,
-													 long int *restrict poblacion)
+generar_poblacion_inicial (char *restrict individuos,
+													 const char *restrict const letras,
+													 const long int *restrict const poblacion)
 {
 	memset (individuos, '\0', (*poblacion * 11));
 
-	size_t len = strlen (letras);
+	const size_t len = strlen (letras);
 	long int n;
-	char *individuos_aux = individuos;
 
 	// avanza el puntero 11 posiciones porque ese es el largo de cada fila
-	for (n = 0; n++ < *poblacion; individuos_aux += 11)
-		memcpy (individuos_aux, letras, len);
+	for (n = 0; n++ < *poblacion; individuos += 11)
+		memcpy (individuos, letras, len);
+	individuos -= (*poblacion * 11);
 
-	// de http://benpfaff.org/writings/clc/shuffle.html
 	n = 0;
+	// de http://benpfaff.org/writings/clc/shuffle.html
 	srand ((time (0) & 0xFFFF) | (getpid () << 16));
-	int columna;
-	short aleatorio;
-	char caracter;
 	do
 		{
+			int columna;
 			/* todos los individuos tiene 10 posiciones,
 			 * independientemente de la cantidad de letras distintas */
 			/* accede a cada posición del individuos como si fuera de 1 dimensión */
 			for (columna = 0; columna < 10; columna++)
 				{
-					aleatorio =
+					const short aleatorio =
 						(short) (columna + rand () / (RAND_MAX / (10 - columna) + 1));
-					caracter = individuos[n * 11 + aleatorio];
+					const char caracter = individuos[n * 11 + aleatorio];
 					individuos[n * 11 + aleatorio] = individuos[n * 11 + columna];
 					individuos[n * 11 + columna] = caracter;
 				}
@@ -112,18 +111,17 @@ generar_poblacion_inicial (char *individuos,
 }
 
 long int
-funcion_de_parada (const char *restrict individuos,
-									 const long int *restrict poblacion,
-									 char **restrict operandos,
-									 const int *restrict cantidad_operandos,
-									 const char *restrict operaciones)
+funcion_de_parada (const char *restrict const individuos,
+									 const long int *restrict const poblacion,
+									 char **restrict const operandos,
+									 const int *restrict const cantidad_operandos,
+									 const char *restrict const operaciones)
 {
-	// parada = |resultado - (operaciones con operadores)|
+	/* parada = |resultado - (operaciones con operadores)| */
 	long int n = 0;
-	int k;
-	int operandos_numericos[*cantidad_operandos];
 	do
 		{
+			int operandos_numericos[*cantidad_operandos];
 			memset (operandos_numericos, 0, sizeof (operandos_numericos));
 
 			convertir_operandos_a_numeros (&individuos[n * 11], operandos,
@@ -136,6 +134,7 @@ funcion_de_parada (const char *restrict individuos,
 			char pila_operaciones[*cantidad_operandos - 2];
 			int tope_pila_operaciones = 0;
 
+			int k;
 			for (k = 0; k < (*cantidad_operandos - 1); k++)
 				{
 					if (strcmp ("(", operandos[k]) == 0
@@ -231,35 +230,35 @@ funcion_de_parada (const char *restrict individuos,
 }
 
 void
-convertir_operandos_a_numeros (const char *restrict individuo,
-															 char **restrict operandos,
+convertir_operandos_a_numeros (const char *restrict const individuo,
+															 char **restrict const operandos,
 															 int cantidad_operandos,
-															 int *restrict operandos_numericos)
+															 int *restrict const operandos_numericos)
 {
-	char caracter_buscado, caracter_encontrado;
-	int indice, longitud_operando, columna, numero;
-
 	while (cantidad_operandos-- > 0)
 		{
 			if (strcmp ("(", operandos[cantidad_operandos]) == 0
 					|| strcmp (")", operandos[cantidad_operandos]) == 0)
 				continue;
 
-			columna = 0;
-			longitud_operando = (int) strlen (operandos[cantidad_operandos]);
+			int columna = 0;
+			const int longitud_operando =
+				(int) strlen (operandos[cantidad_operandos]);
 			// recorre todos los caracteres del operando
 			do
 				{
-					caracter_buscado = operandos[cantidad_operandos][columna];
+					const char caracter_buscado =
+						operandos[cantidad_operandos][columna];
 					// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
 					// con el caracter seleccionado del operando
+					int indice;
 					for (indice = 0; indice < 10; indice++)
 						{
-							caracter_encontrado = individuo[indice];
+							const char caracter_encontrado = individuo[indice];
 							if (caracter_buscado == caracter_encontrado)
 								{
 									int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
-									numero = indice;
+									int numero = indice;
 									if (indice > 0)
 										while (++aux < longitud_operando - columna)
 											numero = (numero << 3) + (numero << 1);	// x*10 => x*[(2^3+2)]
@@ -273,7 +272,7 @@ convertir_operandos_a_numeros (const char *restrict individuo,
 }
 
 int
-precedencia (const char *restrict operacion)
+precedencia (const char *restrict const operacion)
 {
 	if (*operacion == '*' || *operacion == '/')
 		return 2;

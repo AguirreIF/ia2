@@ -12,7 +12,8 @@
 	extern FILE *yyin;
 	extern int yy_scan_string(const char *entrada);
 
-	void yyerror (char **letras, char ***operandos, char **operadores, int *cantidad_operandos, const char *mensaje);
+	void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
+ 				  int *restrict cantidad_operandos, const char *restrict const mensaje);
 %}
 
 %define api.pure
@@ -59,7 +60,8 @@ operando:
 	};
 %%
 
-void yyerror (char **letras, char ***operandos, char **operadores, int *cantidad_operandos, const char *mensaje) {
+void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
+			  int *restrict cantidad_operandos, const char *restrict const mensaje) {
 	UNUSED(letras);
 	UNUSED(operandos);
 	UNUSED(operadores);
@@ -67,7 +69,9 @@ void yyerror (char **letras, char ***operandos, char **operadores, int *cantidad
 	printf ("Error: %s\n", mensaje);
 }
 
-int procesar (const char *restrict entrada, char **restrict letras, char ***restrict operandos, char **restrict operadores, int *restrict cantidad_operandos) {
+int procesar (const char *restrict const entrada, char **restrict letras,
+			  char ***restrict operandos, char **restrict operadores,
+			  int *restrict cantidad_operandos) {
 	if (entrada == NULL)
 		yyin = (FILE *) 0;
 	else

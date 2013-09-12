@@ -173,12 +173,13 @@ main (int argc, char **argv)
 
 			if (individuo_solucion != -1)
 				{
-					int indice;
 					printf ("\n¡Solución! individuo: %ld\n", individuo_solucion);
+					int indice;
 					for (indice = 0; indice < 10; indice++)
 						if (individuos[individuo_solucion * 11 + indice] != '\0')
-							printf ("%c --> %d\t\t", individuos[individuo_solucion * 11 + indice], indice);
-					puts("");
+							printf ("%c --> %d\t\t",
+											individuos[individuo_solucion * 11 + indice], indice);
+					puts ("");
 				}
 
 			/* int j; */
