@@ -1,11 +1,12 @@
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <ctype.h>
+#include <errno.h>
+#include <getopt.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 #include "funciones.h"
 
 /*
@@ -39,7 +40,13 @@ main (int argc, char **argv)
 
 	int opcion;
 
-	while ((opcion = getopt (argc, argv, ":p:e:h")) != -1)
+	static struct option long_options[] = {
+		{"poblacion", required_argument, 0, 'p'},
+		{"help",      no_argument,       0, 'h'},
+		{0,           0,                 0,  0}
+	};
+
+	while ((opcion = getopt_long (argc, argv, "+:p:e:h", long_options, NULL)) != -1)
 		switch (opcion)
 			{
 			case 'p':
@@ -80,7 +87,7 @@ main (int argc, char **argv)
 				}
 			case 'h':
 				printf
-					("Uso: %s [-p|--poblacion <cantidad_poblacion> -s|--silencio]\n",
+					("Uso: %s [-p|--poblacion <cantidad_poblacion> -h|--help]\n",
 					 argv[0]);
 				exit (EXIT_SUCCESS);
 			case ':':
