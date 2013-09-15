@@ -9,26 +9,6 @@
 #include <unistd.h>
 #include "funciones.h"
 
-/*
- * ¿Qué pasa con los números negativos, y la resta?
- * Trabajar solo con números positivos, el signo "-" de la resta puede ser una
- * letra más.
- *
- * ¿La operación es entre dos operandos o es una sola operación entre todos los
- * operandos?
- * Puede mezclarse por ejemplo (op1 - op2) * op3.
- *
- * ¿Los operandos distinguen entre mayúsculas y minúsculas?
- * Trabajar solo con minúsculas, pero permitir entradas en mayúsculas y luego
- * convertir a minúsculas.
- *
- * ¿Los operandos solo tienen caracteres entre [A-Z] sin acentos?
- * Si, usar solo ASCII.
- *
- * Solo 10 letras distintas como mucho, si hay más de 10 letras distintas el
- * programa falla.
- */
-
 int
 main (int argc, char **argv)
 {
@@ -46,7 +26,8 @@ main (int argc, char **argv)
 		{0,           0,                 0,  0}
 	};
 
-	while ((opcion = getopt_long (argc, argv, "+:p:e:h", long_options, NULL)) != -1)
+	while ((opcion =
+					getopt_long (argc, argv, "+:p:e:h", long_options, NULL)) != -1)
 		switch (opcion)
 			{
 			case 'p':
@@ -148,13 +129,8 @@ main (int argc, char **argv)
 			while (indice < (int) strlen (letras))
 				permutaciones *= (10 - indice++);
 
-			// TODO
-			// ¿Permitir una población > al 10% de las permutaciones?
-			//    Ej: 3 letras (720 perm, 10% == 72), pero el usuario ingresa 250
-			// ¿Permitir una población > a 2000?
 			if ((poblacion > permutaciones) || (poblacion == 0))
 				{
-					// Elegir el 10% de la población o como máxima 2000
 					poblacion = permutaciones * .1;
 					if (poblacion > 2000)
 						poblacion = 2000;
@@ -174,42 +150,50 @@ main (int argc, char **argv)
 
 			free (letras);
 
-			long int individuo_solucion =
-				funcion_de_parada ((char *) individuos, &poblacion, operandos,
-													 &cantidad_operandos, operadores);
-
-			if (individuo_solucion != -1)
+			/* CICLO ALGORITMO GENÉTICO  */
+			while (1)
 				{
-					printf ("\n¡Solución! individuo: %ld\n", individuo_solucion);
-					int indice;
-					for (indice = 0; indice < 10; indice++)
-						if (individuos[individuo_solucion * 11 + indice] != '\0')
-							printf ("%c --> %d\t\t",
-											individuos[individuo_solucion * 11 + indice], indice);
-					puts ("");
+					/* Verifica si es solución */
+					long int individuo_solucion =
+						funcion_de_parada ((char *) individuos, &poblacion, operandos,
+															 &cantidad_operandos, operadores);
+
+					if (individuo_solucion != -1)
+						{
+							printf ("\n¡Solución! individuo: %ld\n", individuo_solucion);
+							int indice;
+							for (indice = 0; indice < 10; indice++)
+								if (individuos[individuo_solucion * 11 + indice] != '\0')
+									printf ("%c --> %d\t\t",
+													individuos[individuo_solucion * 11 + indice],
+													indice);
+							puts ("");
+						}
+
+					/* int j; */
+					/* uint32_t i; */
+					/* for (i = 0; i < poblacion; i++) */
+					/* { */
+					/* printf ("\nindividuo[%d]: %c%c%c%c%c%c%c%c%c%c\n", i, */
+					/* individuos[i * 11 + 0], individuos[i * 11 + 1], */
+					/* individuos[i * 11 + 2], individuos[i * 11 + 3], */
+					/* individuos[i * 11 + 4], individuos[i * 11 + 5], */
+					/* individuos[i * 11 + 6], individuos[i * 11 + 7], */
+					/* individuos[i * 11 + 8], individuos[i * 11 + 9]); */
+					/* for (j = 0; j < 10; j++) */
+					/* if (individuos[i * 11 + j] != '\0') */
+					/* printf ("%c --> %d\t\t", individuos[i * 11 + j], j); */
+					/* } */
+
+					/* puts ("Operandos:"); */
+					/* for (j = 0; j < cantidad_operandos; j++) */
+					/* printf ("%d: %s\n", j, operandos[j]); */
+
+					/* for (j = 0; j < (int) strlen (operadores); j++) */
+					/* printf ("%c\t", operadores[j]); */
+
+					break;
 				}
-
-			/* int j; */
-			/* uint32_t i; */
-			/* for (i = 0; i < poblacion; i++) */
-			/* { */
-			/* printf ("\nindividuo[%d]: %c%c%c%c%c%c%c%c%c%c\n", i, */
-			/* individuos[i * 11 + 0], individuos[i * 11 + 1], */
-			/* individuos[i * 11 + 2], individuos[i * 11 + 3], */
-			/* individuos[i * 11 + 4], individuos[i * 11 + 5], */
-			/* individuos[i * 11 + 6], individuos[i * 11 + 7], */
-			/* individuos[i * 11 + 8], individuos[i * 11 + 9]); */
-			/* for (j = 0; j < 10; j++) */
-			/* if (individuos[i * 11 + j] != '\0') */
-			/* printf ("%c --> %d\t\t", individuos[i * 11 + j], j); */
-			/* } */
-
-			/* puts ("Operandos:"); */
-			/* for (j = 0; j < cantidad_operandos; j++) */
-			/* printf ("%d: %s\n", j, operandos[j]); */
-
-			/* for (j = 0; j < (int) strlen (operadores); j++) */
-			/* printf ("%c\t", operadores[j]); */
 
 			exit (EXIT_SUCCESS);
 		}
