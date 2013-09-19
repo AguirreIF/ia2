@@ -13,7 +13,8 @@ int procesar (const char *restrict const entrada, char **restrict letras,
 void a_minusculas (char *restrict operando);
 
 // guarda todos los caracteres distintos en un string dinámico
-int procesar_letras (const char *restrict operando, char **restrict const letras);
+int procesar_letras (const char *restrict operando,
+										 char **restrict const letras);
 
 // guarda el operando
 void guardar_operando (const char *restrict const operando,
