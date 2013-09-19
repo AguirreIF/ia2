@@ -121,7 +121,7 @@ funcion_de_parada (const char *restrict const individuos,
 	long int n = 0;
 	do
 		{
-			int operandos_numericos[*cantidad_operandos];
+			long long int operandos_numericos[*cantidad_operandos];
 			memset (operandos_numericos, 0, sizeof (operandos_numericos));
 
 			convertir_operandos_a_numeros (&individuos[n * 11], operandos,
@@ -233,7 +233,8 @@ void
 convertir_operandos_a_numeros (const char *restrict const individuo,
 															 char **restrict const operandos,
 															 int cantidad_operandos,
-															 int *restrict const operandos_numericos)
+															 long long int *restrict const
+															 operandos_numericos)
 {
 	while (cantidad_operandos-- > 0)
 		{

@@ -40,7 +40,8 @@ long int funcion_de_parada (const char *restrict const individuos,
 void convertir_operandos_a_numeros (const char *restrict const individuo,
 																		char **restrict const operandos,
 																		int cantidad_operandos,
-																		int *restrict const operandos_numericos);
+																		long long int *restrict const
+																		operandos_numericos);
 
 int precedencia (const char *restrict const operacion);
 
