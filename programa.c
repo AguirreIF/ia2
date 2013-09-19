@@ -128,7 +128,6 @@ main (int argc, char **argv)
 			int permutaciones = 10, indice = 1;
 			while (indice < (int) strlen (letras))
 				permutaciones *= (10 - indice++);
-
 			if ((poblacion > permutaciones) || (poblacion == 0))
 				{
 					poblacion = permutaciones * .1;
@@ -160,7 +159,8 @@ main (int argc, char **argv)
 
 					if (individuo_solucion != -1)
 						{
-							printf ("\n¡Solución! individuo: %ld\n", individuo_solucion);
+							printf ("\n¡Solución! individuo: %ld\n",
+											individuo_solucion + 1);
 							int indice;
 							for (indice = 0; indice < 10; indice++)
 								if (individuos[individuo_solucion * 11 + indice] != '\0')
@@ -170,27 +170,30 @@ main (int argc, char **argv)
 							puts ("");
 						}
 
-					/* int j; */
-					/* uint32_t i; */
-					/* for (i = 0; i < poblacion; i++) */
-					/* { */
-					/* printf ("\nindividuo[%d]: %c%c%c%c%c%c%c%c%c%c\n", i, */
-					/* individuos[i * 11 + 0], individuos[i * 11 + 1], */
-					/* individuos[i * 11 + 2], individuos[i * 11 + 3], */
-					/* individuos[i * 11 + 4], individuos[i * 11 + 5], */
-					/* individuos[i * 11 + 6], individuos[i * 11 + 7], */
-					/* individuos[i * 11 + 8], individuos[i * 11 + 9]); */
-					/* for (j = 0; j < 10; j++) */
-					/* if (individuos[i * 11 + j] != '\0') */
-					/* printf ("%c --> %d\t\t", individuos[i * 11 + j], j); */
-					/* } */
+					int i = 0;
 
-					/* puts ("Operandos:"); */
-					/* for (j = 0; j < cantidad_operandos; j++) */
-					/* printf ("%d: %s\n", j, operandos[j]); */
+					do
+						{
+							long int aptitud = calcular_aptitud (&individuos[i * 11],
+																									 operandos,
+																									 &cantidad_operandos,
+																									 operadores);
+							printf ("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
+											i + 1, individuos[i * 11 + 0], individuos[i * 11 + 1],
+											individuos[i * 11 + 2], individuos[i * 11 + 3],
+											individuos[i * 11 + 4], individuos[i * 11 + 5],
+											individuos[i * 11 + 6], individuos[i * 11 + 7],
+											individuos[i * 11 + 8], individuos[i * 11 + 9],
+											aptitud);
 
-					/* for (j = 0; j < (int) strlen (operadores); j++) */
-					/* printf ("%c\t", operadores[j]); */
+							for (indice = 0; indice < 10; indice++)
+								if (individuos[i * 11 + indice] != '\0')
+									printf ("%c --> %d\t\t", individuos[i * 11 + indice],
+													indice);
+
+							puts ("\n");
+						}
+					while (++i < poblacion);
 
 					break;
 				}

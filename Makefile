@@ -1,5 +1,6 @@
 CC       := cc
 CFLAGS   := -g -Wall -Wextra -pedantic -std=gnu99
+LDFLAGS  := -lm
 
 SRC := programa.c funciones.c entrada.tab.c entrada.c
 OBJ := $(SRC:.c=.o)
@@ -7,7 +8,7 @@ OBJ := $(SRC:.c=.o)
 all: programa
 
 programa: ${OBJ}
-	${CC} ${CFLAGS} -o $@ $^
+	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 programa.o: programa.c entrada.tab.c
 	${CC} ${CFLAGS} -c $^

@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -227,6 +228,158 @@ funcion_de_parada (const char *restrict const individuos,
 		}
 	while (++n < *poblacion);
 	return -1;
+}
+
+int
+calcular_aptitud (const char *restrict const individuo,
+									char **restrict const operandos,
+									const int *restrict const cantidad_operandos,
+									const char *restrict const operaciones)
+{
+	long long int operandos_numericos[*cantidad_operandos];
+	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+
+	convertir_operandos_a_numeros (individuo, operandos,
+																 *cantidad_operandos, operandos_numericos);
+
+	long long pila_operandos[*cantidad_operandos - 1];
+	int tope_pila_operandos = 0;
+
+	char pila_operaciones[*cantidad_operandos - 2];
+	int tope_pila_operaciones = 0;
+
+	int k;
+	for (k = 0; k < (*cantidad_operandos - 1); k++)
+		{
+			if (strcmp ("(", operandos[k]) == 0 || strcmp (")", operandos[k]) == 0)
+				continue;
+
+			pila_operandos[tope_pila_operandos] = operandos_numericos[k];
+			tope_pila_operandos++;
+
+			// primero verificar si hay operaciones por cargar
+			if (k < (*cantidad_operandos - 2))
+				{
+					// Antes de guardar la operación hay que verificar si ya hay otra operación en la pila
+					// si hay y es de mayor o igual precedencia que la que estoy por guardar hay que hacer
+					// la operación antes de guardar la operación actual.
+					// Ejemplo: hay una operación multiplicación y voy a guardar una suma. Hay que hacer la
+					// multiplicación y luego guardar la suma
+					if ((tope_pila_operaciones > 0) &&
+							(precedencia (&pila_operaciones[tope_pila_operaciones - 1])
+							 >= precedencia (&operaciones[k])))
+						{
+							switch (pila_operaciones[tope_pila_operaciones - 1])
+								{
+								case '+':
+									pila_operandos[tope_pila_operandos - 2] +=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '-':
+									pila_operandos[tope_pila_operandos - 2] -=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '*':
+									pila_operandos[tope_pila_operandos - 2] *=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '/':
+									if (pila_operandos[tope_pila_operandos - 2] != 0)
+										pila_operandos[tope_pila_operandos -
+																	 2] /=
+											pila_operandos[tope_pila_operandos - 1];
+									else
+										puts ("División por 0");
+									break;
+								}
+							tope_pila_operandos--;
+							tope_pila_operaciones--;
+						}
+					pila_operaciones[tope_pila_operaciones] = operaciones[k];
+					tope_pila_operaciones++;
+				}
+			// no hay más operaciones, procesar las pilas
+			else
+				{
+					while (tope_pila_operandos > 1)
+						{
+							switch (pila_operaciones[tope_pila_operaciones - 1])
+								{
+								case '+':
+									pila_operandos[tope_pila_operandos - 2] +=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '-':
+									pila_operandos[tope_pila_operandos - 2] -=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '*':
+									pila_operandos[tope_pila_operandos - 2] *=
+										pila_operandos[tope_pila_operandos - 1];
+									break;
+								case '/':
+									if (pila_operandos[tope_pila_operandos - 1] != 0)
+										pila_operandos[tope_pila_operandos -
+																	 2] /=
+											pila_operandos[tope_pila_operandos - 1];
+									else
+										puts ("División por 0");
+									break;
+								}
+							tope_pila_operandos--;
+							tope_pila_operaciones--;
+						}
+				}
+		}
+	/*
+	   resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico)
+	   resultado obtenido = pila_operandos[0] (en formato numérico)
+	   Tendría que convertir ambos a formato char y hacer las comparaciones pertinentes
+	 */
+	char resultado_deseado[30];
+	sprintf (resultado_deseado, "%lld",
+					 operandos_numericos[*cantidad_operandos - 1]);
+
+	char resultado_obtenido[30];
+	sprintf (resultado_obtenido, "%lld", pila_operandos[0]);
+
+	int m, t;
+	const char *restrict y;
+	const char *restrict x;
+	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
+		{
+			m = strlen (resultado_deseado) - 1;
+			x = resultado_deseado;
+			t = strlen (resultado_obtenido) - 1;
+			y = resultado_obtenido;
+		}
+	else
+		{
+			m = strlen (resultado_obtenido) - 1;
+			x = resultado_obtenido;
+			t = strlen (resultado_deseado) - 1;
+			y = resultado_deseado;
+		}
+
+	int aptitud = 0, i;
+
+	int sobra = t - m;
+	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en
+	 * comparación con el más corto */
+
+	/* primera parte de la fórmula,
+	 * va de atrás para adelante porque la unidad está en la última
+	 * posición del array */
+	for (i = m; i > -1; i--)
+		aptitud += (abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10);
+
+	/* segunda parte de la fórmula,
+	 * va de adelante para atrás porque la unidad más grande está en
+	 * la primera posición del array */
+	for (i = 0; i < sobra; i++)
+		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
+
+	return aptitud;
 }
 
 void
