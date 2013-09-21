@@ -12,7 +12,8 @@
 int
 main (int argc, char **argv)
 {
-	long int poblacion = 0;
+	long int poblacion = -1;
+	long int poblacion_maxima = 10000;
 
 	// cuando es distinto de cero, getopt() imprime sus propios mensajes
 	// de error para entradas inválidas o argumentos faltantes
@@ -22,12 +23,13 @@ main (int argc, char **argv)
 
 	static struct option long_options[] = {
 		{"poblacion", required_argument, 0, 'p'},
+		{"poblacion-max", required_argument, 0, 'm'},
 		{"help",      no_argument,       0, 'h'},
 		{0,           0,                 0,  0}
 	};
 
 	while ((opcion =
-					getopt_long (argc, argv, "+:p:e:h", long_options, NULL)) != -1)
+					getopt_long (argc, argv, "+:p:m:h", long_options, NULL)) != -1)
 		switch (opcion)
 			{
 			case 'p':
@@ -41,7 +43,7 @@ main (int argc, char **argv)
 							if (!isdigit (optarg[i]))
 								{
 									fputs
-										("La población debe ser un número entero entre 1 y 3628800\n",
+										("La población debe ser un número entero entre 1 y 100\n",
 										 stderr);
 									exit (EXIT_FAILURE);
 								}
@@ -63,12 +65,54 @@ main (int argc, char **argv)
 							fputs ("La población debe ser mayor a 0", stderr);
 							exit (EXIT_FAILURE);
 						}
+					else if (poblacion > 100)
+						{
+							fputs
+								("La población debe ser un número entero entre 1 y 100\n",
+								 stderr);
+							exit (EXIT_FAILURE);
+						}
+
+					break;
+				}
+			case 'm':
+				{
+					int i;
+					for (i = 0; i < (int) strlen (optarg); i++)
+						{
+							if (!isdigit (optarg[i]))
+								{
+									fputs
+										("La población máxima debe ser un número entero entre 1 y 3628800\n",
+										 stderr);
+									exit (EXIT_FAILURE);
+								}
+						}
+
+					poblacion_maxima = strtol (optarg, NULL, 10);
+
+					/* Verifica posibles errores */
+					if ((errno == ERANGE
+							 && (poblacion_maxima == LONG_MAX
+									 || poblacion_maxima == LONG_MIN)) || (errno != 0
+																												 && poblacion_maxima
+																												 == 0))
+						{
+							perror ("Error en strtol: ");
+							exit (EXIT_FAILURE);
+						}
+
+					if (poblacion == 0)
+						{
+							fputs ("La población máxima debe ser mayor a 0", stderr);
+							exit (EXIT_FAILURE);
+						}
 
 					break;
 				}
 			case 'h':
 				printf
-					("Uso: %s [-p|--poblacion <cantidad_poblacion> -h|--help]\n",
+					("Uso: %s [-p|--poblacion <cantidad_poblacion> -m|--poblacion-max <poblacion_maxima> -h|--help]\n",
 					 argv[0]);
 				exit (EXIT_SUCCESS);
 			case ':':
@@ -128,12 +172,16 @@ main (int argc, char **argv)
 			int permutaciones = 10, indice = 1;
 			while (indice < (int) strlen (letras))
 				permutaciones *= (10 - indice++);
-			if ((poblacion > permutaciones) || (poblacion == 0))
-				{
-					poblacion = permutaciones * .1;
-					if (poblacion > 2000)
-						poblacion = 2000;
-				}
+
+			/* si no especificó poblacion, se asigna un 10% por defecto */
+			if (poblacion == -1)
+				poblacion = 10;
+
+			/* si el % representa una población > poblacion_maxima, entonces poblacion = poblacion_maxima. */
+			if (((poblacion / 100.) * permutaciones) > poblacion_maxima)
+				poblacion = poblacion_maxima;
+			else
+				poblacion = (poblacion / 100.) * permutaciones;
 
 			printf ("Permutaciones: %d\nPoblación: %ld\n", permutaciones,
 							poblacion);
