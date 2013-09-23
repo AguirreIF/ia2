@@ -37,7 +37,7 @@ procesar_letras (const char *restrict operando, char **restrict const letras)
 					if (strlen (*letras) == 10)
 						return 0;
 					size_t len = strlen (*letras);
-					*letras = (char *) realloc (*letras, len + 1);
+					*letras = (char *) realloc (*letras, len + 2);
 					(*letras)[len] = *operando;
 					(*letras)[len + 1] = '\0';
 				}
@@ -67,7 +67,7 @@ guardar_operador (const char *restrict const operador,
 {
 	if (*operadores == NULL)
 		{
-			*operadores = (char *) malloc (1);
+			*operadores = (char *) malloc (2);
 			*operadores[0] = '\0';
 		}
 	else
