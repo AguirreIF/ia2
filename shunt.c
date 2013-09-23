@@ -165,7 +165,7 @@ shunt_op (struct op_s *op)
 	return 1;
 }
 
-long int
+long long int
 calcular_operacion (const long long int *restrict const operandos_numericos,
 										const char *restrict const operadores,
 										char *const operacion)

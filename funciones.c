@@ -130,7 +130,7 @@ funcion_de_parada (const char *restrict const individuos,
 																		 *cantidad_operandos,
 																		 operandos_numericos);
 
-			long int resultado =
+			long long int resultado =
 				calcular_operacion (operandos_numericos, operadores, operacion);
 
 			int diferencia = abs (operandos_numericos[*cantidad_operandos - 1] -
@@ -154,7 +154,7 @@ calcular_aptitud (const char *restrict const individuo,
 	convertir_operandos_a_numeros (individuo, operandos,
 																 *cantidad_operandos, operandos_numericos);
 
-	long int resultado =
+	long long int resultado =
 		calcular_operacion (operandos_numericos, operadores, operacion);
 
 	/* resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico) */
@@ -165,7 +165,7 @@ calcular_aptitud (const char *restrict const individuo,
 					 operandos_numericos[*cantidad_operandos - 1]);
 
 	char resultado_obtenido[30];
-	sprintf (resultado_obtenido, "%ld", resultado);
+	sprintf (resultado_obtenido, "%lld", resultado);
 
 	int m, t;
 	const char *restrict y;

@@ -54,9 +54,9 @@ void convertir_operandos_a_numeros (const char *restrict const individuo,
 																		long long int *restrict const
 																		operandos_numericos);
 
-long int calcular_operacion (const long long int *restrict const
-														 operandos_numericos,
-														 const char *restrict const operadores,
-														 char *const operacion);
+long long int calcular_operacion (const long long int *restrict const
+																	operandos_numericos,
+																	const char *restrict const operadores,
+																	char *const operacion);
 
 #endif /* FUNCIONES_H */
