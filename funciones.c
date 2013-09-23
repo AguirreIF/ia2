@@ -108,7 +108,7 @@ generar_poblacion_inicial (char *restrict individuos,
 					individuos[n * 11 + columna] = caracter;
 				}
 		}
-	while (n++ < *poblacion);
+	while (++n < *poblacion);
 }
 
 long int
