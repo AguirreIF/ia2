@@ -215,10 +215,6 @@ convertir_operandos_a_numeros (const char *restrict const individuo,
 {
 	while (cantidad_operandos-- > 0)
 		{
-			if (strcmp ("(", operandos[cantidad_operandos]) == 0
-					|| strcmp (")", operandos[cantidad_operandos]) == 0)
-				continue;
-
 			int columna = 0;
 			const int longitud_operando =
 				(int) strlen (operandos[cantidad_operandos]);
@@ -229,8 +225,7 @@ convertir_operandos_a_numeros (const char *restrict const individuo,
 						operandos[cantidad_operandos][columna];
 					// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
 					// con el caracter seleccionado del operando
-					int indice;
-					for (indice = 0; indice < 10; indice++)
+					for (int indice = 0; indice < 10; indice++)
 						{
 							const char caracter_encontrado = individuo[indice];
 							if (caracter_buscado == caracter_encontrado)
