@@ -13,3 +13,5 @@
 "+"|"-"|"*"|"/"|"="|"("|")"	{ return yytext[0]; }
 
 .							{ printf("Token no reconocido %s\n", yytext); yyterminate(); return -1; }
+
+<<EOF>>						{ yy_delete_buffer(YY_CURRENT_BUFFER); return 0; }

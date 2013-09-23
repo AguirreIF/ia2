@@ -220,6 +220,12 @@ main (int argc, char **argv)
 					break;
 				}
 
+			free (individuos);
+			while (cantidad_operandos-- > 0)
+				free (operandos[cantidad_operandos]);
+			free (operandos);
+			free (operadores);
+			free (operacion);
 			exit (EXIT_SUCCESS);
 		}
 	else if (salida == 1)
