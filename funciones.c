@@ -231,7 +231,7 @@ convertir_operandos_a_numeros (const char *restrict const individuo,
 							if (caracter_buscado == caracter_encontrado)
 								{
 									int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
-									int numero = indice;
+									long long int numero = indice;
 									if (indice > 0)
 										while (++aux < longitud_operando - columna)
 											numero = (numero << 3) + (numero << 1);	// x*10 => x*[(2^3+2)]
