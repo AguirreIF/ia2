@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,7 +78,7 @@ guardar_operador (const char *restrict const operador,
 void
 generar_poblacion_inicial (char *restrict individuos,
 													 const char *restrict const letras,
-													 const long int *restrict const poblacion)
+													 const uint32_t *restrict const poblacion)
 {
 	memset (individuos, '\0', (*poblacion * 11));
 
@@ -112,7 +113,7 @@ generar_poblacion_inicial (char *restrict individuos,
 
 long int
 funcion_de_parada (const char *restrict const individuos,
-									 const long int *restrict const poblacion,
+									 const uint32_t *restrict const poblacion,
 									 char **restrict const operandos,
 									 const int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,

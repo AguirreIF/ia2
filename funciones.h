@@ -2,6 +2,8 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 
+#include <inttypes.h>
+
 #define UNUSED(x) (void)(x)
 
 // función principal de proceso en entrada.y
@@ -29,11 +31,11 @@ void guardar_operador (const char *restrict const operador,
 // genera la población inicial aleatoriamente
 void generar_poblacion_inicial (char *restrict individuos,
 																const char *restrict const letras,
-																const long int *restrict const poblacion);
+																const uint32_t *restrict const poblacion);
 
 // calcula la aptitud de un individuo
 long int funcion_de_parada (const char *restrict const individuos,
-														const long int *restrict const poblacion,
+														const uint32_t *restrict const poblacion,
 														char **restrict const operandos,
 														const int *restrict const cantidad_operandos,
 														const char *restrict const operaciones,

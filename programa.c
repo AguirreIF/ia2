@@ -1,6 +1,7 @@
 #include <argp.h>
 #include <ctype.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +31,7 @@ static const struct argp_option opciones[] = {
 struct args
 {
 	char *args[3], *entrada;
-	long int poblacion, poblacion_maxima;
+	uint32_t poblacion, poblacion_maxima;
 };
 
 /* Función que hace el parsing de las opciones */
@@ -49,13 +50,14 @@ parse_opt (int key, char *arg, struct argp_state *state)
 					argp_error (state,
 											"La población debe ser un número entero entre 1 y 100");
 
-			args->poblacion = strtol (arg, NULL, 10);
-			/* Verifica posibles errores  */
-			if ((errno == ERANGE
-					 && (args->poblacion == LONG_MAX
-							 || args->poblacion == LONG_MIN))
-					|| (errno != 0 && args->poblacion == 0))
+			long int n_aux = strtol (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && (n_aux == LONG_MAX || n_aux == LONG_MIN))
+					|| (errno != 0 && n_aux == 0))
 				argp_failure (state, 1, errno, "Error de strtol");
+
+			args->poblacion = n_aux;
 
 			if (args->poblacion == 0)
 				argp_error (state, "La población debe ser mayor a 0");
@@ -70,13 +72,14 @@ parse_opt (int key, char *arg, struct argp_state *state)
 					argp_error (state,
 											"La población máxima debe ser un número entero entre 1 y 3628800");
 
-			args->poblacion_maxima = strtol (arg, NULL, 10);
-			/* Verifica posibles errores */
-			if ((errno == ERANGE
-					 && (args->poblacion_maxima == LONG_MAX
-							 || args->poblacion_maxima == LONG_MIN))
-					|| (errno != 0 && args->poblacion_maxima == 0))
+			n_aux = strtol (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && (n_aux == LONG_MAX || n_aux == LONG_MIN))
+					|| (errno != 0 && n_aux == 0))
 				argp_failure (state, 1, errno, "Error de strtol");
+
+			args->poblacion_maxima = n_aux;
 
 			if (args->poblacion_maxima == 0)
 				argp_error (state, "La población máxima debe ser mayor a 0");
@@ -118,7 +121,7 @@ int
 main (int argc, char **argv)
 {
 	struct args args;
-	args.poblacion = -1;
+	args.poblacion = 0;
 	args.poblacion_maxima = 10000;
 	args.entrada = NULL;
 
@@ -146,7 +149,7 @@ main (int argc, char **argv)
 				permutaciones *= (10 - indice++);
 
 			/* si no especificó poblacion, se asigna un 10% por defecto */
-			if (args.poblacion == -1)
+			if (args.poblacion == 0)
 				args.poblacion = 10;
 
 			/* si el % representa una población > población máxima,
@@ -156,7 +159,7 @@ main (int argc, char **argv)
 			else
 				args.poblacion = (args.poblacion / 100.) * permutaciones;
 
-			printf ("Permutaciones: %d\nPoblación: %ld\n", permutaciones,
+			printf ("Permutaciones: %d\nPoblación: %u\n", permutaciones,
 							args.poblacion);
 
 			char *individuos = malloc (args.poblacion * 11);
@@ -193,7 +196,7 @@ main (int argc, char **argv)
 							puts ("");
 						}
 
-					for (int i = 0; i < args.poblacion; i++)
+					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
 							long int aptitud = 0;
 							aptitud = calcular_aptitud (&individuos[i * 11], operandos,
