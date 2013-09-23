@@ -98,9 +98,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
 						if (sobrantes == NULL)
 							sobrantes = (char *) malloc (strlen (state->argv[nro]));
 						sobrantes =
-							(char *) realloc (sobrantes,
-																strlen (state->argv[nro]) +
-																strlen (sobrantes) + 1);
+							realloc (sobrantes,
+											 strlen (state->argv[nro]) + strlen (sobrantes) + 1);
 						strcat (sobrantes, state->argv[nro]);
 						strcat (sobrantes, " ");
 					}
@@ -160,7 +159,7 @@ main (int argc, char **argv)
 			printf ("Permutaciones: %d\nPoblación: %ld\n", permutaciones,
 							args.poblacion);
 
-			char *individuos = (char *) malloc (args.poblacion * 11);
+			char *individuos = malloc (args.poblacion * 11);
 			if (individuos == NULL)
 				{
 					printf ("Falló el malloc de individuos");

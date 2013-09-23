@@ -29,7 +29,7 @@ procesar_letras (const char *restrict operando, char **restrict const letras)
 		{
 			if (*letras == NULL)
 				{
-					*letras = (char *) malloc (1);
+					*letras = malloc (1);
 					*letras[0] = '\0';
 				}
 			if ((strchr (*letras, *operando) == NULL))
@@ -37,7 +37,7 @@ procesar_letras (const char *restrict operando, char **restrict const letras)
 					if (strlen (*letras) == 10)
 						return 0;
 					size_t len = strlen (*letras);
-					*letras = (char *) realloc (*letras, len + 2);
+					*letras = realloc (*letras, len + 2);
 					(*letras)[len] = *operando;
 					(*letras)[len + 1] = '\0';
 				}
@@ -53,8 +53,7 @@ guardar_operando (const char *restrict const operando,
 									int *restrict const cantidad_operandos)
 {
 	(*cantidad_operandos)++;
-	*operandos =
-		(char **) realloc (*operandos, sizeof (char *) * (*cantidad_operandos));
+	*operandos = realloc (*operandos, sizeof (char *) * (*cantidad_operandos));
 	(*operandos)[*cantidad_operandos - 1] = malloc (strlen (operando) + 1);
 	strcpy ((*operandos)[*cantidad_operandos - 1], operando);
 }
@@ -67,11 +66,11 @@ guardar_operador (const char *restrict const operador,
 {
 	if (*operadores == NULL)
 		{
-			*operadores = (char *) malloc (2);
+			*operadores = malloc (2);
 			*operadores[0] = '\0';
 		}
 	else
-		*operadores = (char *) realloc (*operadores, *cantidad_operandos + 1);
+		*operadores = realloc (*operadores, *cantidad_operandos + 1);
 	strcat (*operadores, operador);
 }
 
@@ -120,8 +119,8 @@ funcion_de_parada (const char *restrict const individuos,
 									 char *const operacion)
 {
 	/* parada = |resultado - (operaciones con operadores)| */
-	
-	for(long int n = 0; n < *poblacion;n++)
+
+	for (long int n = 0; n < *poblacion; n++)
 		{
 			long long int operandos_numericos[*cantidad_operandos];
 			memset (operandos_numericos, 0, sizeof (operandos_numericos));
