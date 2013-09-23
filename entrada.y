@@ -13,7 +13,8 @@
 	extern int yy_scan_string(const char *entrada);
 
 	void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
- 				  int *restrict cantidad_operandos, const char *restrict const mensaje);
+ 				  int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje);
+	char *aux = NULL;
 %}
 
 %define api.pure
@@ -23,6 +24,7 @@
 %parse-param { char ***operandos }
 %parse-param { char **operadores }
 %parse-param { int *cantidad_operandos }
+%parse-param { char **operacion }
 
 %union {
 	char *cadena;
@@ -32,28 +34,61 @@
 
 %%
 operacion:
-	expresion '=' operando;
+	expresion '=' operando {
+		/* Elimina el último dígito que representa al resultado porque no interesa */
+		*operacion = malloc (strlen(aux));
+		strncpy(*operacion, aux, strlen(aux) - 1);
+		(*operacion)[strlen(aux) - 1] = '\0';
+		free (aux);
+	};
 
 expresion:
 	operando
 	|
-	expresion '+' { guardar_operador ("+", operadores, cantidad_operandos); } expresion
+	expresion '+' {
+		guardar_operador ("+", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 2);
+		strcat(aux, "0");
+	} expresion
 	|
-	expresion '-' { guardar_operador ("-", operadores, cantidad_operandos); } expresion
+	expresion '-' {
+		guardar_operador ("-", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 2);
+		strcat(aux, "0");
+	} expresion
 	|
-	expresion '*' { guardar_operador ("*", operadores, cantidad_operandos); } expresion
+	expresion '*' {
+		guardar_operador ("*", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 2);
+		strcat(aux, "0");
+	} expresion
 	|
-	expresion '/' { guardar_operador ("/", operadores, cantidad_operandos); } expresion
+	expresion '/' {
+		guardar_operador ("/", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 2);
+		strcat(aux, "0");
+	} expresion
 	|
-	'(' { guardar_operando ("(", operandos, cantidad_operandos); }
+	'(' {
+		guardar_operador ("(", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 1);
+		strcat(aux, "0");
+	}
 	expresion
-	')' { guardar_operando (")", operandos, cantidad_operandos); };
+	')' {
+		guardar_operador (")", operadores, cantidad_operandos);
+		aux = realloc (aux, strlen (aux) + 1);
+		strcat(aux, "0");
+	};
 
 operando:
 	OPERANDO {
 		a_minusculas($OPERANDO);
 		if (procesar_letras ($OPERANDO, letras)) {
 			guardar_operando ($OPERANDO, operandos, cantidad_operandos);
+			free (yylval.cadena);
+			aux = realloc (aux, strlen (aux) + 2);
+			strcat(aux, "1");
 		}
 		else
 			return 2;
@@ -61,21 +96,27 @@ operando:
 %%
 
 void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
-			  int *restrict cantidad_operandos, const char *restrict const mensaje) {
+ 			int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje) {
 	UNUSED(letras);
 	UNUSED(operandos);
 	UNUSED(operadores);
 	UNUSED(cantidad_operandos);
+	UNUSED(operacion);
 	printf ("Error: %s\n", mensaje);
 }
 
-int procesar (const char *restrict const entrada, char **restrict letras,
+int procesar (char *restrict const entrada, char **restrict letras,
 			  char ***restrict operandos, char **restrict operadores,
-			  int *restrict cantidad_operandos) {
+			  int *restrict cantidad_operandos, char **restrict operacion) {
 	if (entrada == NULL)
 		yyin = (FILE *) 0;
-	else
+	else {
 		yy_scan_string(entrada);
+		free(entrada);
+	}
 
-	return yyparse(letras, operandos, operadores, cantidad_operandos);
+	aux = malloc (1);
+	aux[0] = '\0';
+
+	return yyparse(letras, operandos, operadores, cantidad_operandos, operacion);
 }

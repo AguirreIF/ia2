@@ -132,9 +132,10 @@ main (int argc, char **argv)
 	char **operandos = NULL;
 	char *operadores = NULL;
 	int cantidad_operandos = 0;
+	char *operacion = NULL;
 
 	int salida = procesar (args.entrada, &letras, &operandos, &operadores,
-												 &cantidad_operandos);
+												 &cantidad_operandos, &operacion);
 
 	// todo bien
 	if (salida == 0)
@@ -177,7 +178,8 @@ main (int argc, char **argv)
 					/* Verifica si es solución */
 					long int individuo_solucion =
 						funcion_de_parada ((char *) individuos, &args.poblacion,
-															 operandos, &cantidad_operandos, operadores);
+															 operandos, &cantidad_operandos, operadores,
+															 operacion);
 
 					if (individuo_solucion != -1)
 						{
@@ -192,14 +194,14 @@ main (int argc, char **argv)
 							puts ("");
 						}
 
-					int i = 0;
-
-					do
+					for (int i = 0; i < args.poblacion; i++)
 						{
-							long int aptitud = calcular_aptitud (&individuos[i * 11],
-																									 operandos,
-																									 &cantidad_operandos,
-																									 operadores);
+							long int aptitud = 0;
+							aptitud = calcular_aptitud (&individuos[i * 11], operandos,
+																					&cantidad_operandos, operadores,
+																					operacion);
+							if (aptitud == -1)
+								puts ("No se pudo calcular la aptitud porque divide por 0");
 							printf ("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
 											i + 1, individuos[i * 11 + 0], individuos[i * 11 + 1],
 											individuos[i * 11 + 2], individuos[i * 11 + 3],
@@ -215,7 +217,6 @@ main (int argc, char **argv)
 
 							puts ("\n");
 						}
-					while (++i < args.poblacion);
 
 					break;
 				}

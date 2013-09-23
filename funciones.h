@@ -5,9 +5,9 @@
 #define UNUSED(x) (void)(x)
 
 // función principal de proceso en entrada.y
-int procesar (const char *restrict const entrada, char **restrict letras,
+int procesar (char *restrict const entrada, char **restrict letras,
 							char ***restrict operandos, char **restrict operadores,
-							int *restrict cantidad_operandos);
+							int *restrict cantidad_operandos, char **restrict operacion);
 
 // convierte la entrada a minúsculas
 void a_minusculas (char *restrict operando);
@@ -36,13 +36,15 @@ long int funcion_de_parada (const char *restrict const individuos,
 														const long int *restrict const poblacion,
 														char **restrict const operandos,
 														const int *restrict const cantidad_operandos,
-														const char *restrict const operaciones);
+														const char *restrict const operaciones,
+														char *const operacion);
 
 // calcula la aptitud de un individuo
 int calcular_aptitud (const char *restrict const individuo,
 											char **restrict const operandos,
 											const int *restrict const cantidad_operandos,
-											const char *restrict const operaciones);
+											const char *restrict const operadores,
+											char *const operacion);
 
 void convertir_operandos_a_numeros (const char *restrict const individuo,
 																		char **restrict const operandos,
@@ -50,6 +52,9 @@ void convertir_operandos_a_numeros (const char *restrict const individuo,
 																		long long int *restrict const
 																		operandos_numericos);
 
-int precedencia (const char *restrict const operacion);
+long int calcular_operacion (const long long int *restrict const
+														 operandos_numericos,
+														 const char *restrict const operadores,
+														 char *const operacion);
 
 #endif /* FUNCIONES_H */
