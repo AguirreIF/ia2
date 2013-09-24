@@ -203,7 +203,7 @@ main (int argc, char **argv)
 					/* Se toma el 5% como selección elitista
 					 * Serían las estructuras
 					 * individuos[0] a individuos[cantidad_elite - 1] */
-					int cantidad_elite = args.poblacion * .05;
+					uint32_t cantidad_elite = args.poblacion * .05;
 
 					/* Apunta al comienzo del resto de individuos */
 					struct individuos_s *individuos_restantes_s =
