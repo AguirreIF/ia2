@@ -169,8 +169,10 @@ main (int argc, char **argv)
 			free (letras);
 
 			/* CICLO ALGORITMO GENÉTICO  */
-			while (1)
+			for (int generaciones = 1; generaciones > 0; generaciones--)
 				{
+					printf ("Generación: %d\n", generaciones);
+
 					/* Verifica si es solución */
 					long int individuo_solucion =
 						funcion_de_parada (individuos, &args.poblacion,
@@ -187,19 +189,39 @@ main (int argc, char **argv)
 													individuos[individuo_solucion].letras[indice],
 													indice);
 							puts ("");
+							exit (EXIT_SUCCESS);
 						}
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
+						calcular_aptitud (&individuos[i], operandos,
+															&cantidad_operandos, operadores, operacion);
+
+					/* Ordena los individuos por aptitud */
+					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
+								 individuos_cmp);
+
+					/* Se toma el 5% como selección elitista
+					 * Serían las estructuras
+					 * individuos[0] a individuos[cantidad_elite - 1] */
+					int cantidad_elite = args.poblacion * .05;
+
+					/* Apunta al comienzo del resto de individuos */
+					struct individuos_s *individuos_restantes_s =
+						&individuos[cantidad_elite];
+
+					/* Cantidad de individuos restantes */
+					uint32_t individuos_restantes_n = args.poblacion - cantidad_elite;
+
+					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
-							calcular_aptitud (&individuos[i], operandos,
-																&cantidad_operandos, operadores, operacion);
-							printf ("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
-											i + 1, individuos[i].letras[0], individuos[i].letras[1],
-											individuos[i].letras[2], individuos[i].letras[3],
-											individuos[i].letras[4], individuos[i].letras[5],
-											individuos[i].letras[6], individuos[i].letras[7],
-											individuos[i].letras[8], individuos[i].letras[9],
-											individuos[i].aptitud);
+							printf
+								("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
+								 i + 1, individuos[i].letras[0], individuos[i].letras[1],
+								 individuos[i].letras[2], individuos[i].letras[3],
+								 individuos[i].letras[4], individuos[i].letras[5],
+								 individuos[i].letras[6], individuos[i].letras[7],
+								 individuos[i].letras[8], individuos[i].letras[9],
+								 individuos[i].aptitud);
 
 							for (int indice = 0; indice < 10; indice++)
 								if (individuos[i].letras[indice] != '\0')
