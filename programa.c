@@ -144,9 +144,9 @@ main (int argc, char **argv)
 		{
 			// calcula la cantidad de permutaciones posibles
 			// según la cantidad de letras distintas
-			int permutaciones = 10, indice = 1;
-			while (indice < (int) strlen (letras))
-				permutaciones *= (10 - indice++);
+			int permutaciones = 10;
+			for (int indice = 1; indice < (int) strlen (letras); indice++)
+				permutaciones *= (10 - indice);
 
 			/* si no especificó poblacion, se asigna un 10% por defecto */
 			if (args.poblacion == 0)
@@ -162,7 +162,9 @@ main (int argc, char **argv)
 			printf ("Permutaciones: %d\nPoblación: %u\n", permutaciones,
 							args.poblacion);
 
-			char *individuos = malloc (args.poblacion * 11);
+			struct individuos_s *individuos =
+				malloc (args.poblacion * sizeof (struct individuos_s));
+
 			if (individuos == NULL)
 				{
 					printf ("Falló el malloc de individuos");
@@ -178,7 +180,7 @@ main (int argc, char **argv)
 				{
 					/* Verifica si es solución */
 					long int individuo_solucion =
-						funcion_de_parada ((char *) individuos, &args.poblacion,
+						funcion_de_parada (individuos, &args.poblacion,
 															 operandos, &cantidad_operandos, operadores,
 															 operacion);
 
@@ -186,34 +188,29 @@ main (int argc, char **argv)
 						{
 							printf ("\n¡Solución! individuo: %ld\n",
 											individuo_solucion + 1);
-							int indice;
-							for (indice = 0; indice < 10; indice++)
-								if (individuos[individuo_solucion * 11 + indice] != '\0')
+							for (int indice = 0; indice < 10; indice++)
+								if (individuos[individuo_solucion].letras[indice] != '\0')
 									printf ("%c --> %d\t\t",
-													individuos[individuo_solucion * 11 + indice],
+													individuos[individuo_solucion].letras[indice],
 													indice);
 							puts ("");
 						}
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
-							long int aptitud = 0;
-							aptitud = calcular_aptitud (&individuos[i * 11], operandos,
-																					&cantidad_operandos, operadores,
-																					operacion);
-							if (aptitud == -1)
-								puts ("No se pudo calcular la aptitud porque divide por 0");
+							calcular_aptitud (&individuos[i], operandos,
+																&cantidad_operandos, operadores, operacion);
 							printf ("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
-											i + 1, individuos[i * 11 + 0], individuos[i * 11 + 1],
-											individuos[i * 11 + 2], individuos[i * 11 + 3],
-											individuos[i * 11 + 4], individuos[i * 11 + 5],
-											individuos[i * 11 + 6], individuos[i * 11 + 7],
-											individuos[i * 11 + 8], individuos[i * 11 + 9],
-											aptitud);
+											i + 1, individuos[i].letras[0], individuos[i].letras[1],
+											individuos[i].letras[2], individuos[i].letras[3],
+											individuos[i].letras[4], individuos[i].letras[5],
+											individuos[i].letras[6], individuos[i].letras[7],
+											individuos[i].letras[8], individuos[i].letras[9],
+											individuos[i].aptitud);
 
-							for (indice = 0; indice < 10; indice++)
-								if (individuos[i * 11 + indice] != '\0')
-									printf ("%c --> %d\t\t", individuos[i * 11 + indice],
+							for (int indice = 0; indice < 10; indice++)
+								if (individuos[i].letras[indice] != '\0')
+									printf ("%c --> %d\t\t", individuos[i].letras[indice],
 													indice);
 
 							puts ("\n");
@@ -222,6 +219,8 @@ main (int argc, char **argv)
 					break;
 				}
 
+			while (args.poblacion-- > 0)
+				free (individuos[args.poblacion].letras);
 			free (individuos);
 			while (cantidad_operandos-- > 0)
 				free (operandos[cantidad_operandos]);

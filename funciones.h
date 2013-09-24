@@ -6,6 +6,12 @@
 
 #define UNUSED(x) (void)(x)
 
+struct individuos_s
+{
+	char *letras;
+	long int aptitud;
+};
+
 // función principal de proceso en entrada.y
 int procesar (char *restrict const entrada, char **restrict letras,
 							char ***restrict operandos, char **restrict operadores,
@@ -29,26 +35,28 @@ void guardar_operador (const char *restrict const operador,
 											 const int *restrict const cantidad_operandos);
 
 // genera la población inicial aleatoriamente
-void generar_poblacion_inicial (char *restrict individuos,
+void generar_poblacion_inicial (struct individuos_s *restrict individuos,
 																const char *restrict const letras,
-																const uint32_t *restrict const poblacion);
+																const uint32_t * restrict const poblacion);
 
 // calcula la aptitud de un individuo
-long int funcion_de_parada (const char *restrict const individuos,
-														const uint32_t *restrict const poblacion,
+long int funcion_de_parada (const struct individuos_s *restrict const
+														individuos,
+														const uint32_t * restrict const poblacion,
 														char **restrict const operandos,
 														const int *restrict const cantidad_operandos,
 														const char *restrict const operadores,
 														char *const operacion);
 
 // calcula la aptitud de un individuo
-int calcular_aptitud (const char *restrict const individuo,
-											char **restrict const operandos,
-											const int *restrict const cantidad_operandos,
-											const char *restrict const operadores,
-											char *const operacion);
+void calcular_aptitud (struct individuos_s *restrict const individuo,
+											 char **restrict const operandos,
+											 const int *restrict const cantidad_operandos,
+											 const char *restrict const operadores,
+											 char *const operacion);
 
-void convertir_operandos_a_numeros (const char *restrict const individuo,
+void convertir_operandos_a_numeros (const struct individuos_s *restrict const
+																		individuo,
 																		char **restrict const operandos,
 																		int cantidad_operandos,
 																		long long int *restrict const

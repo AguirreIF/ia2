@@ -76,44 +76,36 @@ guardar_operador (const char *restrict const operador,
 }
 
 void
-generar_poblacion_inicial (char *restrict individuos,
+generar_poblacion_inicial (struct individuos_s *restrict individuos,
 													 const char *restrict const letras,
-													 const uint32_t *restrict const poblacion)
+													 const uint32_t * restrict const poblacion)
 {
-	memset (individuos, '\0', (*poblacion * 11));
-
 	const size_t len = strlen (letras);
-	long int n;
 
-	// avanza el puntero 11 posiciones porque ese es el largo de cada fila
-	for (n = 0; n++ < *poblacion; individuos += 11)
-		memcpy (individuos, letras, len);
-	individuos -= (*poblacion * 11);
-
-	n = 0;
 	// de http://benpfaff.org/writings/clc/shuffle.html
 	srand ((time (0) & 0xFFFF) | (getpid () << 16));
-	do
+
+	for (uint32_t n = 0; n < *poblacion; n++)
 		{
-			int columna;
-			/* todos los individuos tiene 10 posiciones,
-			 * independientemente de la cantidad de letras distintas */
-			/* accede a cada posición del individuos como si fuera de 1 dimensión */
-			for (columna = 0; columna < 10; columna++)
+			individuos[n].letras = malloc (11);
+			individuos[n].aptitud = 0;
+			memset (individuos[n].letras, '\0', 11);
+			memcpy (individuos[n].letras, letras, len);
+
+			for (int columna = 0; columna < 10; columna++)
 				{
 					const short aleatorio =
 						(short) (columna + rand () / (RAND_MAX / (10 - columna) + 1));
-					const char caracter = individuos[n * 11 + aleatorio];
-					individuos[n * 11 + aleatorio] = individuos[n * 11 + columna];
-					individuos[n * 11 + columna] = caracter;
+					const char caracter = individuos[n].letras[aleatorio];
+					individuos[n].letras[aleatorio] = individuos[n].letras[columna];
+					individuos[n].letras[columna] = caracter;
 				}
 		}
-	while (++n < *poblacion);
 }
 
 long int
-funcion_de_parada (const char *restrict const individuos,
-									 const uint32_t *restrict const poblacion,
+funcion_de_parada (const struct individuos_s *restrict const individuos,
+									 const uint32_t * restrict const poblacion,
 									 char **restrict const operandos,
 									 const int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,
@@ -126,7 +118,7 @@ funcion_de_parada (const char *restrict const individuos,
 			long long int operandos_numericos[*cantidad_operandos];
 			memset (operandos_numericos, 0, sizeof (operandos_numericos));
 
-			convertir_operandos_a_numeros (&individuos[n * 11], operandos,
+			convertir_operandos_a_numeros (&individuos[n], operandos,
 																		 *cantidad_operandos,
 																		 operandos_numericos);
 
@@ -141,8 +133,8 @@ funcion_de_parada (const char *restrict const individuos,
 	return -1;
 }
 
-int
-calcular_aptitud (const char *restrict const individuo,
+void
+calcular_aptitud (struct individuos_s *restrict const individuo,
 									char **restrict const operandos,
 									const int *restrict const cantidad_operandos,
 									const char *restrict const operadores,
@@ -203,12 +195,12 @@ calcular_aptitud (const char *restrict const individuo,
 	for (i = 0; i < sobra; i++)
 		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
 
-	return aptitud;
+	individuo->aptitud = aptitud;
 }
 
 void
-convertir_operandos_a_numeros (const char *restrict const individuo,
-															 char **restrict const operandos,
+convertir_operandos_a_numeros (const struct individuos_s *restrict const
+															 individuo, char **restrict const operandos,
 															 int cantidad_operandos,
 															 long long int *restrict const
 															 operandos_numericos)
@@ -227,7 +219,7 @@ convertir_operandos_a_numeros (const char *restrict const individuo,
 					// con el caracter seleccionado del operando
 					for (int indice = 0; indice < 10; indice++)
 						{
-							const char caracter_encontrado = individuo[indice];
+							const char caracter_encontrado = individuo->letras[indice];
 							if (caracter_buscado == caracter_encontrado)
 								{
 									int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
