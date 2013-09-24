@@ -38,7 +38,7 @@ long int funcion_de_parada (const char *restrict const individuos,
 														const uint32_t *restrict const poblacion,
 														char **restrict const operandos,
 														const int *restrict const cantidad_operandos,
-														const char *restrict const operaciones,
+														const char *restrict const operadores,
 														char *const operacion);
 
 // calcula la aptitud de un individuo
