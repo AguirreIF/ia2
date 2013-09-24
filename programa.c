@@ -169,8 +169,7 @@ main (int argc, char **argv)
 					exit (EXIT_FAILURE);
 				}
 
-			generar_poblacion_inicial ((char *) individuos, letras,
-																 &args.poblacion);
+			generar_poblacion_inicial (individuos, letras, &args.poblacion);
 
 			free (letras);
 
