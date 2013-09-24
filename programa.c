@@ -230,8 +230,6 @@ main (int argc, char **argv)
 
 							puts ("\n");
 						}
-
-					break;
 				}
 
 			while (args.poblacion-- > 0)
