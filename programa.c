@@ -162,14 +162,7 @@ main (int argc, char **argv)
 			printf ("Permutaciones: %d\nPoblación: %u\n", permutaciones,
 							args.poblacion);
 
-			struct individuos_s *individuos =
-				malloc (args.poblacion * sizeof (struct individuos_s));
-
-			if (individuos == NULL)
-				{
-					printf ("Falló el malloc de individuos");
-					exit (EXIT_FAILURE);
-				}
+			struct individuos_s individuos[args.poblacion];
 
 			generar_poblacion_inicial (individuos, letras, &args.poblacion);
 
@@ -221,7 +214,6 @@ main (int argc, char **argv)
 
 			while (args.poblacion-- > 0)
 				free (individuos[args.poblacion].letras);
-			free (individuos);
 			while (cantidad_operandos-- > 0)
 				free (operandos[cantidad_operandos]);
 			free (operandos);
