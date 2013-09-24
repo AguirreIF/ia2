@@ -235,3 +235,17 @@ convertir_operandos_a_numeros (const struct individuos_s *restrict const
 			while (++columna < longitud_operando);
 		}
 }
+
+/* Función de comparación de estructuras de individuos */
+int
+individuos_cmp (const void *const ptr1, const void *const ptr2)
+{
+	const struct individuos_s *restrict const individuo1 = ptr1;
+	const struct individuos_s *restrict const individuo2 = ptr2;
+	if (individuo1->aptitud < individuo2->aptitud)
+		return -1;
+	else if (individuo1->aptitud > individuo2->aptitud)
+		return 1;
+	else
+		return 0;
+}

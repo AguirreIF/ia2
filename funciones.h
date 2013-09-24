@@ -67,4 +67,6 @@ long long int calcular_operacion (const long long int *restrict const
 																	const char *restrict const operadores,
 																	char *const operacion);
 
+int individuos_cmp (const void *ptr1, const void *ptr2);
+
 #endif /* FUNCIONES_H */
