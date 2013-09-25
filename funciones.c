@@ -87,8 +87,8 @@ generar_poblacion_inicial (struct individuos_s *restrict individuos,
 
 	for (uint32_t n = 0; n < *poblacion; n++)
 		{
-			individuos[n].letras = malloc (11);
 			individuos[n].aptitud = 0;
+			individuos[n].letras = malloc (11);
 			memset (individuos[n].letras, '\0', 11);
 			memcpy (individuos[n].letras, letras, len);
 
@@ -248,4 +248,42 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 		return 1;
 	else
 		return 0;
+}
+
+void
+seleccion_por_ranking_con_ce (struct individuos_s *restrict const
+															individuos, float rmin, uint32_t cantidad)
+{
+	struct individuos_s seleccionados[cantidad];
+	uint32_t copias_totales = 0, indice_nuevos = 0;
+
+	for (uint32_t indice = 0;
+			 (indice < cantidad) && (copias_totales < cantidad); indice++)
+		{
+			short copias_por_individuo =
+				(round) (rmin +
+								 2. * (((cantidad - indice) * (1. - rmin)) / (cantidad - 1)));
+
+			/* Verifica que copias_por_individuo no supere a cantidad.
+			 * Puede pasar si cantidad es muy chica */
+			if ((uint32_t) copias_por_individuo >= cantidad)
+				copias_por_individuo = cantidad - copias_totales;
+
+			/* Hace la cantidad de copias correspondientes */
+			for (short n = 0; n < copias_por_individuo; n++, indice_nuevos++)
+				{
+					seleccionados[indice_nuevos].letras = malloc (11);
+					memcpy (&seleccionados[indice_nuevos], &individuos[indice],
+									sizeof (individuos[indice]));
+				}
+
+			copias_totales += copias_por_individuo;
+		}
+
+	/* Se copian los individuos seleccionados a la estructura original */
+	memcpy (individuos, seleccionados, sizeof (seleccionados));
+
+	/* Por algún motivo no funciona */
+	/* for (uint32_t n = 0; n < (indice_nuevos - 1); n++) */
+		/* free (seleccionados[n].letras); */
 }

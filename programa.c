@@ -205,12 +205,17 @@ main (int argc, char **argv)
 					 * individuos[0] a individuos[cantidad_elite - 1] */
 					uint32_t cantidad_elite = args.poblacion * .05;
 
+					printf ("Cantidad elite: %u\n", cantidad_elite);
+
 					/* Apunta al comienzo del resto de individuos */
 					struct individuos_s *individuos_restantes_s =
 						&individuos[cantidad_elite];
 
 					/* Cantidad de individuos restantes */
 					uint32_t individuos_restantes_n = args.poblacion - cantidad_elite;
+
+					seleccion_por_ranking_con_ce (individuos_restantes_s, 0,
+																				individuos_restantes_n);
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
@@ -232,8 +237,10 @@ main (int argc, char **argv)
 						}
 				}
 
-			while (args.poblacion-- > 0)
-				free (individuos[args.poblacion].letras);
+			/* No ejecuta cuando encuentra solución */
+			/* Por algún motivo no funciona   */
+			/* while (args.poblacion-- > 0) */
+			/* free (individuos[args.poblacion].letras); */
 			while (cantidad_operandos-- > 0)
 				free (operandos[cantidad_operandos]);
 			free (operandos);
