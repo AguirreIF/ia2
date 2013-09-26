@@ -70,7 +70,8 @@ long long int calcular_operacion (const long long int *restrict const
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
-void seleccion_por_ranking_con_ce (struct individuos_s **restrict
-																	 individuos, float rmin, uint32_t cantidad);
+void seleccion_por_ranking_con_ce (struct individuos_s **restrict individuos,
+																	 const uint32_t * restrict const cantidad,
+																	 const float rmin);
 
 #endif /* FUNCIONES_H */

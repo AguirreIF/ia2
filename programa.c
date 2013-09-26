@@ -239,8 +239,8 @@ main (int argc, char **argv)
 					printf ("Cantidad por copias esperadas: %u\n",
 									individuos_restantes_n);
 
-					seleccion_por_ranking_con_ce (&individuos_restantes_s, 0,
-																				individuos_restantes_n);
+					seleccion_por_ranking_con_ce (&individuos_restantes_s,
+																				&individuos_restantes_n, 0);
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
