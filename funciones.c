@@ -78,12 +78,15 @@ guardar_operador (const char *restrict const operador,
 void
 generar_poblacion_inicial (struct individuos_s **restrict individuos,
 													 const char *restrict const letras,
-													 const uint32_t * restrict const poblacion)
+													 const uint32_t * restrict const poblacion,
+													 const long *restrict const semilla)
 {
 	const size_t len = strlen (letras);
 
-	// de http://benpfaff.org/writings/clc/shuffle.html
-	srand ((time (0) & 0xFFFF) | (getpid () << 16));
+	if (*semilla != -1)
+		srand (*semilla);
+	else
+		srand ((time (0) & 0xFFFF) | (getpid () << 16));
 
 	for (uint32_t n = 0; n < *poblacion; n++)
 		{

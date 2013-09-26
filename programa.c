@@ -23,6 +23,8 @@ static const struct argp_option opciones[] = {
 	 "El porcentaje de permutaciones que se usará como población inicial", 0},
 	{"poblacion-max", 'm', "NUM", 0,
 	 "La cantidad máxima de población inicial", 0},
+	{"semilla", 's', "SEMILLA", 0,
+	 "Semilla para generar la población inicial", 0},
 	{0, 0, 0, 0, "Sobre el programa:", -1},
 	{0, 0, 0, 0, 0, 0}
 };
@@ -32,6 +34,7 @@ struct args
 {
 	char *args[3], *entrada;
 	uint32_t poblacion, poblacion_maxima;
+	long semilla;
 };
 
 /* Función que hace el parsing de las opciones */
@@ -85,6 +88,22 @@ parse_opt (int key, char *arg, struct argp_state *state)
 				argp_error (state, "La población máxima debe ser mayor a 0");
 			break;
 
+		case 's':
+			for (int i = 0; i < (int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"La población máxima debe ser un número entero entre 0 y %ld",
+											LONG_MAX);
+
+			n_aux = strtol (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && (n_aux == LONG_MAX || n_aux == LONG_MIN))
+					|| (errno != 0 && n_aux == 0))
+				argp_failure (state, 1, errno, "Error de strtol");
+
+			args->semilla = n_aux;
+
 		case ARGP_KEY_ARG:
 			/* Procesa el argumento */
 			if (state->arg_num > 0)
@@ -124,6 +143,7 @@ main (int argc, char **argv)
 	args.poblacion = 0;
 	args.poblacion_maxima = 10000;
 	args.entrada = NULL;
+	args.semilla = -1;
 
 	static struct argp argp = {
 		opciones, parse_opt, 0, doc, 0, 0, "es_AR"
@@ -165,7 +185,8 @@ main (int argc, char **argv)
 			struct individuos_s *individuos =
 				malloc (args.poblacion * sizeof (struct individuos_s));
 
-			generar_poblacion_inicial (&individuos, letras, &args.poblacion);
+			generar_poblacion_inicial (&individuos, letras, &args.poblacion,
+																 &args.semilla);
 
 			free (letras);
 

@@ -37,7 +37,8 @@ void guardar_operador (const char *restrict const operador,
 // genera la población inicial aleatoriamente
 void generar_poblacion_inicial (struct individuos_s **restrict individuos,
 																const char *restrict const letras,
-																const uint32_t * restrict const poblacion);
+																const uint32_t * restrict const poblacion,
+																const long *restrict const semilla);
 
 // calcula la aptitud de un individuo
 long int funcion_de_parada (const struct individuos_s *restrict const
