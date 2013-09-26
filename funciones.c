@@ -91,8 +91,8 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 	for (uint32_t n = 0; n < *poblacion; n++)
 		{
 			(*individuos)[n].aptitud = 0;
-			(*individuos)[n].letras = malloc (11);
-			memset ((*individuos)[n].letras, '\0', 11);
+			(*individuos)[n].letras = malloc (10);
+			memset ((*individuos)[n].letras, '\0', 10);
 			memcpy ((*individuos)[n].letras, letras, len);
 
 			for (int columna = 0; columna < 10; columna++)
@@ -281,9 +281,9 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos, float rmin,
 					seleccionados[indice_nuevos].aptitud =
 						(*individuos)[indice].aptitud;
 
-					seleccionados[indice_nuevos].letras = malloc (11);
+					seleccionados[indice_nuevos].letras = malloc (10);
 					memcpy (seleccionados[indice_nuevos].letras,
-									(*individuos)[indice].letras, 11);
+									(*individuos)[indice].letras, 10);
 				}
 			copias_totales += copias_por_individuo;
 		}
@@ -292,7 +292,7 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos, float rmin,
 	for (uint32_t indice = 0; indice < cantidad; indice++)
 		{
 			(*individuos)[indice].aptitud = seleccionados[indice].aptitud;
-			memcpy ((*individuos)[indice].letras, seleccionados[indice].letras, 11);
+			memcpy ((*individuos)[indice].letras, seleccionados[indice].letras, 10);
 			free (seleccionados[indice].letras);
 		}
 
