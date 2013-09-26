@@ -35,7 +35,7 @@ void guardar_operador (const char *restrict const operador,
 											 const int *restrict const cantidad_operandos);
 
 // genera la población inicial aleatoriamente
-void generar_poblacion_inicial (struct individuos_s *restrict individuos,
+void generar_poblacion_inicial (struct individuos_s **restrict individuos,
 																const char *restrict const letras,
 																const uint32_t * restrict const poblacion);
 
@@ -69,7 +69,7 @@ long long int calcular_operacion (const long long int *restrict const
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
-void seleccion_por_ranking_con_ce (struct individuos_s *restrict const
+void seleccion_por_ranking_con_ce (struct individuos_s **restrict
 																	 individuos, float rmin, uint32_t cantidad);
 
 #endif /* FUNCIONES_H */

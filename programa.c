@@ -162,9 +162,10 @@ main (int argc, char **argv)
 			printf ("Permutaciones: %d\nPoblación: %u\n", permutaciones,
 							args.poblacion);
 
-			struct individuos_s individuos[args.poblacion];
+			struct individuos_s *individuos =
+				malloc (args.poblacion * sizeof (struct individuos_s));
 
-			generar_poblacion_inicial (individuos, letras, &args.poblacion);
+			generar_poblacion_inicial (&individuos, letras, &args.poblacion);
 
 			free (letras);
 
@@ -214,7 +215,10 @@ main (int argc, char **argv)
 					/* Cantidad de individuos restantes */
 					uint32_t individuos_restantes_n = args.poblacion - cantidad_elite;
 
-					seleccion_por_ranking_con_ce (individuos_restantes_s, 0,
+					printf ("Cantidad por copias esperadas: %u\n",
+									individuos_restantes_n);
+
+					seleccion_por_ranking_con_ce (&individuos_restantes_s, 0,
 																				individuos_restantes_n);
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
@@ -238,9 +242,9 @@ main (int argc, char **argv)
 				}
 
 			/* No ejecuta cuando encuentra solución */
-			/* Por algún motivo no funciona   */
-			/* while (args.poblacion-- > 0) */
-			/* free (individuos[args.poblacion].letras); */
+			while (args.poblacion-- > 0)
+				free (individuos[args.poblacion].letras);
+			free (individuos);
 			while (cantidad_operandos-- > 0)
 				free (operandos[cantidad_operandos]);
 			free (operandos);
