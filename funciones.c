@@ -275,7 +275,7 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 
 			/* Verifica que copias_por_individuo no supere a cantidad.
 			 * Puede pasar si cantidad es muy chica */
-			if (copias_por_individuo >= *cantidad)
+			if ((copias_por_individuo + copias_totales) >= *cantidad)
 				copias_por_individuo = *cantidad - copias_totales;
 
 			/* Hace la cantidad de copias correspondientes */
