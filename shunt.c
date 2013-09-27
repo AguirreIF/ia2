@@ -145,6 +145,8 @@ shunt_op (struct op_s *op)
 							push_numstack (pop->eval (operando2, operando1));
 						}
 				}
+			/* Saca el '(' */
+			pop_opstack ();
 			return 1;
 		}
 
