@@ -75,4 +75,8 @@ void seleccion_por_ranking_con_ce (struct individuos_s **restrict individuos,
 																	 const uint32_t * restrict const cantidad,
 																	 const float rmin);
 
+void cruza (struct individuos_s *restrict individuos,
+						const uint32_t * restrict const cantidad,
+						const unsigned short puntos);
+
 #endif /* FUNCIONES_H */

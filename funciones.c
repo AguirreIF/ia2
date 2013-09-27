@@ -306,3 +306,55 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 
 	free (seleccionados);
 }
+
+void
+cruza (struct individuos_s *restrict individuos,
+			 const uint32_t * restrict const cantidad, const unsigned short puntos)
+{
+	unsigned short d;
+	switch (puntos)
+		{
+		case 1:
+			d = 5;
+			break;
+		case 2:
+			d = 4;
+			break;
+		case 3:
+			d = 3;
+			break;
+		case 4:
+			d = 2;
+			break;
+		}
+
+	for (uint32_t i = 0; i < *cantidad; i++)
+		{
+			/* Si el siguiente es un copia no se cruza */
+			if ((i + 1) < *cantidad)
+				if (individuos[i].letras[0] == individuos[i + 1].letras[0] &&
+						individuos[i].letras[1] == individuos[i + 1].letras[1] &&
+						individuos[i].letras[2] == individuos[i + 1].letras[2] &&
+						individuos[i].letras[3] == individuos[i + 1].letras[3] &&
+						individuos[i].letras[4] == individuos[i + 1].letras[4] &&
+						individuos[i].letras[5] == individuos[i + 1].letras[5] &&
+						individuos[i].letras[6] == individuos[i + 1].letras[6] &&
+						individuos[i].letras[7] == individuos[i + 1].letras[7] &&
+						individuos[i].letras[8] == individuos[i + 1].letras[8] &&
+						individuos[i].letras[9] == individuos[i + 1].letras[9])
+					continue;
+
+			unsigned short j = 0;
+			for (short x = 0; x < puntos; x++)
+				if ((10 - j) >= (d * 2))
+					{
+						for (short a = 0; a < d; a++, j++)
+							{
+								char letra = individuos[i].letras[j];
+								individuos[i].letras[j] = individuos[i].letras[j + d];
+								individuos[i].letras[j + d] = letra;
+							}
+						j += d;
+					}
+		}
+}

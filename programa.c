@@ -255,6 +255,9 @@ main (int argc, char **argv)
 
 							puts ("\n");
 						}
+
+					/* No se cruzan los individuos elite */
+					cruza (&individuos[cantidad_elite], &cantidad_restantes, 2);
 				}
 
 			/* No ejecuta cuando encuentra solución */
