@@ -268,10 +268,14 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 	for (uint32_t indice = 0;
 			 (indice < *cantidad) && (copias_totales < *cantidad); indice++)
 		{
-			short copias_por_individuo =
-				(round) (rmin +
-								 2. * (((*cantidad - indice) * (1. - rmin)) /
-											 (*cantidad - 1)));
+			short copias_por_individuo;
+			if (*cantidad == 1)
+				copias_por_individuo = 1;
+			else
+				copias_por_individuo =
+					(round) (rmin +
+									 2. * (((*cantidad - indice) * (1. - rmin)) /
+												 (*cantidad - 1)));
 
 			/* Verifica que copias_por_individuo no supere a cantidad.
 			 * Puede pasar si cantidad es muy chica */
