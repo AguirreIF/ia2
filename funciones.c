@@ -256,6 +256,7 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 
 void
 seleccion_por_ranking_con_ce (struct individuos_s **individuos,
+															const uint32_t * restrict const inicio,
 															const uint32_t * restrict const cantidad,
 															const float rmin)
 {
@@ -274,7 +275,7 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 
 			/* Verifica que copias_por_individuo no supere a cantidad.
 			 * Puede pasar si cantidad es muy chica */
-			if ((uint32_t) copias_por_individuo >= *cantidad)
+			if (copias_por_individuo >= *cantidad)
 				copias_por_individuo = *cantidad - copias_totales;
 
 			/* Hace la cantidad de copias correspondientes */
@@ -293,8 +294,9 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 	/* Se copian los individuos seleccionados a la estructura original */
 	for (uint32_t indice = 0; indice < *cantidad; indice++)
 		{
-			(*individuos)[indice].aptitud = seleccionados[indice].aptitud;
-			memcpy ((*individuos)[indice].letras, seleccionados[indice].letras, 10);
+			(*individuos)[indice + *inicio].aptitud = seleccionados[indice].aptitud;
+			memcpy ((*individuos)[indice + *inicio].letras,
+							seleccionados[indice].letras, 10);
 			free (seleccionados[indice].letras);
 		}
 

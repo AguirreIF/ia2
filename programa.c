@@ -229,18 +229,13 @@ main (int argc, char **argv)
 
 					printf ("Cantidad elite: %u\n", cantidad_elite);
 
-					/* Apunta al comienzo del resto de individuos */
-					struct individuos_s *individuos_restantes_s =
-						&individuos[cantidad_elite];
-
 					/* Cantidad de individuos restantes */
-					uint32_t individuos_restantes_n = args.poblacion - cantidad_elite;
+					uint32_t cantidad_restantes = args.poblacion - cantidad_elite;
 
-					printf ("Cantidad por copias esperadas: %u\n",
-									individuos_restantes_n);
+					printf ("Cantidad por copias esperadas: %u\n", cantidad_restantes);
 
-					seleccion_por_ranking_con_ce (&individuos_restantes_s,
-																				&individuos_restantes_n, 0);
+					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
+																				&cantidad_restantes, 0);
 
 					for (uint32_t i = 0; i < args.poblacion; i++)
 						{
