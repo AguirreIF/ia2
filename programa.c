@@ -25,6 +25,8 @@ static const struct argp_option opciones[] = {
 	 "La cantidad máxima de población inicial", 0},
 	{"semilla", 's', "SEMILLA", 0,
 	 "Semilla para generar la población inicial", 0},
+	{"generaciones", 'g', "GENERACIONES", 0,
+	 "Cantidad de generaciones", 0},
 	{0, 0, 0, 0, "Sobre el programa:", -1},
 	{0, 0, 0, 0, 0, 0}
 };
@@ -34,7 +36,7 @@ struct args
 {
 	char *args[3], *entrada;
 	uint32_t poblacion, poblacion_maxima;
-	long semilla;
+	long int semilla, generaciones;
 };
 
 /* Función que hace el parsing de las opciones */
@@ -86,6 +88,25 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
 			if (args->poblacion_maxima == 0)
 				argp_error (state, "La población máxima debe ser mayor a 0");
+			break;
+
+		case 'g':
+			for (int i = 0; i < (int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"La cantidad de generaciones debe ser mayor a 0");
+
+			n_aux = strtol (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && (n_aux == LONG_MAX || n_aux == LONG_MIN))
+					|| (errno != 0 && n_aux == 0))
+				argp_failure (state, 1, errno, "Error de strtol");
+
+			args->generaciones = n_aux;
+
+			if (args->generaciones == 0)
+				argp_error (state, "La cantidad de generaciones debe ser mayor a 0");
 			break;
 
 		case 's':
@@ -191,9 +212,10 @@ main (int argc, char **argv)
 			free (letras);
 
 			/* CICLO ALGORITMO GENÉTICO  */
-			for (int generaciones = 1; generaciones > 0; generaciones--)
+			for (long int generacion = 0; generacion < args.generaciones;
+					 generacion++)
 				{
-					printf ("Generación: %d\n", generaciones);
+					printf ("Generación: %ld\n", generacion);
 
 					/* Verifica si es solución */
 					long int individuo_solucion =
