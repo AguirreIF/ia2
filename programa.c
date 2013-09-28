@@ -243,7 +243,7 @@ main (int argc, char **argv)
 					 generacion++)
 				{
 					puts ("\n=================================");
-					printf ("       GENERACIÓN %ld\n", generacion);
+					printf ("       GENERACIÓN %ld\n", generacion + 1);
 					puts ("=================================\n");
 
 					/* Ordena los individuos por aptitud */
@@ -273,7 +273,7 @@ main (int argc, char **argv)
 					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
 																				&cantidad_restantes, 0);
 
-					puts ("Individuos después de selección elitista y por ranking");
+					puts ("\nIndividuos después de selección elitista y por ranking");
 					puts ("------------------------------------------------------");
 					for (uint32_t i = 0; i < args.poblacion; i++)
 						printf
@@ -285,8 +285,11 @@ main (int argc, char **argv)
 							 individuos[i].letras[8], individuos[i].letras[9],
 							 individuos[i].aptitud);
 
+					/* Se toma como punto/s de cruza un número aleatorio entre 1 y 4 */
+					unsigned const short punto =
+						(short) (1 + rand () / (RAND_MAX / (5 - 1) + 1));
 					/* No se cruzan los individuos elite */
-					cruza (&individuos[cantidad_elite], &cantidad_restantes, 2);
+					cruza (&individuos[cantidad_elite], &cantidad_restantes, punto);
 
 					/* for (uint32_t i = cantidad_elite; i < cantidad_restantes; i++) */
 					for (uint32_t i = 0; i < args.poblacion; i++)
