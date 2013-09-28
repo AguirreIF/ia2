@@ -208,17 +208,107 @@ main (int argc, char **argv)
 
 			generar_poblacion_inicial (&individuos, letras, &args.poblacion,
 																 &args.semilla);
-
 			free (letras);
+
+			/* Calcula aptitud de la población */
+			for (uint32_t i = 0; i < args.poblacion; i++)
+				calcular_aptitud (&individuos[i], operandos,
+													&cantidad_operandos, operadores, operacion);
+
+			/* Verifica hay algún individuo solución */
+			long int individuo_solucion =
+				funcion_de_parada (individuos, &args.poblacion,
+													 operandos, &cantidad_operandos, operadores,
+													 operacion);
+
+			if (individuo_solucion != -1)
+				{
+					printf ("\n¡Solución! individuo: %ld\n", individuo_solucion + 1);
+					for (int indice = 0; indice < 10; indice++)
+						if (individuos[individuo_solucion].letras[indice] != '\0')
+							printf ("%c --> %d\t\t",
+											individuos[individuo_solucion].letras[indice], indice);
+					puts ("");
+					exit (EXIT_SUCCESS);
+				}
+
+			/* Se toma el 5% como selección elitista
+			 * Serían las estructuras
+			 * individuos[0] a individuos[cantidad_elite - 1] */
+			uint32_t cantidad_elite = args.poblacion * .05;
+
+			/* Cantidad de individuos restantes */
+			uint32_t cantidad_restantes = args.poblacion - cantidad_elite;
 
 			/* CICLO ALGORITMO GENÉTICO  */
 			for (long int generacion = 0; generacion < args.generaciones;
 					 generacion++)
 				{
-					printf ("Generación: %ld\n", generacion);
+					puts ("\n=================================");
+					printf ("       GENERACIÓN %ld\n", generacion);
+					puts ("=================================\n");
 
-					/* Verifica si es solución */
-					long int individuo_solucion =
+					/* Ordena los individuos por aptitud */
+					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
+								 individuos_cmp);
+
+					puts ("Población (ordenada por aptitud)");
+					puts ("--------------------------------");
+					for (uint32_t i = 0; i < args.poblacion; i++)
+						printf
+							("Individuo[%2d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
+							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
+							 individuos[i].letras[2], individuos[i].letras[3],
+							 individuos[i].letras[4], individuos[i].letras[5],
+							 individuos[i].letras[6], individuos[i].letras[7],
+							 individuos[i].letras[8], individuos[i].letras[9],
+							 individuos[i].aptitud);
+					/* for (int indice = 0; indice < 10; indice++) */
+					/* if (individuos[i].letras[indice] != '\0') */
+					/* printf ("%c --> %d\t\t", individuos[i].letras[indice], */
+					/* indice); */
+
+					printf ("\nCantidad elite: %u\n", cantidad_elite);
+					printf ("Cantidad por copias esperadas: %u\n\n",
+									cantidad_restantes);
+
+					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
+																				&cantidad_restantes, 0);
+
+					puts ("Individuos después de selección elitista y por ranking");
+					puts ("------------------------------------------------------");
+					for (uint32_t i = 0; i < args.poblacion; i++)
+						printf
+							("Aptitud individuo[%2d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
+							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
+							 individuos[i].letras[2], individuos[i].letras[3],
+							 individuos[i].letras[4], individuos[i].letras[5],
+							 individuos[i].letras[6], individuos[i].letras[7],
+							 individuos[i].letras[8], individuos[i].letras[9],
+							 individuos[i].aptitud);
+
+					/* No se cruzan los individuos elite */
+					cruza (&individuos[cantidad_elite], &cantidad_restantes, 2);
+
+					/* for (uint32_t i = cantidad_elite; i < cantidad_restantes; i++) */
+					for (uint32_t i = 0; i < args.poblacion; i++)
+						calcular_aptitud (&individuos[i], operandos,
+															&cantidad_operandos, operadores, operacion);
+
+					puts ("\nIndividuos después de cruzar");
+					puts ("----------------------------");
+					for (uint32_t i = cantidad_elite; i < args.poblacion; i++)
+						printf
+							("Aptitud individuo[%2d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
+							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
+							 individuos[i].letras[2], individuos[i].letras[3],
+							 individuos[i].letras[4], individuos[i].letras[5],
+							 individuos[i].letras[6], individuos[i].letras[7],
+							 individuos[i].letras[8], individuos[i].letras[9],
+							 individuos[i].aptitud);
+
+					/* Verifica hay algún individuo solución */
+					individuo_solucion =
 						funcion_de_parada (individuos, &args.poblacion,
 															 operandos, &cantidad_operandos, operadores,
 															 operacion);
@@ -235,51 +325,6 @@ main (int argc, char **argv)
 							puts ("");
 							exit (EXIT_SUCCESS);
 						}
-
-					for (uint32_t i = 0; i < args.poblacion; i++)
-						calcular_aptitud (&individuos[i], operandos,
-															&cantidad_operandos, operadores, operacion);
-
-					/* Ordena los individuos por aptitud */
-					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
-								 individuos_cmp);
-
-					/* Se toma el 5% como selección elitista
-					 * Serían las estructuras
-					 * individuos[0] a individuos[cantidad_elite - 1] */
-					uint32_t cantidad_elite = args.poblacion * .05;
-
-					printf ("Cantidad elite: %u\n", cantidad_elite);
-
-					/* Cantidad de individuos restantes */
-					uint32_t cantidad_restantes = args.poblacion - cantidad_elite;
-
-					printf ("Cantidad por copias esperadas: %u\n", cantidad_restantes);
-
-					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
-																				&cantidad_restantes, 0);
-
-					for (uint32_t i = 0; i < args.poblacion; i++)
-						{
-							printf
-								("Aptitud individuo[%d]: %c%c%c%c%c%c%c%c%c%c = %ld\n",
-								 i + 1, individuos[i].letras[0], individuos[i].letras[1],
-								 individuos[i].letras[2], individuos[i].letras[3],
-								 individuos[i].letras[4], individuos[i].letras[5],
-								 individuos[i].letras[6], individuos[i].letras[7],
-								 individuos[i].letras[8], individuos[i].letras[9],
-								 individuos[i].aptitud);
-
-							for (int indice = 0; indice < 10; indice++)
-								if (individuos[i].letras[indice] != '\0')
-									printf ("%c --> %d\t\t", individuos[i].letras[indice],
-													indice);
-
-							puts ("\n");
-						}
-
-					/* No se cruzan los individuos elite */
-					cruza (&individuos[cantidad_elite], &cantidad_restantes, 2);
 				}
 
 			/* No ejecuta cuando encuentra solución */
