@@ -217,9 +217,7 @@ main (int argc, char **argv)
 
 			/* Verifica hay algún individuo solución */
 			long int individuo_solucion =
-				funcion_de_parada (individuos, &args.poblacion,
-													 operandos, &cantidad_operandos, operadores,
-													 operacion);
+				funcion_de_parada (individuos, &args.poblacion);
 
 			if (individuo_solucion != -1)
 				{
@@ -309,9 +307,7 @@ main (int argc, char **argv)
 
 					/* Verifica hay algún individuo solución */
 					individuo_solucion =
-						funcion_de_parada (individuos, &args.poblacion,
-															 operandos, &cantidad_operandos, operadores,
-															 operacion);
+						funcion_de_parada (individuos, &args.poblacion);
 
 					if (individuo_solucion != -1)
 						{

@@ -40,14 +40,10 @@ void generar_poblacion_inicial (struct individuos_s **restrict individuos,
 																const uint32_t * restrict const poblacion,
 																const long *restrict const semilla);
 
-// calcula la aptitud de un individuo
+// verifica si algún individuo es solución
 long int funcion_de_parada (const struct individuos_s *restrict const
 														individuos,
-														const uint32_t * restrict const poblacion,
-														char **restrict const operandos,
-														const int *restrict const cantidad_operandos,
-														const char *restrict const operadores,
-														char *const operacion);
+														const uint32_t * restrict const poblacion);
 
 // calcula la aptitud de un individuo
 void calcular_aptitud (struct individuos_s *restrict const individuo,

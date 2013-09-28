@@ -109,31 +109,11 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 
 long int
 funcion_de_parada (const struct individuos_s *restrict const individuos,
-									 const uint32_t * restrict const poblacion,
-									 char **restrict const operandos,
-									 const int *restrict const cantidad_operandos,
-									 const char *restrict const operadores,
-									 char *const operacion)
+									 const uint32_t * restrict const poblacion)
 {
-	/* parada = |resultado - (operaciones con operadores)| */
-
 	for (long int n = 0; n < *poblacion; n++)
-		{
-			long long int operandos_numericos[*cantidad_operandos];
-			memset (operandos_numericos, 0, sizeof (operandos_numericos));
-
-			convertir_operandos_a_numeros (&individuos[n], operandos,
-																		 *cantidad_operandos,
-																		 operandos_numericos);
-
-			long long int resultado =
-				calcular_operacion (operandos_numericos, operadores, operacion);
-
-			int diferencia = abs (operandos_numericos[*cantidad_operandos - 1] -
-														resultado);
-			if (diferencia == 0)
-				return n;
-		}
+		if (individuos[n].aptitud == 0)
+			return n;
 	return -1;
 }
 
