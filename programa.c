@@ -141,20 +141,18 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
 		case ARGP_KEY_ARGS:
 			{
-				char *sobrantes = NULL;
+				char *sobrantes = malloc (1);
+				sobrantes[0] = '\0';
 				for (int nro = state->next; nro < state->argc; nro++)
 					{
-						if (sobrantes == NULL)
-							sobrantes = malloc (strlen (state->argv[nro]));
 						sobrantes =
 							realloc (sobrantes,
-											 strlen (state->argv[nro]) + strlen (sobrantes) + 1);
+											 strlen (state->argv[nro]) + strlen (sobrantes) + 2);
 						strcat (sobrantes, state->argv[nro]);
 						strcat (sobrantes, " ");
 					}
 				argp_error (state, "Los últimos %d argumentos están de más: %s",
 										state->argc - state->next, sobrantes);
-				break;
 			}
 
 		default:
@@ -215,6 +213,10 @@ main (int argc, char **argv)
 
 			generar_poblacion_inicial (&individuos, letras, &args.poblacion,
 																 args.semilla);
+
+			if (args.semilla != NULL)
+				free (args.semilla);
+
 			free (letras);
 
 			/* Calcula aptitud de la población */
@@ -233,6 +235,7 @@ main (int argc, char **argv)
 						if (individuos[*individuo_solucion].letras[indice] != '\0')
 							printf ("%c --> %u\t\t",
 											individuos[*individuo_solucion].letras[indice], indice);
+					free (individuo_solucion);
 					puts ("");
 					exit (EXIT_SUCCESS);
 				}
@@ -327,6 +330,7 @@ main (int argc, char **argv)
 									printf ("%c --> %d\t\t",
 													individuos[*individuo_solucion].letras[indice],
 													indice);
+							free (individuo_solucion);
 							puts ("");
 							exit (EXIT_SUCCESS);
 						}
