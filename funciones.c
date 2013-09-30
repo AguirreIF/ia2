@@ -109,19 +109,6 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 }
 
 void
-funcion_de_parada (const struct individuos_s *restrict const individuos,
-									 const unsigned long int *restrict const poblacion,
-									 unsigned long int **restrict individuo_solucion)
-{
-	for (unsigned long int n = 0; n < *poblacion; n++)
-		if (individuos[n].aptitud == 0)
-			{
-				*individuo_solucion = malloc (sizeof (unsigned long int));
-				**individuo_solucion = n;
-			}
-}
-
-void
 calcular_aptitud (struct individuos_s *restrict const individuo,
 									char **restrict const operandos,
 									const unsigned int *restrict const cantidad_operandos,
@@ -181,6 +168,74 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
 	for (unsigned int i = 0; i < sobra; i++)
+		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
+
+	individuo->aptitud = aptitud;
+}
+
+void
+calcular_aptitud2 (struct individuos_s *restrict const individuo,
+									 char **restrict const operandos,
+									 const int *restrict const cantidad_operandos,
+									 const char *restrict const operadores,
+									 char *const operacion)
+{
+	long long int operandos_numericos[*cantidad_operandos];
+	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+
+	convertir_operandos_a_numeros (individuo, operandos,
+																 *cantidad_operandos, operandos_numericos);
+
+	long long int resultado =
+		calcular_operacion (operandos_numericos, operadores, operacion);
+
+	/* resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico) */
+	/* resultado obtenido = pila_operandos[0] (en formato numérico) */
+	/* Se convierte ambos a char y se hacen las comparaciones */
+	char resultado_deseado[30];
+	sprintf (resultado_deseado, "%lld",
+					 operandos_numericos[*cantidad_operandos - 1]);
+
+	char resultado_obtenido[30];
+	sprintf (resultado_obtenido, "%lld", resultado);
+
+	int m, t;
+	const char *restrict y;
+	const char *restrict x;
+	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
+		{
+			m = strlen (resultado_deseado) - 1;
+			x = resultado_deseado;
+			t = strlen (resultado_obtenido) - 1;
+			y = resultado_obtenido;
+		}
+	else
+		{
+			m = strlen (resultado_obtenido) - 1;
+			x = resultado_obtenido;
+			t = strlen (resultado_deseado) - 1;
+			y = resultado_deseado;
+		}
+
+	unsigned long long int aptitud = 0;
+
+	int sobra = t - m;
+	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en */
+	/* comparación con el más corto */
+
+	/* primera parte de la fórmula, */
+	/* va de atrás para adelante porque la unidad está en la última */
+	/* posición del array */
+	int j = 0;
+	for (int i = m; i > -1; i--)
+		aptitud +=
+			(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * ((j++) + 1));
+	/* multiplicar por (i+1) en vez de por 10, empezando con i = 0 */
+
+	/* segunda parte de la fórmula, */
+	/* va de adelante para atrás porque la unidad más grande está en */
+	/* la primera posición del array */
+	for (int i = 0; i < sobra; i++)
 		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
 
 	individuo->aptitud = aptitud;

@@ -224,18 +224,17 @@ main (int argc, char **argv)
 				calcular_aptitud (&individuos[i], operandos,
 													&cantidad_operandos, operadores, operacion);
 
-			/* Verifica hay algún individuo solución */
-			unsigned long int *individuo_solucion = NULL;
-			funcion_de_parada (individuos, &args.poblacion, &individuo_solucion);
+			/* Ordena los individuos por aptitud */
+			qsort (individuos, args.poblacion, sizeof (struct individuos_s),
+						 individuos_cmp);
 
-			if (individuo_solucion != NULL)
+			/* Verifica si hay algún individuo solución */
+			if (individuos[0].aptitud == 0)
 				{
-					printf ("\n¡Solución! individuo: %ld\n", *individuo_solucion + 1);
+					puts ("\n¡Solución!");
 					for (unsigned int indice = 0; indice < 10; indice++)
-						if (individuos[*individuo_solucion].letras[indice] != '\0')
-							printf ("%c --> %u\t\t",
-											individuos[*individuo_solucion].letras[indice], indice);
-					free (individuo_solucion);
+						if (individuos[0].letras[indice] != '\0')
+							printf ("%c --> %u\t\t", individuos[0].letras[indice], indice);
 					puts ("");
 					exit (EXIT_SUCCESS);
 				}
@@ -255,10 +254,6 @@ main (int argc, char **argv)
 					puts ("\n=================================");
 					printf ("       GENERACIÓN %lu\n", generacion + 1);
 					puts ("=================================\n");
-
-					/* Ordena los individuos por aptitud */
-					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
-								 individuos_cmp);
 
 					puts ("Población (ordenada por aptitud)");
 					puts ("--------------------------------");
@@ -317,20 +312,18 @@ main (int argc, char **argv)
 							 individuos[i].letras[8], individuos[i].letras[9],
 							 individuos[i].aptitud);
 
-					/* Verifica hay algún individuo solución */
-					funcion_de_parada (individuos, &args.poblacion,
-														 &individuo_solucion);
+					/* Ordena los individuos por aptitud */
+					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
+								 individuos_cmp);
 
-					if (individuo_solucion != NULL)
+					/* Verifica si hay algún individuo solución */
+					if (individuos[0].aptitud == 0)
 						{
-							printf ("\n¡Solución! individuo: %ld\n",
-											*individuo_solucion + 1);
+							puts ("\n¡Solución!");
 							for (unsigned int indice = 0; indice < 10; indice++)
-								if (individuos[*individuo_solucion].letras[indice] != '\0')
-									printf ("%c --> %d\t\t",
-													individuos[*individuo_solucion].letras[indice],
-													indice);
-							free (individuo_solucion);
+								if (individuos[0].letras[indice] != '\0')
+									printf ("%c --> %u\t\t",
+													individuos[0].letras[indice], indice);
 							puts ("");
 							exit (EXIT_SUCCESS);
 						}
