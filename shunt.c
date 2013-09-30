@@ -29,26 +29,26 @@ Retrieved from: http://en.literateprograms.org/Shunting_yard_algorithm_(C)?oldid
 #include <limits.h>
 #include <string.h>
 
-static int
-eval_suma (int operando1, int operando2)
+static long long int
+eval_suma (long long int operando1, long long int operando2)
 {
 	return operando1 + operando2;
 }
 
-static int
-eval_resta (int operando1, int operando2)
+static long long int
+eval_resta (long long int operando1, long long int operando2)
 {
 	return operando1 - operando2;
 }
 
-static int
-eval_mul (int operando1, int operando2)
+static long long int
+eval_mul (long long int operando1, long long int operando2)
 {
 	return operando1 * operando2;
 }
 
-static int
-eval_div (int operando1, int operando2)
+static long long int
+eval_div (long long int operando1, long long int operando2)
 {
 	return operando1 / operando2;
 }
@@ -59,9 +59,9 @@ enum
 static struct op_s
 {
 	char op;
-	int prec;
-	int assoc;
-	int (*eval) (int operando1, int operando2);
+	unsigned int prec;
+	unsigned int assoc;
+	long long int (*eval) (long long int operando1, long long int operando2);
 } ops[] =
 {
 	{
@@ -81,7 +81,7 @@ static struct op_s
 static struct op_s *
 getop (char operador)
 {
-	for (int i = 0; i < (int) (sizeof ops / sizeof ops[0]); ++i)
+	for (unsigned int i = 0; i < (int) (sizeof ops / sizeof ops[0]); ++i)
 		{
 			if (ops[i].op == operador)
 				return ops + i;
@@ -90,9 +90,9 @@ getop (char operador)
 }
 
 struct op_s *opstack[64];
-int numstack[64];
-int nopstack = 0;
-int nnumstack = 0;
+long long int numstack[64];
+unsigned int nopstack = 0;
+unsigned int nnumstack = 0;
 
 void
 push_opstack (struct op_s *op)
@@ -107,23 +107,23 @@ pop_opstack ()
 }
 
 void
-push_numstack (int num)
+push_numstack (long long int num)
 {
 	numstack[nnumstack++] = num;
 }
 
-int
+long long int
 pop_numstack ()
 {
 	return numstack[--nnumstack];
 }
 
 
-int
+long long int
 shunt_op (struct op_s *op)
 {
 	struct op_s *pop;
-	int operando1, operando2;
+	long long int operando1, operando2;
 	if (op->op == '(')
 		{
 			push_opstack (op);
@@ -168,7 +168,8 @@ shunt_op (struct op_s *op)
 }
 
 long long int
-calcular_operacion (const long long int *restrict const operandos_numericos,
+calcular_operacion (const long long int *restrict const
+										operandos_numericos,
 										const char *restrict const operadores,
 										char *const operacion)
 {
@@ -177,7 +178,7 @@ calcular_operacion (const long long int *restrict const operandos_numericos,
 
 	struct op_s *op = NULL;
 
-	int n_operando = 0, n_operador = 0;
+	unsigned int n_operando = 0, n_operador = 0;
 	for (char *tipo = operacion; *tipo; tipo++)
 		{
 			/* operador */
@@ -200,12 +201,12 @@ calcular_operacion (const long long int *restrict const operandos_numericos,
 			/* Si está por dividir por 0 salir */
 			if ((opstack[nopstack - 1]->op == '/')
 					&& (numstack[nnumstack - 1] == 0))
-				return LONG_MAX;
+				return LLONG_MAX;
 			else
 				{
 					op = pop_opstack ();
-					int operando1 = pop_numstack ();
-					int operando2 = pop_numstack ();
+					long long int operando1 = pop_numstack ();
+					long long int operando2 = pop_numstack ();
 					push_numstack (op->eval (operando2, operando1));
 				}
 		}

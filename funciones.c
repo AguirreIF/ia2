@@ -23,7 +23,7 @@ a_minusculas (char *restrict operando)
 }
 
 // guarda todos los caracteres distintos de cada entrada
-int
+unsigned int
 procesar_letras (const char *restrict operando, char **restrict const letras)
 {
 	do
@@ -51,7 +51,7 @@ procesar_letras (const char *restrict operando, char **restrict const letras)
 void
 guardar_operando (const char *restrict const operando,
 									char ***restrict const operandos,
-									int *restrict const cantidad_operandos)
+									unsigned int *restrict const cantidad_operandos)
 {
 	(*cantidad_operandos)++;
 	*operandos = realloc (*operandos, sizeof (char *) * (*cantidad_operandos));
@@ -63,7 +63,7 @@ guardar_operando (const char *restrict const operando,
 void
 guardar_operador (const char *restrict const operador,
 									char **restrict operadores,
-									const int *restrict const cantidad_operandos)
+									const unsigned int *restrict const cantidad_operandos)
 {
 	if (*operadores == NULL)
 		{
@@ -78,27 +78,28 @@ guardar_operador (const char *restrict const operador,
 void
 generar_poblacion_inicial (struct individuos_s **restrict individuos,
 													 const char *restrict const letras,
-													 const uint32_t * restrict const poblacion,
-													 const long *restrict const semilla)
+													 const unsigned long int *restrict const poblacion,
+													 const unsigned long int *restrict const semilla)
 {
 	const size_t len = strlen (letras);
 
-	if (*semilla != -1)
+	if (semilla != NULL)
 		srand (*semilla);
 	else
 		srand ((time (0) & 0xFFFF) | (getpid () << 16));
 
-	for (uint32_t n = 0; n < *poblacion; n++)
+	for (unsigned long int n = 0; n < *poblacion; n++)
 		{
 			(*individuos)[n].aptitud = 0;
 			(*individuos)[n].letras = malloc (10);
 			memset ((*individuos)[n].letras, '\0', 10);
 			memcpy ((*individuos)[n].letras, letras, len);
 
-			for (int columna = 0; columna < 10; columna++)
+			for (unsigned int columna = 0; columna < 10; columna++)
 				{
-					const short aleatorio =
-						(short) (columna + rand () / (RAND_MAX / (10 - columna) + 1));
+					const unsigned int aleatorio =
+						(unsigned int) (columna +
+														rand () / (RAND_MAX / (10 - columna) + 1));
 					const char caracter = (*individuos)[n].letras[aleatorio];
 					(*individuos)[n].letras[aleatorio] =
 						(*individuos)[n].letras[columna];
@@ -107,20 +108,23 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 		}
 }
 
-long int
+void
 funcion_de_parada (const struct individuos_s *restrict const individuos,
-									 const uint32_t * restrict const poblacion)
+									 const unsigned long int *restrict const poblacion,
+									 unsigned long int **restrict individuo_solucion)
 {
-	for (long int n = 0; n < *poblacion; n++)
+	for (unsigned long int n = 0; n < *poblacion; n++)
 		if (individuos[n].aptitud == 0)
-			return n;
-	return -1;
+			{
+				*individuo_solucion = malloc (sizeof (unsigned long int));
+				**individuo_solucion = n;
+			}
 }
 
 void
 calcular_aptitud (struct individuos_s *restrict const individuo,
 									char **restrict const operandos,
-									const int *restrict const cantidad_operandos,
+									const unsigned int *restrict const cantidad_operandos,
 									const char *restrict const operadores,
 									char *const operacion)
 {
@@ -130,7 +134,7 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 	convertir_operandos_a_numeros (individuo, operandos,
 																 *cantidad_operandos, operandos_numericos);
 
-	long long int resultado =
+	const long long int resultado =
 		calcular_operacion (operandos_numericos, operadores, operacion);
 
 	/* resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico) */
@@ -143,7 +147,7 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 	char resultado_obtenido[30];
 	sprintf (resultado_obtenido, "%lld", resultado);
 
-	int m, t;
+	unsigned int m, t;
 	const char *restrict y;
 	const char *restrict x;
 	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
@@ -161,22 +165,22 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 			y = resultado_deseado;
 		}
 
-	int aptitud = 0, i;
+	unsigned long long int aptitud = 0;
 
-	int sobra = t - m;
+	unsigned const int sobra = t - m;
 	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en */
 	/* comparación con el más corto */
 
 	/* primera parte de la fórmula, */
 	/* va de atrás para adelante porque la unidad está en la última */
 	/* posición del array */
-	for (i = m; i > -1; i--)
+	for (int i = m; i > -1; i--)
 		aptitud += (abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10);
 
 	/* segunda parte de la fórmula, */
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
-	for (i = 0; i < sobra; i++)
+	for (unsigned int i = 0; i < sobra; i++)
 		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
 
 	individuo->aptitud = aptitud;
@@ -185,14 +189,14 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 void
 convertir_operandos_a_numeros (const struct individuos_s *restrict const
 															 individuo, char **restrict const operandos,
-															 int cantidad_operandos,
+															 unsigned int cantidad_operandos,
 															 long long int *restrict const
 															 operandos_numericos)
 {
 	while (cantidad_operandos-- > 0)
 		{
-			int columna = 0;
-			const int longitud_operando =
+			unsigned int columna = 0;
+			const unsigned int longitud_operando =
 				(int) strlen (operandos[cantidad_operandos]);
 			// recorre todos los caracteres del operando
 			do
@@ -201,13 +205,13 @@ convertir_operandos_a_numeros (const struct individuos_s *restrict const
 						operandos[cantidad_operandos][columna];
 					// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
 					// con el caracter seleccionado del operando
-					for (int indice = 0; indice < 10; indice++)
+					for (unsigned int indice = 0; indice < 10; indice++)
 						{
 							const char caracter_encontrado = individuo->letras[indice];
 							if (caracter_buscado == caracter_encontrado)
 								{
-									int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
-									long long int numero = indice;
+									unsigned int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
+									unsigned long long int numero = indice;
 									if (indice > 0)
 										while (++aux < longitud_operando - columna)
 											numero = (numero << 3) + (numero << 1);	// x*10 => x*[(2^3+2)]
@@ -236,19 +240,19 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 
 void
 seleccion_por_ranking_con_ce (struct individuos_s **individuos,
-															const uint32_t * restrict const inicio,
-															const uint32_t * restrict const cantidad,
+															const unsigned long int *restrict const inicio,
+															const unsigned long int *restrict const cantidad,
 															const float rmin)
 {
 	struct individuos_s *seleccionados =
 		malloc (*cantidad * sizeof (struct individuos_s));
 
-	uint32_t copias_totales = 0, indice_nuevos = 0;
+	unsigned long int copias_totales = 0, indice_nuevos = 0;
 
-	for (uint32_t indice = 0;
+	for (unsigned long int indice = 0;
 			 (indice < *cantidad) && (copias_totales < *cantidad); indice++)
 		{
-			short copias_por_individuo;
+			unsigned int copias_por_individuo;
 			if (*cantidad == 1)
 				copias_por_individuo = 1;
 			else
@@ -263,7 +267,7 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 				copias_por_individuo = *cantidad - copias_totales;
 
 			/* Hace la cantidad de copias correspondientes */
-			for (short n = 0; n < copias_por_individuo; n++, indice_nuevos++)
+			for (unsigned int n = 0; n < copias_por_individuo; n++, indice_nuevos++)
 				{
 					seleccionados[indice_nuevos].aptitud =
 						(*individuos)[indice].aptitud;
@@ -276,7 +280,7 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 		}
 
 	/* Se copian los individuos seleccionados a la estructura original */
-	for (uint32_t indice = 0; indice < *cantidad; indice++)
+	for (unsigned long int indice = 0; indice < *cantidad; indice++)
 		{
 			(*individuos)[indice + *inicio].aptitud = seleccionados[indice].aptitud;
 			memcpy ((*individuos)[indice + *inicio].letras,
@@ -289,9 +293,10 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 
 void
 cruza (struct individuos_s *restrict individuos,
-			 const uint32_t * restrict const cantidad, const unsigned short puntos)
+			 const unsigned long int *restrict const cantidad,
+			 const unsigned int puntos)
 {
-	unsigned short d;
+	unsigned int d;
 	switch (puntos)
 		{
 		case 1:
@@ -308,7 +313,7 @@ cruza (struct individuos_s *restrict individuos,
 			break;
 		}
 
-	for (uint32_t i = 0; i < *cantidad; i++)
+	for (unsigned long int i = 0; i < *cantidad; i++)
 		{
 			/* Si el siguiente es un copia no se cruza */
 			if ((i + 1) < *cantidad)
@@ -324,11 +329,11 @@ cruza (struct individuos_s *restrict individuos,
 						individuos[i].letras[9] == individuos[i + 1].letras[9])
 					continue;
 
-			unsigned short j = 0;
-			for (short x = 0; x < puntos; x++)
+			unsigned int j = 0;
+			for (unsigned int x = 0; x < puntos; x++)
 				if ((10 - j) >= (d * 2))
 					{
-						for (short a = 0; a < d; a++, j++)
+						for (unsigned int a = 0; a < d; a++, j++)
 							{
 								char letra = individuos[i].letras[j];
 								individuos[i].letras[j] = individuos[i].letras[j + d];

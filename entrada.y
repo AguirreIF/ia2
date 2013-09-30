@@ -13,7 +13,7 @@
 	extern int yy_scan_string(const char *entrada);
 
 	void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
- 				  int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje);
+ 				  unsigned int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje);
 	char *aux = NULL;
 %}
 
@@ -23,7 +23,7 @@
 %parse-param { char **letras }
 %parse-param { char ***operandos }
 %parse-param { char **operadores }
-%parse-param { int *cantidad_operandos }
+%parse-param { unsigned int *cantidad_operandos }
 %parse-param { char **operacion }
 
 %union {
@@ -96,7 +96,7 @@ operando:
 %%
 
 void yyerror (char **restrict letras, char ***restrict operandos, char **restrict operadores,
- 			int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje) {
+ 			  unsigned int *restrict cantidad_operandos, char **restrict operacion, const char *restrict const mensaje) {
 	UNUSED(letras);
 	UNUSED(operandos);
 	UNUSED(operadores);
@@ -107,7 +107,7 @@ void yyerror (char **restrict letras, char ***restrict operandos, char **restric
 
 int procesar (char *restrict const entrada, char **restrict letras,
 			  char ***restrict operandos, char **restrict operadores,
-			  int *restrict cantidad_operandos, char **restrict operacion) {
+			  unsigned int *restrict cantidad_operandos, char **restrict operacion) {
 	if (entrada == NULL)
 		yyin = (FILE *) 0;
 	else {
