@@ -129,6 +129,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
 			args->semilla = malloc (sizeof (unsigned long int));
 			*args->semilla = n_aux;
+			break;
 
 		case ARGP_KEY_ARG:
 			/* Procesa el argumento */
