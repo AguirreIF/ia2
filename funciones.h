@@ -38,25 +38,31 @@ void guardar_operador (const char *restrict const operador,
 // genera la población inicial aleatoriamente
 void generar_poblacion_inicial (struct individuos_s **restrict individuos,
 																const char *restrict const letras,
-																const unsigned long int *restrict const poblacion,
-																const unsigned long int *restrict const semilla);
-
+																const unsigned long int *restrict const
+																poblacion,
+																const unsigned long int *restrict const
+																semilla);
 
 // calcula la aptitud de un individuo
-void calcular_aptitud2 (struct individuos_s *restrict const individuo,
+void calcular_aptitud1 (struct individuos_s *restrict const individuo,
 												char **restrict const operandos,
-												const int *restrict const cantidad_operandos,
+												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
 												char *const operacion);
 
+// otra función de aptitud
+void calcular_aptitud2 (struct individuos_s *restrict const individuo,
+												char **restrict const operandos,
+												const unsigned int *restrict const cantidad_operandos,
+												const char *restrict const operadores,
+												char *const operacion);
 
-
-// calcula la aptitud de un individuo
-void calcular_aptitud (struct individuos_s *restrict const individuo,
-											 char **restrict const operandos,
-											 const unsigned int *restrict const cantidad_operandos,
-											 const char *restrict const operadores,
-											 char *const operacion);
+// otra función de aptitud
+void calcular_aptitud3 (struct individuos_s *restrict const individuo,
+												char **restrict const operandos,
+												const unsigned int *restrict const cantidad_operandos,
+												const char *restrict const operadores,
+												char *const operacion);
 
 void convertir_operandos_a_numeros (const struct individuos_s *restrict const
 																		individuo,
@@ -73,7 +79,8 @@ long long int calcular_operacion (const long long int *restrict const
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
 void seleccion_por_ranking_con_ce (struct individuos_s **restrict individuos,
-																	 const unsigned long int *restrict const inicio,
+																	 const unsigned long int *restrict const
+																	 inicio,
 																	 const unsigned long int *restrict const
 																	 cantidad, const float rmin);
 

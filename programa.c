@@ -27,6 +27,8 @@ static const struct argp_option opciones[] = {
 	 "Semilla para generar la población inicial", 0},
 	{"generaciones", 'g', "GENERACIONES", 0,
 	 "Cantidad de generaciones", 0},
+	{"aptitud", 'a', "APTITUD", 0,
+	 "Función de aptitud a utilizar", 0},
 	{0, 0, 0, 0, "Sobre el programa:", -1},
 	{0, 0, 0, 0, 0, 0}
 };
@@ -36,6 +38,11 @@ struct args
 {
 	char *args[5], *entrada;
 	unsigned long int *semilla, generaciones, poblacion, poblacion_maxima;
+	void (*faptitud) (struct individuos_s * restrict const individuo,
+										char **restrict const operandos,
+										const unsigned int *restrict const cantidad_operandos,
+										const char *restrict const operadores,
+										char *const operacion);
 };
 
 /* Función que hace el parsing de las opciones */
@@ -131,6 +138,26 @@ parse_opt (int key, char *arg, struct argp_state *state)
 			*args->semilla = n_aux;
 			break;
 
+		case 'a':
+			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"Debe elegir entre las funciones de aptitud 1, 2 o 3");
+
+			unsigned int aptitud = atoi (arg);
+
+			if (aptitud < 1 || aptitud > 3)
+				argp_error (state,
+										"Debe elegir entre las funciones de aptitud 1, 2 o 3");
+
+			if (atoi (arg) == 1)
+				args->faptitud = calcular_aptitud1;
+			else if (atoi (arg) == 2)
+				args->faptitud = calcular_aptitud2;
+			else if (atoi (arg) == 3)
+				args->faptitud = calcular_aptitud3;
+			break;
+
 		case ARGP_KEY_ARG:
 			/* Procesa el argumento */
 			if (state->arg_num > 0)
@@ -169,6 +196,7 @@ main (int argc, char **argv)
 	args.poblacion_maxima = 10000;
 	args.entrada = NULL;
 	args.semilla = NULL;
+	args.faptitud = calcular_aptitud1;
 
 	static struct argp argp = {
 		opciones, parse_opt, 0, doc, 0, 0, "es_AR"
@@ -221,8 +249,8 @@ main (int argc, char **argv)
 
 			/* Calcula aptitud de la población */
 			for (unsigned long int i = 0; i < args.poblacion; i++)
-				calcular_aptitud (&individuos[i], operandos,
-													&cantidad_operandos, operadores, operacion);
+				args.faptitud (&individuos[i], operandos,
+											 &cantidad_operandos, operadores, operacion);
 
 			/* Ordena los individuos por aptitud */
 			qsort (individuos, args.poblacion, sizeof (struct individuos_s),
@@ -277,7 +305,7 @@ main (int argc, char **argv)
 					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
 																				&cantidad_restantes, 0);
 
-					puts ("\nIndividuos después de selección elitista y por ranking");
+					puts ("Individuos después de selección elitista y por ranking");
 					puts ("------------------------------------------------------");
 					for (unsigned long int i = 0; i < args.poblacion; i++)
 						printf
@@ -297,8 +325,8 @@ main (int argc, char **argv)
 
 					for (unsigned long int i = cantidad_elite; i < cantidad_restantes;
 							 i++)
-						calcular_aptitud (&individuos[i], operandos, &cantidad_operandos,
-															operadores, operacion);
+						args.faptitud (&individuos[i], operandos,
+													 &cantidad_operandos, operadores, operacion);
 
 					puts ("\nIndividuos después de cruzar");
 					puts ("----------------------------");

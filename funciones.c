@@ -109,11 +109,11 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 }
 
 void
-calcular_aptitud (struct individuos_s *restrict const individuo,
-									char **restrict const operandos,
-									const unsigned int *restrict const cantidad_operandos,
-									const char *restrict const operadores,
-									char *const operacion)
+calcular_aptitud1 (struct individuos_s *restrict const individuo,
+									 char **restrict const operandos,
+									 const unsigned int *restrict const cantidad_operandos,
+									 const char *restrict const operadores,
+									 char *const operacion)
 {
 	long long int operandos_numericos[*cantidad_operandos];
 	memset (operandos_numericos, 0, sizeof (operandos_numericos));
@@ -176,7 +176,7 @@ calcular_aptitud (struct individuos_s *restrict const individuo,
 void
 calcular_aptitud2 (struct individuos_s *restrict const individuo,
 									 char **restrict const operandos,
-									 const int *restrict const cantidad_operandos,
+									 const unsigned int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,
 									 char *const operacion)
 {
@@ -199,7 +199,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	char resultado_obtenido[30];
 	sprintf (resultado_obtenido, "%lld", resultado);
 
-	int m, t;
+	unsigned int m, t;
 	const char *restrict y;
 	const char *restrict x;
 	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
@@ -219,14 +219,14 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 
 	unsigned long long int aptitud = 0;
 
-	int sobra = t - m;
+	unsigned const int sobra = t - m;
 	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en */
 	/* comparación con el más corto */
 
 	/* primera parte de la fórmula, */
 	/* va de atrás para adelante porque la unidad está en la última */
 	/* posición del array */
-	int j = 0;
+	unsigned int j = 0;
 	for (int i = m; i > -1; i--)
 		aptitud +=
 			(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * ((j++) + 1));
@@ -235,10 +235,30 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	/* segunda parte de la fórmula, */
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
-	for (int i = 0; i < sobra; i++)
+	for (unsigned int i = 0; i < sobra; i++)
 		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
 
 	individuo->aptitud = aptitud;
+}
+
+void
+calcular_aptitud3 (struct individuos_s *restrict const individuo,
+									 char **restrict const operandos,
+									 const unsigned int *restrict const cantidad_operandos,
+									 const char *restrict const operadores,
+									 char *const operacion)
+{
+	long long int operandos_numericos[*cantidad_operandos];
+	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+
+	convertir_operandos_a_numeros (individuo, operandos,
+																 *cantidad_operandos, operandos_numericos);
+
+	long long int resultado =
+		calcular_operacion (operandos_numericos, operadores, operacion);
+
+	individuo->aptitud = abs (operandos_numericos[*cantidad_operandos - 1] -
+														resultado);
 }
 
 void
@@ -296,8 +316,8 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 void
 seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 															const unsigned long int *restrict const inicio,
-															const unsigned long int *restrict const cantidad,
-															const float rmin)
+															const unsigned long int *restrict const
+															cantidad, const float rmin)
 {
 	struct individuos_s *seleccionados =
 		malloc (*cantidad * sizeof (struct individuos_s));
