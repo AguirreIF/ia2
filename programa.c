@@ -34,7 +34,7 @@ static const struct argp_option opciones[] = {
 /* Estructura para pasar datos de main a parse_opt */
 struct args
 {
-	char *args[3], *entrada;
+	char *args[5], *entrada;
 	uint32_t poblacion, poblacion_maxima;
 	long int semilla, generaciones;
 };
