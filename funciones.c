@@ -90,7 +90,7 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 
 	for (unsigned long int n = 0; n < *poblacion; n++)
 		{
-			(*individuos)[n].aptitud = 0;
+			mpz_init ((*individuos)[n].aptitud);
 			(*individuos)[n].letras = malloc (10);
 			memset ((*individuos)[n].letras, '\0', 10);
 			memcpy ((*individuos)[n].letras, letras, len);
@@ -115,62 +115,110 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 									 const char *restrict const operadores,
 									 char *const operacion)
 {
-	long long int operandos_numericos[*cantidad_operandos];
-	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+	mpz_t resultado_deseado, *resultado_obtenido = NULL;
+	char *operando = NULL;
 
-	convertir_operandos_a_numeros (individuo, operandos,
-																 *cantidad_operandos, operandos_numericos);
+	/* Calcula el resultado deseado */
+	convertir_operando_a_numeros (individuo,
+																operandos[*cantidad_operandos - 1],
+																&operando);
+	mpz_init_set_str (resultado_deseado, operando, 10);
+	free (operando);
 
-	const long long int resultado =
-		calcular_operacion (operandos_numericos, operadores, operacion);
 
-	/* resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico) */
-	/* resultado obtenido = pila_operandos[0] (en formato numérico) */
+	puts ("");
+	for (int indice = 0; indice < 10; indice++)
+		if (individuo->letras[indice] != '\0')
+			printf ("%c:%d\t", individuo->letras[indice], indice);
+
+
+	/* Calcula el resultado obtenido */
+	calcular_operacion (operandos, individuo, operadores, operacion,
+											&resultado_obtenido);
+	if (resultado_obtenido == NULL)
+		{
+			puts ("\nDivisión por 0");
+			mpz_set_si (individuo->aptitud, -1);
+			return;
+		}
+
 	/* Se convierte ambos a char y se hacen las comparaciones */
-	char resultado_deseado[30];
-	sprintf (resultado_deseado, "%lld",
-					 operandos_numericos[*cantidad_operandos - 1]);
+	char *resultado_deseado_str = NULL;
+	resultado_deseado_str = mpz_get_str (NULL, 10, resultado_deseado);
+	mpz_clear (resultado_deseado);
 
-	char resultado_obtenido[30];
-	sprintf (resultado_obtenido, "%lld", resultado);
+	char *resultado_obtenido_str = NULL;
+	resultado_obtenido_str = mpz_get_str (NULL, 10, *resultado_obtenido);
+	mpz_clear (*resultado_obtenido);
+	free (resultado_obtenido);
 
 	unsigned int m, t;
 	const char *restrict y;
 	const char *restrict x;
-	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
+	if (strlen (resultado_obtenido_str) >= strlen (resultado_deseado_str))
 		{
-			m = strlen (resultado_deseado) - 1;
-			x = resultado_deseado;
-			t = strlen (resultado_obtenido) - 1;
-			y = resultado_obtenido;
+			m = strlen (resultado_deseado_str) - 1;
+			x = resultado_deseado_str;
+			t = strlen (resultado_obtenido_str) - 1;
+			y = resultado_obtenido_str;
 		}
 	else
 		{
-			m = strlen (resultado_obtenido) - 1;
-			x = resultado_obtenido;
-			t = strlen (resultado_deseado) - 1;
-			y = resultado_deseado;
+			m = strlen (resultado_obtenido_str) - 1;
+			x = resultado_obtenido_str;
+			t = strlen (resultado_deseado_str) - 1;
+			y = resultado_deseado_str;
 		}
 
-	unsigned long long int aptitud = 0;
 
-	unsigned const int sobra = t - m;
-	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en */
+	printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
+	printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
+
+
+	mpz_t aptitud;
+	mpz_init (aptitud);
+
+
+	mpz_t aptitud1, aptitud2;
+	mpz_init (aptitud1);
+	mpz_init (aptitud2);
+
+
+
+	/* cuántos dígitos de más tiene el resultado más largo en */
 	/* comparación con el más corto */
+	unsigned const int sobra = t - m;
 
 	/* primera parte de la fórmula, */
 	/* va de atrás para adelante porque la unidad está en la última */
 	/* posición del array */
 	for (int i = m; i > -1; i--)
-		aptitud += (abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10);
+		/* mpz_add_ui (aptitud, aptitud, */
+		/* (abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10)); */
+
+
+		mpz_add_ui (aptitud1, aptitud1,
+								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10));
+	gmp_printf ("Aptitud: %Zd + ", aptitud1);
+
 
 	/* segunda parte de la fórmula, */
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
 	for (unsigned int i = 0; i < sobra; i++)
-		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
+		/* mpz_add_ui (aptitud, aptitud, */
+		/* (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))))); */
 
-	individuo->aptitud = aptitud;
+
+		mpz_add_ui (aptitud2, aptitud2,
+								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
+	gmp_printf ("%Zd\n", aptitud2);
+
+
+	mpz_add (aptitud, aptitud1, aptitud2);
+
+
+	mpz_set (individuo->aptitud, aptitud);
 }
 
 void
@@ -180,65 +228,114 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 									 const char *restrict const operadores,
 									 char *const operacion)
 {
-	long long int operandos_numericos[*cantidad_operandos];
-	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+	mpz_t resultado_deseado, *resultado_obtenido = NULL;
+	char *operando = NULL;
 
-	convertir_operandos_a_numeros (individuo, operandos,
-																 *cantidad_operandos, operandos_numericos);
+	/* Calcula el resultado deseado */
+	convertir_operando_a_numeros (individuo,
+																operandos[*cantidad_operandos - 1],
+																&operando);
+	mpz_init_set_str (resultado_deseado, operando, 10);
+	free (operando);
 
-	long long int resultado =
-		calcular_operacion (operandos_numericos, operadores, operacion);
 
-	/* resultado deseado = operandos_numericos[*cantidad_operandos - 1] (en formato numérico) */
-	/* resultado obtenido = pila_operandos[0] (en formato numérico) */
+	puts ("");
+	for (int indice = 0; indice < 10; indice++)
+		if (individuo->letras[indice] != '\0')
+			printf ("%c:%d\t", individuo->letras[indice], indice);
+
+
+	/* Calcula el resultado obtenido */
+	calcular_operacion (operandos, individuo, operadores, operacion,
+											&resultado_obtenido);
+	if (resultado_obtenido == NULL)
+		{
+			puts ("\nDivisión por 0");
+			mpz_set_si (individuo->aptitud, -1);
+			return;
+		}
+
 	/* Se convierte ambos a char y se hacen las comparaciones */
-	char resultado_deseado[30];
-	sprintf (resultado_deseado, "%lld",
-					 operandos_numericos[*cantidad_operandos - 1]);
+	char *resultado_deseado_str = NULL;
+	resultado_deseado_str = mpz_get_str (NULL, 10, resultado_deseado);
+	mpz_clear (resultado_deseado);
 
-	char resultado_obtenido[30];
-	sprintf (resultado_obtenido, "%lld", resultado);
+	char *resultado_obtenido_str = NULL;
+	resultado_obtenido_str = mpz_get_str (NULL, 10, *resultado_obtenido);
+	mpz_clear (*resultado_obtenido);
+	free (resultado_obtenido);
 
 	unsigned int m, t;
 	const char *restrict y;
 	const char *restrict x;
-	if (strlen (resultado_obtenido) >= strlen (resultado_deseado))
+	if (strlen (resultado_obtenido_str) >= strlen (resultado_deseado_str))
 		{
-			m = strlen (resultado_deseado) - 1;
-			x = resultado_deseado;
-			t = strlen (resultado_obtenido) - 1;
-			y = resultado_obtenido;
+			m = strlen (resultado_deseado_str) - 1;
+			x = resultado_deseado_str;
+			t = strlen (resultado_obtenido_str) - 1;
+			y = resultado_obtenido_str;
 		}
 	else
 		{
-			m = strlen (resultado_obtenido) - 1;
-			x = resultado_obtenido;
-			t = strlen (resultado_deseado) - 1;
-			y = resultado_deseado;
+			m = strlen (resultado_obtenido_str) - 1;
+			x = resultado_obtenido_str;
+			t = strlen (resultado_deseado_str) - 1;
+			y = resultado_deseado_str;
 		}
 
-	unsigned long long int aptitud = 0;
 
-	unsigned const int sobra = t - m;
-	/* la variable sobra tiene cuántos dígitos de más tiene el resultado más largo en */
+	printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
+	printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
+
+
+	mpz_t aptitud;
+	mpz_init (aptitud);
+
+
+	mpz_t aptitud1, aptitud2;
+	mpz_init (aptitud1);
+	mpz_init (aptitud2);
+
+
+	/* cuántos dígitos de más tiene el resultado más largo en */
 	/* comparación con el más corto */
+	unsigned const int sobra = t - m;
 
 	/* primera parte de la fórmula, */
 	/* va de atrás para adelante porque la unidad está en la última */
 	/* posición del array */
 	unsigned int j = 0;
 	for (int i = m; i > -1; i--)
-		aptitud +=
-			(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * ((j++) + 1));
-	/* multiplicar por (i+1) en vez de por 10, empezando con i = 0 */
+		/* mpz_add_ui (aptitud, aptitud, */
+		/* (abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * ((j++) + 1)); */
+		/* multiplicar por (i+1) en vez de por 10, empezando con i = 0 */
+
+
+
+
+		mpz_add_ui (aptitud1, aptitud1,
+								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) *
+								 ((j++) + 1)));
+	gmp_printf ("Aptitud: %Zd + ", aptitud1);
+
 
 	/* segunda parte de la fórmula, */
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
 	for (unsigned int i = 0; i < sobra; i++)
-		aptitud += (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))));
+		/* mpz_add_ui (aptitud, aptitud, */
+		/* (((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1))))); */
 
-	individuo->aptitud = aptitud;
+
+		mpz_add_ui (aptitud2, aptitud2,
+								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
+	gmp_printf ("%Zd\n", aptitud2);
+
+
+	mpz_add (aptitud, aptitud1, aptitud2);
+
+
+	mpz_set (individuo->aptitud, aptitud);
 }
 
 void
@@ -248,55 +345,90 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 									 const char *restrict const operadores,
 									 char *const operacion)
 {
-	long long int operandos_numericos[*cantidad_operandos];
-	memset (operandos_numericos, 0, sizeof (operandos_numericos));
+	mpz_t resultado_deseado, *resultado_obtenido = NULL;
+	char *operando = NULL;
 
-	convertir_operandos_a_numeros (individuo, operandos,
-																 *cantidad_operandos, operandos_numericos);
+	/* Calcula el resultado deseado */
+	convertir_operando_a_numeros (individuo,
+																operandos[*cantidad_operandos - 1],
+																&operando);
 
-	long long int resultado =
-		calcular_operacion (operandos_numericos, operadores, operacion);
+	mpz_init_set_str (resultado_deseado, operando, 10);
+	/* free (operando); */
 
-	individuo->aptitud = abs (operandos_numericos[*cantidad_operandos - 1] -
-														resultado);
+
+	puts ("");
+	for (int indice = 0; indice < 10; indice++)
+		if (individuo->letras[indice] != '\0')
+			printf ("%c:%d\t", individuo->letras[indice], indice);
+
+
+	/* Calcula el resultado obtenido */
+	calcular_operacion (operandos, individuo, operadores, operacion,
+											&resultado_obtenido);
+	if (resultado_obtenido == NULL)
+		{
+			puts ("\nDivisión por 0");
+			mpz_set_si (individuo->aptitud, -1);
+			return;
+		}
+
+
+	char *resultado_obtenido_str = mpz_get_str (NULL, 10, *resultado_obtenido);
+	unsigned int ancho;
+	ancho =
+		(strlen (resultado_obtenido_str) >
+		 strlen (operando) ? strlen (resultado_obtenido_str) : strlen (operando));
+	printf ("Resultado obtenido: %*s\n", ancho, resultado_obtenido_str);
+	printf (" Resultado deseado: %s\n", operando);
+	free (resultado_obtenido_str);
+	free (operando);
+
+
+	/* Calcula la aptitud */
+	mpz_t aptitud;
+	mpz_init (aptitud);
+	mpz_sub (aptitud, resultado_deseado, *resultado_obtenido);
+	mpz_abs (aptitud, aptitud);
+
+
+	char *aptitud_str = mpz_get_str (NULL, 10, aptitud);
+	printf ("           Aptitud: %*s\n", ancho, aptitud_str);
+	free (aptitud_str);
+
+
+	mpz_set (individuo->aptitud, aptitud);
+
+	/* Libera memoria */
+	mpz_clear (resultado_deseado);
+	mpz_clear (*resultado_obtenido);
+	free (resultado_obtenido);
+	mpz_clear (aptitud);
 }
 
 void
-convertir_operandos_a_numeros (const struct individuos_s *restrict const
-															 individuo, char **restrict const operandos,
-															 unsigned int cantidad_operandos,
-															 long long int *restrict const
-															 operandos_numericos)
+convertir_operando_a_numeros (const struct individuos_s *restrict const
+															individuo,
+															const char *restrict const operando_str,
+															char **restrict operando)
 {
-	while (cantidad_operandos-- > 0)
-		{
-			unsigned int columna = 0;
-			const unsigned int longitud_operando =
-				(int) strlen (operandos[cantidad_operandos]);
-			// recorre todos los caracteres del operando
-			do
-				{
-					const char caracter_buscado =
-						operandos[cantidad_operandos][columna];
-					// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
-					// con el caracter seleccionado del operando
-					for (unsigned int indice = 0; indice < 10; indice++)
-						{
-							const char caracter_encontrado = individuo->letras[indice];
-							if (caracter_buscado == caracter_encontrado)
-								{
-									unsigned int aux = 0;	// aux incrementa cuántes veces hay que multiplicar por 10
-									unsigned long long int numero = indice;
-									if (indice > 0)
-										while (++aux < longitud_operando - columna)
-											numero = (numero << 3) + (numero << 1);	// x*10 => x*[(2^3+2)]
-									operandos_numericos[cantidad_operandos] += numero;
-									break;
-								}
-						}
-				}
-			while (++columna < longitud_operando);
-		}
+	unsigned int columna = 0;
+	const unsigned int longitud_operando = (int) strlen (operando_str);
+	*operando = malloc (longitud_operando + 1);
+	// recorre todos los caracteres del operando
+	do
+		// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
+		// con el caracter seleccionado del operando
+		for (unsigned int indice = 0; indice < 10; indice++)
+			if (operando_str[columna] == individuo->letras[indice])
+				(*operando)[columna] = '0' + indice;
+	while (++columna < longitud_operando);
+	(*operando)[columna] = '\0';
+
+	/* for (int indice = 0; indice < 10; indice++) */
+	/* if (individuo->letras[indice] != '\0') */
+	/* printf ("%c --> %d\t\t", individuo->letras[indice], indice); */
+	/* printf ("\n%s = %s\n", operando_str, *operando); */
 }
 
 /* Función de comparación de estructuras de individuos */
@@ -305,12 +437,12 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 {
 	const struct individuos_s *restrict const individuo1 = ptr1;
 	const struct individuos_s *restrict const individuo2 = ptr2;
-	if (individuo1->aptitud < individuo2->aptitud)
-		return -1;
-	else if (individuo1->aptitud > individuo2->aptitud)
+	if (mpz_sgn (individuo1->aptitud) == -1)
 		return 1;
+	if (mpz_sgn (individuo2->aptitud) == -1)
+		return -1;
 	else
-		return 0;
+		return mpz_cmp (individuo1->aptitud, individuo2->aptitud);
 }
 
 void
@@ -336,6 +468,11 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 									 2. * (((*cantidad - indice) * (1. - rmin)) /
 												 (*cantidad - 1)));
 
+
+			printf ("individuo %lu: %u copia/s\n", indice + 1,
+							copias_por_individuo);
+
+
 			/* Verifica que copias_por_individuo no supere a cantidad.
 			 * Puede pasar si cantidad es muy chica */
 			if ((copias_por_individuo + copias_totales) >= *cantidad)
@@ -344,8 +481,9 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 			/* Hace la cantidad de copias correspondientes */
 			for (unsigned int n = 0; n < copias_por_individuo; n++, indice_nuevos++)
 				{
-					seleccionados[indice_nuevos].aptitud =
-						(*individuos)[indice].aptitud;
+					mpz_init (seleccionados[indice_nuevos].aptitud);
+					mpz_set (seleccionados[indice_nuevos].aptitud,
+									 (*individuos)[indice].aptitud);
 
 					seleccionados[indice_nuevos].letras = malloc (10);
 					memcpy (seleccionados[indice_nuevos].letras,
@@ -357,11 +495,17 @@ seleccion_por_ranking_con_ce (struct individuos_s **individuos,
 	/* Se copian los individuos seleccionados a la estructura original */
 	for (unsigned long int indice = 0; indice < *cantidad; indice++)
 		{
-			(*individuos)[indice + *inicio].aptitud = seleccionados[indice].aptitud;
+			mpz_set ((*individuos)[indice + *inicio].aptitud,
+							 seleccionados[indice].aptitud);
 			memcpy ((*individuos)[indice + *inicio].letras,
 							seleccionados[indice].letras, 10);
+			mpz_clear (seleccionados[indice].aptitud);
 			free (seleccionados[indice].letras);
 		}
+
+
+	puts ("");
+
 
 	free (seleccionados);
 }

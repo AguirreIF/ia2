@@ -2,6 +2,7 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 
+#include <gmp.h>
 #include <inttypes.h>
 
 #define UNUSED(x) (void)(x)
@@ -9,7 +10,7 @@
 struct individuos_s
 {
 	char *letras;
-	unsigned long long int aptitud;
+	mpz_t aptitud;
 };
 
 // función principal de proceso en entrada.y
@@ -64,17 +65,15 @@ void calcular_aptitud3 (struct individuos_s *restrict const individuo,
 												const char *restrict const operadores,
 												char *const operacion);
 
-void convertir_operandos_a_numeros (const struct individuos_s *restrict const
-																		individuo,
-																		char **restrict const operandos,
-																		unsigned int cantidad_operandos,
-																		long long int *restrict const
-																		operandos_numericos);
+void convertir_operando_a_numeros (const struct individuos_s *restrict const
+																	 individuo,
+																	 const char *restrict const operando_str,
+																	 char **restrict operando);
 
-long long int calcular_operacion (const long long int *restrict const
-																	operandos_numericos,
-																	const char *restrict const operadores,
-																	char *const operacion);
+void calcular_operacion (char **restrict const operandos,
+												 const struct individuos_s *restrict const
+												 individuo, const char *restrict const operadores,
+												 char *const operacion, mpz_t ** resultado);
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 

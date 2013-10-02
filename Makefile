@@ -1,6 +1,6 @@
 CC       := cc
 CFLAGS   := -g -Wall -Wextra -pedantic -std=gnu99
-LDFLAGS  := -lm
+LDFLAGS  := -lm -lgmp
 
 SRC := programa.c funciones.c entrada.tab.c entrada.c shunt.c
 OBJ := $(SRC:.c=.o)
