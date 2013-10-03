@@ -221,13 +221,13 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 
 	mpz_set (individuo->aptitud, aptitud);
 
-	mpz_clear(aptitud);
-	mpz_clear(aptitud1);
-	mpz_clear(aptitud2);
+	mpz_clear (aptitud);
+	mpz_clear (aptitud1);
+	mpz_clear (aptitud2);
 
 
-	free(resultado_deseado_str);
-	free(resultado_obtenido_str);
+	free (resultado_deseado_str);
+	free (resultado_obtenido_str);
 }
 
 void
@@ -466,9 +466,9 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 
 void
 seleccion_por_ranking (struct individuos_s **individuos,
-															const unsigned long int *restrict const inicio,
-															const unsigned long int *restrict const
-															cantidad, const float rmin)
+											 const unsigned long int *restrict const inicio,
+											 const unsigned long int *restrict const
+											 cantidad, const float rmin)
 {
 	struct individuos_s *seleccionados =
 		malloc (*cantidad * sizeof (struct individuos_s)), **extras = NULL;
@@ -516,7 +516,7 @@ seleccion_por_ranking (struct individuos_s **individuos,
 				}
 
 
-			printf ("individuo %lu: %u +%u copias\n", indice + 1, copias_e,
+			printf ("individuo %lu: %u + %u copias\n", indice + 1, copias_e,
 							copias_d);
 
 

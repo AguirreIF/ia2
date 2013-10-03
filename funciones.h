@@ -78,10 +78,10 @@ void calcular_operacion (char **restrict const operandos,
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
 void seleccion_por_ranking (struct individuos_s **restrict individuos,
-																	 const unsigned long int *restrict const
-																	 inicio,
-																	 const unsigned long int *restrict const
-																	 cantidad, const float rmin);
+														const unsigned long int *restrict const
+														inicio,
+														const unsigned long int *restrict const
+														cantidad, const float rmin);
 
 void cruza (struct individuos_s *restrict individuos,
 						const unsigned long int *restrict const cantidad);
