@@ -160,9 +160,15 @@ shunt_op (struct op_s *op)
 					pop_numstack (operando2);
 					/* Obtiene el operador */
 					pop = pop_opstack ();
-					/* Verifica que no vaya a dividir por 0 */
+					/* Verifica que no vaya a dividir por 0
+					 * libera la memoria y retorna */
 					if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
-						return -1;
+						{
+							mpq_clear (operando1);
+							mpq_clear (operando2);
+							mpq_clear (resultado);
+							return -1;
+						}
 					/* Hace el cálculo y lo guarda en resultado */
 					pop->eval (resultado, operando2, operando1);
 					/* Guarda el resultado en la pila */
@@ -185,9 +191,15 @@ shunt_op (struct op_s *op)
 			pop_numstack (operando2);
 			/* Obtiene el operador */
 			pop = pop_opstack ();
-			/* Verifica que no vaya a dividir por 0 */
+			/* Verifica que no vaya a dividir por 0
+			 * libera la memoria y retorna */
 			if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
-				return -1;
+				{
+					mpq_clear (operando1);
+					mpq_clear (operando2);
+					mpq_clear (resultado);
+					return -1;
+				}
 			/* Hace el cálculo y lo guarda en resultado */
 			pop->eval (resultado, operando2, operando1);
 			/* Guarda el resultado en la pila */
@@ -271,9 +283,15 @@ calcular_operacion (char **restrict const operandos,
 			pop_numstack (operando2);
 			/* Obtiene el operador */
 			op = pop_opstack ();
-			/* Verifica que no vaya a dividir por 0 */
+			/* Verifica que no vaya a dividir por 0
+			 * libera la memoria y retorna */
 			if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
-				return;
+				{
+					mpq_clear (operando1);
+					mpq_clear (operando2);
+					mpq_clear (resultado);
+					return;
+				}
 			/* Hace el cálculo y lo guarda en resultado */
 			op->eval (resultado, operando2, operando1);
 			/* Guarda el resultado en la pila */

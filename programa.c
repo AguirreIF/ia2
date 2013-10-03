@@ -306,8 +306,8 @@ main (int argc, char **argv)
 					printf ("Cantidad por copias esperadas: %lu\n\n",
 									cantidad_restantes);
 
-					seleccion_por_ranking_con_ce (&individuos, &cantidad_elite,
-																				&cantidad_restantes, 0);
+					seleccion_por_ranking (&individuos, &cantidad_elite,
+																 &cantidad_restantes, 0);
 
 					puts ("Individuos después de selección elitista y por ranking");
 					puts ("------------------------------------------------------");

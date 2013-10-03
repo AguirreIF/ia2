@@ -77,7 +77,7 @@ void calcular_operacion (char **restrict const operandos,
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
-void seleccion_por_ranking_con_ce (struct individuos_s **restrict individuos,
+void seleccion_por_ranking (struct individuos_s **restrict individuos,
 																	 const unsigned long int *restrict const
 																	 inicio,
 																	 const unsigned long int *restrict const
