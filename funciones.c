@@ -589,44 +589,31 @@ seleccion_por_ranking (struct individuos_s **individuos,
 
 void
 cruza (struct individuos_s *restrict individuos,
-			 const unsigned long int *restrict const cantidad,
-			 const unsigned int puntos)
+			 const unsigned long int *restrict const cantidad)
 {
-	unsigned int d;
-	switch (puntos)
-		{
-		case 1:
-			d = 5;
-			break;
-		case 2:
-			d = 4;
-			break;
-		case 3:
-			d = 3;
-			break;
-		case 4:
-			d = 2;
-			break;
-		}
-
 	for (unsigned long int i = 0; i < *cantidad; i++)
 		{
-			/* Si el siguiente es un copia no se cruza */
-			if ((i + 1) < *cantidad)
-				if (individuos[i].letras[0] == individuos[i + 1].letras[0] &&
-						individuos[i].letras[1] == individuos[i + 1].letras[1] &&
-						individuos[i].letras[2] == individuos[i + 1].letras[2] &&
-						individuos[i].letras[3] == individuos[i + 1].letras[3] &&
-						individuos[i].letras[4] == individuos[i + 1].letras[4] &&
-						individuos[i].letras[5] == individuos[i + 1].letras[5] &&
-						individuos[i].letras[6] == individuos[i + 1].letras[6] &&
-						individuos[i].letras[7] == individuos[i + 1].letras[7] &&
-						individuos[i].letras[8] == individuos[i + 1].letras[8] &&
-						individuos[i].letras[9] == individuos[i + 1].letras[9])
-					continue;
+			unsigned int punto = (1 + rand () / (RAND_MAX / (5 - 1) + 1));
+
+			unsigned int d;
+			switch (punto)
+				{
+				case 1:
+					d = 5;
+					break;
+				case 2:
+					d = 4;
+					break;
+				case 3:
+					d = 3;
+					break;
+				case 4:
+					d = 2;
+					break;
+				}
 
 			unsigned int j = 0;
-			for (unsigned int x = 0; x < puntos; x++)
+			for (unsigned int x = 0; x < punto; x++)
 				if ((10 - j) >= (d * 2))
 					{
 						for (unsigned int a = 0; a < d; a++, j++)

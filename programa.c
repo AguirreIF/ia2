@@ -321,11 +321,8 @@ main (int argc, char **argv)
 							 individuos[i].letras[8], individuos[i].letras[9],
 							 individuos[i].aptitud);
 
-					/* Se toma como punto/s de cruza un número aleatorio entre 1 y 4 */
-					unsigned int punto =
-						(unsigned int) (1 + rand () / (RAND_MAX / (5 - 1) + 1));
 					/* No se cruzan los individuos elite */
-					cruza (&individuos[cantidad_elite], &cantidad_restantes, punto);
+					cruza (&individuos[cantidad_elite], &cantidad_restantes);
 
 
 					puts ("\nCálculo de aptitud después de cruzar");
@@ -337,8 +334,8 @@ main (int argc, char **argv)
 						args.faptitud (&individuos[i], operandos,
 													 &cantidad_operandos, operadores, operacion);
 
-					printf ("\nIndividuos después de cruzar (%u)\n", punto);
-					puts ("---------------------------------");
+					puts ("\nIndividuos después de cruzar");
+					puts ("----------------------------");
 					for (unsigned long int i = cantidad_elite; i < args.poblacion; i++)
 						gmp_printf
 							("Aptitud individuo[%2lu]: %c%c%c%c%c%c%c%c%c%c = %Zd\n",

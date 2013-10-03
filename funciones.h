@@ -84,7 +84,6 @@ void seleccion_por_ranking (struct individuos_s **restrict individuos,
 																	 cantidad, const float rmin);
 
 void cruza (struct individuos_s *restrict individuos,
-						const unsigned long int *restrict const cantidad,
-						const unsigned int puntos);
+						const unsigned long int *restrict const cantidad);
 
 #endif /* FUNCIONES_H */
