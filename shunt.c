@@ -266,7 +266,6 @@ calcular_operacion (char **restrict const operandos,
 						strcat (operacion_completa, operando_str);
 
 					mpq_t operando;
-					/* mpq_init_set_str (operando, operando_str, 10); */
 					mpq_init (operando);
 					mpq_set_str (operando, operando_str, 10);
 					free (operando_str);

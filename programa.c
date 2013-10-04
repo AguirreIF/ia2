@@ -272,7 +272,6 @@ main (int argc, char **argv)
 						 individuos_cmp);
 
 			/* Verifica si hay algún individuo solución */
-			/* if (individuos[0].aptitud == 0) */
 			if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
 				{
 					puts ("\n¡Solución en la población inicial!");
