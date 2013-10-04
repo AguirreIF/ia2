@@ -162,7 +162,7 @@ shunt_op (struct op_s *op)
 					pop = pop_opstack ();
 					/* Verifica que no vaya a dividir por 0
 					 * libera la memoria y retorna */
-					if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
+					if ((pop->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
 						{
 							mpq_clear (operando1);
 							mpq_clear (operando2);
