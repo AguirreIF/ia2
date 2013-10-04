@@ -275,12 +275,19 @@ main (int argc, char **argv)
 			/* if (individuos[0].aptitud == 0) */
 			if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
 				{
-					puts ("\n¡Solución!");
-					for (unsigned int indice = 0; indice < 10; indice++)
-						if (individuos[0].letras[indice] != '\0')
-							printf ("%c --> %u\t\t", individuos[0].letras[indice], indice);
+					puts ("\n¡Solución en la población inicial!");
+					char c;
+					for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
+						{
+							printf ("%c:", c = letras[j]);
+							for (unsigned int x = 0; x < 10; x++)
+								if (c == individuos[0].letras[x])
+									{
+										printf ("%u  ", x);
+										break;
+									}
+						}
 					puts ("");
-
 					exit (EXIT_SUCCESS);
 				}
 
@@ -405,10 +412,18 @@ main (int argc, char **argv)
 						{
 							printf ("\n¡Solución en la generación %lu!\n",
 											generacion + 1);
-							for (unsigned int indice = 0; indice < 10; indice++)
-								if (individuos[0].letras[indice] != '\0')
-									printf ("%c --> %u\t\t",
-													individuos[0].letras[indice], indice);
+							char c;
+							for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+									 j++)
+								{
+									printf ("%c:", c = letras[j]);
+									for (unsigned int x = 0; x < 10; x++)
+										if (c == individuos[0].letras[x])
+											{
+												printf ("%u  ", x);
+												break;
+											}
+								}
 							puts ("");
 							exit (EXIT_SUCCESS);
 						}

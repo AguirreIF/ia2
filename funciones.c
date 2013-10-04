@@ -422,11 +422,6 @@ convertir_operando_a_numeros (const struct individuos_s *restrict const
 				(*operando)[columna] = '0' + indice;
 	while (++columna < longitud_operando);
 	(*operando)[columna] = '\0';
-
-	/* for (int indice = 0; indice < 10; indice++) */
-	/* if (individuo->letras[indice] != '\0') */
-	/* printf ("%c --> %d\t\t", individuo->letras[indice], indice); */
-	/* printf ("\n%s = %s\n", operando_str, *operando); */
 }
 
 /* Función de comparación de estructuras de individuos */
