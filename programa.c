@@ -429,19 +429,19 @@ main (int argc, char **argv)
 				}
 
 			/* No ejecuta cuando encuentra solución */
-			free (letras);
-			while (args.poblacion-- > 0)
-				{
-					free (individuos[args.poblacion].letras);
-					mpz_clear (individuos[args.poblacion].aptitud);
-				}
-			free (individuos);
-			while (cantidad_operandos-- > 0)
-				free (operandos[cantidad_operandos]);
-			free (operandos);
-			free (operadores);
-			free (operacion);
-			exit (EXIT_SUCCESS);
+			/* free (letras); */
+			/* while (args.poblacion-- > 0) */
+				/* { */
+					/* free (individuos[args.poblacion].letras); */
+					/* mpz_clear (individuos[args.poblacion].aptitud); */
+				/* } */
+			/* free (individuos); */
+			/* while (cantidad_operandos-- > 0) */
+				/* free (operandos[cantidad_operandos]); */
+			/* free (operandos); */
+			/* free (operadores); */
+			/* free (operacion); */
+			exit (EXIT_FAILURE);
 		}
 	else if (salida == 1)
 		{
