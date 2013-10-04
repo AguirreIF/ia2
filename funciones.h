@@ -49,21 +49,24 @@ void calcular_aptitud1 (struct individuos_s *restrict const individuo,
 												char **restrict const operandos,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
-												char *const operacion);
+												char *const operacion,
+												const unsigned int *restrict const debug);
 
 // otra función de aptitud
 void calcular_aptitud2 (struct individuos_s *restrict const individuo,
 												char **restrict const operandos,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
-												char *const operacion);
+												char *const operacion,
+												const unsigned int *restrict const debug);
 
 // otra función de aptitud
 void calcular_aptitud3 (struct individuos_s *restrict const individuo,
 												char **restrict const operandos,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
-												char *const operacion);
+												char *const operacion,
+												const unsigned int *restrict const debug);
 
 void convertir_operando_a_numeros (const struct individuos_s *restrict const
 																	 individuo,
@@ -73,7 +76,8 @@ void convertir_operando_a_numeros (const struct individuos_s *restrict const
 void calcular_operacion (char **restrict const operandos,
 												 const struct individuos_s *restrict const
 												 individuo, const char *restrict const operadores,
-												 char *const operacion, mpz_t ** resultado);
+												 char *const operacion, mpz_t ** resultado,
+												 const unsigned int *restrict const debug);
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
@@ -81,7 +85,8 @@ void seleccion_por_ranking (struct individuos_s **restrict individuos,
 														const unsigned long int *restrict const
 														inicio,
 														const unsigned long int *restrict const
-														cantidad, const float rmin);
+														cantidad, const float rmin,
+														const unsigned int *restrict const debug);
 
 void cruza (struct individuos_s *restrict individuos,
 						const unsigned long int *restrict const cantidad);

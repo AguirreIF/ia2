@@ -29,6 +29,9 @@ static const struct argp_option opciones[] = {
 	 "Cantidad de generaciones", 0},
 	{"aptitud", 'a', "APTITUD", 0,
 	 "Función de aptitud a utilizar", 0},
+	{0, 0, 0, 0, "Otras opciones", 2},
+	{"debug", 'd', 0, OPTION_ARG_OPTIONAL,
+	 "Cuánta info mostrar", 0},
 	{0, 0, 0, 0, "Sobre el programa:", -1},
 	{0, 0, 0, 0, 0, 0}
 };
@@ -42,7 +45,9 @@ struct args
 										char **restrict const operandos,
 										const unsigned int *restrict const cantidad_operandos,
 										const char *restrict const operadores,
-										char *const operacion);
+										char *const operacion,
+										const unsigned int *restrict const debug);
+	unsigned int debug;
 };
 
 /* Función que hace el parsing de las opciones */
@@ -158,6 +163,11 @@ parse_opt (int key, char *arg, struct argp_state *state)
 				args->faptitud = calcular_aptitud3;
 			break;
 
+		case 'd':
+			if (args->debug < 2)
+				args->debug++;
+			break;
+
 		case ARGP_KEY_ARG:
 			/* Procesa el argumento */
 			if (state->arg_num > 0)
@@ -198,6 +208,7 @@ main (int argc, char **argv)
 	args.semilla = NULL;
 	args.generaciones = 10;
 	args.faptitud = calcular_aptitud1;
+	args.debug = 0;
 
 	static struct argp argp = {
 		opciones, parse_opt, 0, doc, 0, 0, "es_AR"
@@ -230,8 +241,9 @@ main (int argc, char **argv)
 			else
 				args.poblacion = (args.poblacion / 100.) * permutaciones;
 
-			printf ("Permutaciones: %lu\nPoblación: %lu\n", permutaciones,
-							args.poblacion);
+			if (args.debug > 0)
+				printf ("Permutaciones: %lu\nPoblación: %lu\n", permutaciones,
+								args.poblacion);
 
 			struct individuos_s *individuos =
 				malloc (args.poblacion * sizeof (struct individuos_s));
@@ -242,17 +254,18 @@ main (int argc, char **argv)
 			if (args.semilla != NULL)
 				free (args.semilla);
 
-			free (letras);
 
-
-			puts ("\nCálculo de aptitud inicial");
-			puts ("--------------------------");
-
+			if (args.debug > 1)
+				{
+					puts ("\nCálculo de aptitud inicial");
+					puts ("--------------------------");
+				}
 
 			/* Calcula aptitud de la población */
 			for (unsigned long int i = 0; i < args.poblacion; i++)
 				args.faptitud (&individuos[i], operandos,
-											 &cantidad_operandos, operadores, operacion);
+											 &cantidad_operandos, operadores, operacion,
+											 &args.debug);
 
 			/* Ordena los individuos por aptitud */
 			qsort (individuos, args.poblacion, sizeof (struct individuos_s),
@@ -285,68 +298,103 @@ main (int argc, char **argv)
 			for (unsigned long int generacion = 0; generacion < args.generaciones;
 					 generacion++)
 				{
-					puts ("\n=================================");
-					printf ("       GENERACIÓN %lu\n", generacion + 1);
-					puts ("=================================\n");
+					if (args.debug > 0)
+						{
+							puts ("\n=================================");
+							printf ("       GENERACIÓN %lu\n", generacion + 1);
+							puts ("=================================\n");
 
-					puts ("Población (ordenada por aptitud)");
-					puts ("--------------------------------");
-					for (unsigned long int i = 0; i < args.poblacion; i++)
-						gmp_printf
-							("Individuo[%2lu]: %c%c%c%c%c%c%c%c%c%c = %Zd\n",
-							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
-							 individuos[i].letras[2], individuos[i].letras[3],
-							 individuos[i].letras[4], individuos[i].letras[5],
-							 individuos[i].letras[6], individuos[i].letras[7],
-							 individuos[i].letras[8], individuos[i].letras[9],
-							 individuos[i].aptitud);
-					/* for (int indice = 0; indice < 10; indice++) */
-					/* if (individuos[i].letras[indice] != '\0') */
-					/* printf ("%c --> %d\t\t", individuos[i].letras[indice], indice); */
+							puts ("Población (ordenada por aptitud)");
+							puts ("--------------------------------");
+							for (unsigned long int i = 0; i < args.poblacion; i++)
+								{
+									printf ("Individuo[%2lu]:  ", i);
+									char c;
 
-					printf ("\nCantidad elite: %lu\n", cantidad_elite);
-					printf ("Cantidad por copias esperadas: %lu\n\n",
-									cantidad_restantes);
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", c = letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (c == individuos[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd\n", individuos[i].aptitud);
+								}
+
+							printf ("\nElite: %lu\n", cantidad_elite);
+							printf ("Por ranking: %lu\n\n", cantidad_restantes);
+						}
 
 					seleccion_por_ranking (&individuos, &cantidad_elite,
-																 &cantidad_restantes, 0);
+																 &cantidad_restantes, 0, &args.debug);
 
-					puts ("Individuos después de selección elitista y por ranking");
-					puts ("------------------------------------------------------");
-					for (unsigned long int i = 0; i < args.poblacion; i++)
-						gmp_printf
-							("Aptitud individuo[%2lu]: %c%c%c%c%c%c%c%c%c%c = %Zd\n",
-							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
-							 individuos[i].letras[2], individuos[i].letras[3],
-							 individuos[i].letras[4], individuos[i].letras[5],
-							 individuos[i].letras[6], individuos[i].letras[7],
-							 individuos[i].letras[8], individuos[i].letras[9],
-							 individuos[i].aptitud);
+					if (args.debug > 0)
+						{
+							puts
+								("Individuos después de selección elitista y por ranking");
+							puts ("------------------------------------------------------");
+							for (unsigned long int i = 0; i < args.poblacion; i++)
+								{
+									printf ("Individuo[%2lu]:  ", i);
+									char c;
+
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", c = letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (c == individuos[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd\n", individuos[i].aptitud);
+								}
+						}
 
 					/* No se cruzan los individuos elite */
 					cruza (&individuos[cantidad_elite], &cantidad_restantes);
 
-
-					puts ("\nCálculo de aptitud después de cruzar");
-					puts ("------------------------------------");
-
+					if (args.debug > 1)
+						{
+							puts ("\nCálculo de aptitud después de cruzar");
+							puts ("------------------------------------");
+						}
 
 					for (unsigned long int i = cantidad_elite; i < cantidad_restantes;
 							 i++)
 						args.faptitud (&individuos[i], operandos,
-													 &cantidad_operandos, operadores, operacion);
+													 &cantidad_operandos, operadores, operacion,
+													 &args.debug);
 
-					puts ("\nIndividuos después de cruzar");
-					puts ("----------------------------");
-					for (unsigned long int i = cantidad_elite; i < args.poblacion; i++)
-						gmp_printf
-							("Aptitud individuo[%2lu]: %c%c%c%c%c%c%c%c%c%c = %Zd\n",
-							 i + 1, individuos[i].letras[0], individuos[i].letras[1],
-							 individuos[i].letras[2], individuos[i].letras[3],
-							 individuos[i].letras[4], individuos[i].letras[5],
-							 individuos[i].letras[6], individuos[i].letras[7],
-							 individuos[i].letras[8], individuos[i].letras[9],
-							 individuos[i].aptitud);
+					if (args.debug > 0)
+						{
+							puts ("\nIndividuos después de cruzar");
+							puts ("----------------------------");
+							for (unsigned long int i = 0; i < args.poblacion; i++)
+								{
+									printf ("Individuo[%2lu]:  ", i);
+									char c;
+
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", c = letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (c == individuos[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd\n", individuos[i].aptitud);
+								}
+						}
 
 					/* Ordena los individuos por aptitud */
 					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
@@ -355,7 +403,8 @@ main (int argc, char **argv)
 					/* Verifica si hay algún individuo solución */
 					if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
 						{
-							puts ("\n¡Solución!");
+							printf ("\n¡Solución en la generación %lu!\n",
+											generacion + 1);
 							for (unsigned int indice = 0; indice < 10; indice++)
 								if (individuos[0].letras[indice] != '\0')
 									printf ("%c --> %u\t\t",
@@ -366,6 +415,7 @@ main (int argc, char **argv)
 				}
 
 			/* No ejecuta cuando encuentra solución */
+			free (letras);
 			while (args.poblacion-- > 0)
 				{
 					free (individuos[args.poblacion].letras);

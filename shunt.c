@@ -213,13 +213,15 @@ void
 calcular_operacion (char **restrict const operandos,
 										const struct individuos_s *restrict const individuo,
 										const char *restrict const operadores,
-										char *const operacion, mpz_t ** resultado)
+										char *const operacion, mpz_t ** resultado,
+										const unsigned int *restrict const debug)
 {
 	nopstack = 0;
 	nnumstack = 0;
 
 	char operacion_completa[3000];
-	memset (operacion_completa, '\0', 3000);
+	if (*debug > 1)
+		memset (operacion_completa, '\0', 3000);
 
 	struct op_s *op = NULL;
 
@@ -230,8 +232,9 @@ calcular_operacion (char **restrict const operandos,
 			/* operador */
 			if (*tipo == '0')
 				{
-					operacion_completa[strlen (operacion_completa)] =
-						operadores[n_operador];
+					if (*debug > 1)
+						operacion_completa[strlen (operacion_completa)] =
+							operadores[n_operador];
 
 					op = getop (operadores[n_operador]);
 					if (shunt_op (op) == -1)
@@ -259,7 +262,8 @@ calcular_operacion (char **restrict const operandos,
 					while (++columna < longitud_operando);
 					operando_str[columna] = '\0';
 
-					strcat (operacion_completa, operando_str);
+					if (*debug > 1)
+						strcat (operacion_completa, operando_str);
 
 					mpq_t operando;
 					/* mpq_init_set_str (operando, operando_str, 10); */
@@ -297,7 +301,8 @@ calcular_operacion (char **restrict const operandos,
 			/* Guarda el resultado en la pila */
 			push_numstack (resultado);
 		}
-	gmp_printf ("\nOperación: %s\n", operacion_completa);
+	if (*debug > 1)
+		gmp_printf ("\nOperación: %s\n", operacion_completa);
 	*resultado = malloc (sizeof (mpz_t));
 	mpz_init (**resultado);
 	mpz_set_q (**resultado, numstack[0]);
