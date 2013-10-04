@@ -275,6 +275,8 @@ main (int argc, char **argv)
 			 * Serían las estructuras
 			 * individuos[0] a individuos[cantidad_elite - 1] */
 			unsigned long int cantidad_elite = args.poblacion * .05;
+			if (cantidad_elite < 1)
+				cantidad_elite = 1;
 
 			/* Cantidad de individuos restantes */
 			unsigned long int cantidad_restantes = args.poblacion - cantidad_elite;
