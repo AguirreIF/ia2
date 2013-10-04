@@ -603,7 +603,8 @@ cruza (struct individuos_s *restrict individuos,
 					gen1 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
 					gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
 
-					while (gen1 == gen2)
+					while ((gen1 == gen2) || ((individuos[i].letras[gen1] == '\0') &&
+																		(individuos[i].letras[gen2] == '\0')))
 						gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
 
 					char aux = individuos[i].letras[gen1];
