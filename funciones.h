@@ -86,4 +86,6 @@ void seleccion_por_ranking (struct individuos_s **restrict individuos,
 void cruza (struct individuos_s *restrict individuos,
 						const unsigned long int *restrict const cantidad);
 
+unsigned int al_azar (const unsigned int min, const unsigned int max);
+
 #endif /* FUNCIONES_H */

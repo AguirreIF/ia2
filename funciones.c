@@ -97,9 +97,7 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 
 			for (unsigned int columna = 0; columna < 10; columna++)
 				{
-					const unsigned int aleatorio =
-						(unsigned int) (columna +
-														rand () / (RAND_MAX / (10 - columna) + 1));
+					const unsigned int aleatorio = al_azar (columna, 9);
 					const char caracter = (*individuos)[n].letras[aleatorio];
 					(*individuos)[n].letras[aleatorio] =
 						(*individuos)[n].letras[columna];
@@ -600,16 +598,22 @@ cruza (struct individuos_s *restrict individuos,
 				{
 					unsigned int gen1, gen2;
 
-					gen1 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
-					gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
+					gen1 = al_azar (0, 9);
+					gen2 = al_azar (0, 9);
 
 					while ((gen1 == gen2) || ((individuos[i].letras[gen1] == '\0') &&
 																		(individuos[i].letras[gen2] == '\0')))
-						gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
+						gen2 = al_azar (0, 9);
 
 					char aux = individuos[i].letras[gen1];
 					individuos[i].letras[gen1] = individuos[i].letras[gen2];
 					individuos[i].letras[gen2] = aux;
 				}
 		}
+}
+
+unsigned int
+al_azar (const unsigned int min, const unsigned int max)
+{
+	return (min + rand () / (RAND_MAX / (max - min + 1) + 1));
 }
