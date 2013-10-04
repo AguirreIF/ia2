@@ -593,36 +593,22 @@ cruza (struct individuos_s *restrict individuos,
 {
 	for (unsigned long int i = 0; i < *cantidad; i++)
 		{
-			unsigned int punto = (1 + rand () / (RAND_MAX / (5 - 1) + 1));
+			unsigned int longitud_aptitud =
+				mpz_sizeinbase (individuos[i].aptitud, 10);
 
-			unsigned int d;
-			switch (punto)
+			while (longitud_aptitud-- > 0)
 				{
-				case 1:
-					d = 5;
-					break;
-				case 2:
-					d = 4;
-					break;
-				case 3:
-					d = 3;
-					break;
-				case 4:
-					d = 2;
-					break;
-				}
+					unsigned int gen1, gen2;
 
-			unsigned int j = 0;
-			for (unsigned int x = 0; x < punto; x++)
-				if ((10 - j) >= (d * 2))
-					{
-						for (unsigned int a = 0; a < d; a++, j++)
-							{
-								char letra = individuos[i].letras[j];
-								individuos[i].letras[j] = individuos[i].letras[j + d];
-								individuos[i].letras[j + d] = letra;
-							}
-						j += d;
-					}
+					gen1 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
+					gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
+
+					while (gen1 == gen2)
+						gen2 = 0 + rand () / (RAND_MAX / (9 - 0 + 1) + 1);
+
+					char aux = individuos[i].letras[gen1];
+					individuos[i].letras[gen1] = individuos[i].letras[gen2];
+					individuos[i].letras[gen2] = aux;
+				}
 		}
 }
