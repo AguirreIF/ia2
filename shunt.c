@@ -162,7 +162,9 @@ shunt_op (struct op_s *op)
 					pop = pop_opstack ();
 					/* Verifica que no vaya a dividir por 0
 					 * libera la memoria y retorna */
-					if ((pop->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
+					if (((pop->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0)) ||
+							((pop->op == '/') && (mpq_cmp (operando2, operando1) < 0)) ||
+							((pop->op == '-') && (mpq_cmp (operando2, operando1) < 0)))
 						{
 							mpq_clear (operando1);
 							mpq_clear (operando2);
@@ -193,7 +195,9 @@ shunt_op (struct op_s *op)
 			pop = pop_opstack ();
 			/* Verifica que no vaya a dividir por 0
 			 * libera la memoria y retorna */
-			if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
+			if (((pop->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0)) ||
+					((pop->op == '/') && (mpq_cmp (operando2, operando1) < 0)) ||
+					((pop->op == '-') && (mpq_cmp (operando2, operando1) < 0)))
 				{
 					mpq_clear (operando1);
 					mpq_clear (operando2);
@@ -213,7 +217,7 @@ void
 calcular_operacion (char **restrict const operandos,
 										const struct individuos_s *restrict const individuo,
 										const char *restrict const operadores,
-										char *const operacion, mpz_t ** resultado,
+										char *const operacion, mpz_t ** resultado_op,
 										const unsigned int *restrict const debug)
 {
 	nopstack = 0;
@@ -304,7 +308,9 @@ calcular_operacion (char **restrict const operandos,
 			op = pop_opstack ();
 			/* Verifica que no vaya a dividir por 0
 			 * libera la memoria y retorna */
-			if ((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0))
+			if (((op->op == '/') && (mpq_cmp_ui (operando1, 0, 1) == 0)) ||
+					((op->op == '/') && (mpq_cmp (operando2, operando1) < 0)) ||
+					((op->op == '-') && (mpq_cmp (operando2, operando1) < 0)))
 				{
 					mpq_clear (operando1);
 					mpq_clear (operando2);
@@ -318,9 +324,9 @@ calcular_operacion (char **restrict const operandos,
 		}
 	if (*debug > 1)
 		gmp_printf ("\nOperación: %s\n", operacion_completa);
-	*resultado = malloc (sizeof (mpz_t));
-	mpz_init (**resultado);
-	mpz_set_q (**resultado, numstack[0]);
+	*resultado_op = malloc (sizeof (mpz_t));
+	mpz_init (**resultado_op);
+	mpz_set_q (**resultado_op, numstack[0]);
 	mpq_clear (numstack[--nnumstack]);
 	free (numstack[nnumstack]);
 	numstack = NULL;
