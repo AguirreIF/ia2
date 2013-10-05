@@ -46,7 +46,8 @@ struct args
 										const unsigned int *restrict const cantidad_operandos,
 										const char *restrict const operadores,
 										char *const operacion,
-										const unsigned int *restrict const debug);
+										const unsigned int *restrict const debug,
+										const char *restrict const letras);
 	unsigned int debug;
 };
 
@@ -265,7 +266,7 @@ main (int argc, char **argv)
 			for (unsigned long int i = 0; i < args.poblacion; i++)
 				args.faptitud (&individuos[i], operandos,
 											 &cantidad_operandos, operadores, operacion,
-											 &args.debug);
+											 &args.debug, letras);
 
 			/* Ordena los individuos por aptitud */
 			qsort (individuos, args.poblacion, sizeof (struct individuos_s),
@@ -275,10 +276,10 @@ main (int argc, char **argv)
 			if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
 				{
 					puts ("\n¡Solución en la población inicial!");
-					char c;
 					for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
 						{
-							printf ("%c:", c = letras[j]);
+							char c = letras[j];
+							printf ("%c:", c);
 							for (unsigned int x = 0; x < 10; x++)
 								if (c == individuos[0].letras[x])
 									{
@@ -376,7 +377,7 @@ main (int argc, char **argv)
 							 i++)
 						args.faptitud (&individuos[i], operandos,
 													 &cantidad_operandos, operadores, operacion,
-													 &args.debug);
+													 &args.debug, letras);
 
 					if (args.debug > 0)
 						{

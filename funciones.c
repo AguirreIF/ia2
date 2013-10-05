@@ -112,7 +112,8 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 									 const unsigned int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,
 									 char *const operacion,
-									 const unsigned int *restrict const debug)
+									 const unsigned int *restrict const debug,
+									 const char *restrict const letras)
 {
 	mpz_t resultado_deseado, *resultado_obtenido = NULL;
 	char *operando = NULL;
@@ -127,9 +128,17 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	if (*debug > 1)
 		{
 			puts ("");
-			for (int indice = 0; indice < 10; indice++)
-				if (individuo->letras[indice] != '\0')
-					printf ("%c:%d\t", individuo->letras[indice], indice);
+			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
+				{
+					char c = letras[j];
+					printf ("%c:", c = letras[j]);
+					for (unsigned int x = 0; x < 10; x++)
+						if (c == individuo->letras[x])
+							{
+								printf ("%u  ", x);
+								break;
+							}
+				}
 		}
 
 	/* Calcula el resultado obtenido */
@@ -225,7 +234,8 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 									 const unsigned int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,
 									 char *const operacion,
-									 const unsigned int *restrict const debug)
+									 const unsigned int *restrict const debug,
+									 const char *restrict const letras)
 {
 	mpz_t resultado_deseado, *resultado_obtenido = NULL;
 	char *operando = NULL;
@@ -240,9 +250,17 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	if (*debug > 1)
 		{
 			puts ("");
-			for (int indice = 0; indice < 10; indice++)
-				if (individuo->letras[indice] != '\0')
-					printf ("%c:%d\t", individuo->letras[indice], indice);
+			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
+				{
+					char c = letras[j];
+					printf ("%c:", c);
+					for (unsigned int x = 0; x < 10; x++)
+						if (c == individuo->letras[x])
+							{
+								printf ("%u  ", x);
+								break;
+							}
+				}
 		}
 
 	/* Calcula el resultado obtenido */
@@ -341,7 +359,8 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 									 const unsigned int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,
 									 char *const operacion,
-									 const unsigned int *restrict const debug)
+									 const unsigned int *restrict const debug,
+									 const char *restrict const letras)
 {
 	mpz_t resultado_deseado, *resultado_obtenido = NULL;
 	char *operando = NULL;
@@ -356,9 +375,17 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 	if (*debug > 1)
 		{
 			puts ("");
-			for (int indice = 0; indice < 10; indice++)
-				if (individuo->letras[indice] != '\0')
-					printf ("%c:%d\t", individuo->letras[indice], indice);
+			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
+				{
+					char c = letras[j];
+					printf ("%c:", c);
+					for (unsigned int x = 0; x < 10; x++)
+						if (c == individuo->letras[x])
+							{
+								printf ("%u  ", x);
+								break;
+							}
+				}
 		}
 
 	/* Calcula el resultado obtenido */

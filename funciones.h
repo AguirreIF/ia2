@@ -50,7 +50,8 @@ void calcular_aptitud1 (struct individuos_s *restrict const individuo,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
 												char *const operacion,
-												const unsigned int *restrict const debug);
+												const unsigned int *restrict const debug,
+												const char *restrict const letras);
 
 // otra función de aptitud
 void calcular_aptitud2 (struct individuos_s *restrict const individuo,
@@ -58,7 +59,8 @@ void calcular_aptitud2 (struct individuos_s *restrict const individuo,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
 												char *const operacion,
-												const unsigned int *restrict const debug);
+												const unsigned int *restrict const debug,
+												const char *restrict const letras);
 
 // otra función de aptitud
 void calcular_aptitud3 (struct individuos_s *restrict const individuo,
@@ -66,7 +68,8 @@ void calcular_aptitud3 (struct individuos_s *restrict const individuo,
 												const unsigned int *restrict const cantidad_operandos,
 												const char *restrict const operadores,
 												char *const operacion,
-												const unsigned int *restrict const debug);
+												const unsigned int *restrict const debug,
+												const char *restrict const letras);
 
 void convertir_operando_a_numeros (const struct individuos_s *restrict const
 																	 individuo,
