@@ -364,13 +364,13 @@ main (int argc, char **argv)
 								}
 						}
 
-					/* No se cruzan los individuos elite */
-					cruza (&individuos[cantidad_elite], &cantidad_restantes);
+					/* No se mutan los individuos elite */
+					mutacion (&individuos[cantidad_elite], &cantidad_restantes);
 
 					if (args.debug > 1)
 						{
-							puts ("\nCálculo de aptitud después de cruzar");
-							puts ("------------------------------------");
+							puts ("\nCálculo de aptitud después de mutar");
+							puts ("-----------------------------------");
 						}
 
 					for (unsigned long int i = cantidad_elite; i < cantidad_restantes;
@@ -381,8 +381,8 @@ main (int argc, char **argv)
 
 					if (args.debug > 0)
 						{
-							puts ("\nIndividuos después de cruzar");
-							puts ("----------------------------");
+							puts ("\nIndividuos después de mutar");
+							puts ("---------------------------");
 							for (unsigned long int i = 0; i < args.poblacion; i++)
 								{
 									printf ("Individuo[%2lu]:  ", i);

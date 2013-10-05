@@ -591,8 +591,8 @@ seleccion_por_ranking (struct individuos_s **individuos,
 }
 
 void
-cruza (struct individuos_s *restrict individuos,
-			 const unsigned long int *restrict const cantidad)
+mutacion (struct individuos_s *restrict individuos,
+					const unsigned long int *restrict const cantidad)
 {
 	for (unsigned long int i = 0; i < *cantidad; i++)
 		{
