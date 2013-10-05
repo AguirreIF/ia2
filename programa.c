@@ -286,7 +286,7 @@ main (int argc, char **argv)
 										break;
 									}
 						}
-					puts ("");
+					mostrar_operacion (individuos, operandos, operadores, operacion);
 					exit (EXIT_SUCCESS);
 				}
 
@@ -423,7 +423,8 @@ main (int argc, char **argv)
 												break;
 											}
 								}
-							puts ("");
+							mostrar_operacion (individuos, operandos,
+																 operadores, operacion);
 							exit (EXIT_SUCCESS);
 						}
 				}

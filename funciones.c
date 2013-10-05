@@ -592,3 +592,74 @@ al_azar (const unsigned int min, const unsigned int max)
 {
 	return (min + rand () / (RAND_MAX / (max - min + 1) + 1));
 }
+
+void
+mostrar_operacion (const struct individuos_s *restrict const
+									 individuo, char **restrict const operandos,
+									 const char *restrict const operadores,
+									 char *restrict operacion)
+{
+	unsigned int n_operando = 0, n_operador = 0;
+
+	char *operacion_completa = NULL;
+	operacion_completa = malloc (1);
+	operacion_completa[0] = '\0';
+
+	do
+		{
+			/* operador */
+			if (*operacion == '0')
+				{
+					operacion_completa =
+						realloc (operacion_completa, strlen (operacion_completa) + 2);
+
+					operacion_completa[strlen (operacion_completa) + 1] = '\0';
+
+					operacion_completa[strlen (operacion_completa)] =
+						operadores[n_operador];
+
+					n_operador++;
+				}
+			/* operando */
+			else
+				{
+					/* Convierte el operando en su representación numérica */
+					unsigned int columna = 0;
+					const unsigned int longitud_operando =
+						(int) strlen (operandos[n_operando]);
+					char *operando_str = malloc (longitud_operando + 1);
+					// recorre todos los caracteres del operando
+					do
+						{
+							const char caracter_buscado = operandos[n_operando][columna];
+							// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
+							// con el caracter seleccionado del operando
+							for (unsigned int indice = 0; indice < 10; indice++)
+								if (caracter_buscado == individuo->letras[indice])
+									operando_str[columna] = '0' + indice;
+						}
+					while (++columna < longitud_operando);
+					operando_str[columna] = '\0';
+
+					if (*operacion == '\0')
+						{
+							operacion_completa =
+								realloc (operacion_completa,
+												 strlen (operacion_completa) + longitud_operando + 4);
+							strcat (operacion_completa, " = ");
+						}
+					else
+						operacion_completa =
+							realloc (operacion_completa,
+											 strlen (operacion_completa) + longitud_operando + 1);
+
+					strcat (operacion_completa, operando_str);
+					free (operando_str);
+					n_operando++;
+				}
+		}
+	while (*operacion++);
+
+	printf ("\nOperación: %s\n", operacion_completa);
+	free (operacion_completa);
+}

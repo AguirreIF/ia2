@@ -93,4 +93,9 @@ void cruza (struct individuos_s *restrict individuos,
 
 unsigned int al_azar (const unsigned int min, const unsigned int max);
 
+void mostrar_operacion (const struct individuos_s *restrict const
+												individuo, char **restrict const operandos,
+												const char *restrict const operadores,
+												char *restrict operacion);
+
 #endif /* FUNCIONES_H */

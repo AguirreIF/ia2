@@ -219,9 +219,12 @@ calcular_operacion (char **restrict const operandos,
 	nopstack = 0;
 	nnumstack = 0;
 
-	char operacion_completa[3000];
+	char *operacion_completa = NULL;
 	if (*debug > 1)
-		memset (operacion_completa, '\0', 3000);
+		{
+			operacion_completa = malloc (1);
+			operacion_completa[0] = '\0';
+		}
 
 	struct op_s *op = NULL;
 
@@ -233,8 +236,15 @@ calcular_operacion (char **restrict const operandos,
 			if (*tipo == '0')
 				{
 					if (*debug > 1)
-						operacion_completa[strlen (operacion_completa)] =
-							operadores[n_operador];
+						{
+							operacion_completa =
+								realloc (operacion_completa, strlen (operacion_completa) + 2);
+
+							operacion_completa[strlen (operacion_completa) + 1] = '\0';
+
+							operacion_completa[strlen (operacion_completa)] =
+								operadores[n_operador];
+						}
 
 					op = getop (operadores[n_operador]);
 					if (shunt_op (op) == -1)
@@ -263,7 +273,13 @@ calcular_operacion (char **restrict const operandos,
 					operando_str[columna] = '\0';
 
 					if (*debug > 1)
-						strcat (operacion_completa, operando_str);
+						{
+							operacion_completa =
+								realloc (operacion_completa,
+												 strlen (operacion_completa) + longitud_operando + 1);
+
+							strcat (operacion_completa, operando_str);
+						}
 
 					mpq_t operando;
 					mpq_init (operando);
