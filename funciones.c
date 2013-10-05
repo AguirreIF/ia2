@@ -135,9 +135,10 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	/* Calcula el resultado obtenido */
 	calcular_operacion (operandos, individuo, operadores, operacion,
 											&resultado_obtenido, debug);
-	if ((resultado_obtenido == NULL) && (*debug > 1))
+	if (resultado_obtenido == NULL)
 		{
-			puts ("\nDivisión por 0");
+			if (*debug > 1)
+				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			mpz_clear (resultado_deseado);
 			return;
@@ -247,9 +248,10 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	/* Calcula el resultado obtenido */
 	calcular_operacion (operandos, individuo, operadores, operacion,
 											&resultado_obtenido, debug);
-	if ((resultado_obtenido == NULL) && (*debug > 1))
+	if (resultado_obtenido == NULL)
 		{
-			puts ("\nDivisión por 0");
+			if (*debug > 1)
+				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			mpz_clear (resultado_deseado);
 			return;
@@ -362,9 +364,10 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 	/* Calcula el resultado obtenido */
 	calcular_operacion (operandos, individuo, operadores, operacion,
 											&resultado_obtenido, debug);
-	if ((resultado_obtenido == NULL) && (*debug > 1))
+	if (resultado_obtenido == NULL)
 		{
-			puts ("\nDivisión por 0");
+			if (*debug > 1)
+				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			return;
 		}
