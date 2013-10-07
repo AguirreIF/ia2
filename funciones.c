@@ -469,6 +469,21 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 }
 
 void
+seleccion_elitista (struct individuos_s **restrict individuos,
+										const unsigned long int *restrict const cantidad_elite,
+										struct individuos_s **restrict elite)
+{
+	for (unsigned long int indice = 0; indice < *cantidad_elite; indice++)
+		{
+			mpz_init ((*elite)[indice].aptitud);
+			mpz_set ((*elite)[indice].aptitud, (*individuos)[indice].aptitud);
+
+			(*elite)[indice].letras = malloc (10);
+			memcpy ((*elite)[indice].letras, (*individuos)[indice].letras, 10);
+		}
+}
+
+void
 seleccion_por_ranking (struct individuos_s **individuos,
 											 const unsigned long int *restrict const inicio,
 											 const unsigned long int *restrict const
@@ -591,30 +606,44 @@ seleccion_por_ranking (struct individuos_s **individuos,
 }
 
 void
-mutacion (struct individuos_s *restrict individuos,
-					const unsigned long int *restrict const cantidad)
+cruza_ciclica (struct individuos_s *restrict madre,
+							 struct individuos_s *restrict padre)
 {
-	for (unsigned long int i = 0; i < *cantidad; i++)
+	UNUSED(padre);
+	unsigned int longitud_aptitud = mpz_sizeinbase (madre->aptitud, 10);
+
+	while (longitud_aptitud-- > 0)
 		{
-			unsigned int longitud_aptitud =
-				mpz_sizeinbase (individuos[i].aptitud, 10);
+			unsigned int gen1, gen2;
 
-			while (longitud_aptitud-- > 0)
-				{
-					unsigned int gen1, gen2;
+			gen1 = al_azar (0, 9);
+			gen2 = al_azar (0, 9);
 
-					gen1 = al_azar (0, 9);
-					gen2 = al_azar (0, 9);
+			while ((gen1 == gen2) || ((madre->letras[gen1] == '\0') &&
+																(madre->letras[gen2] == '\0')))
+				gen2 = al_azar (0, 9);
 
-					while ((gen1 == gen2) || ((individuos[i].letras[gen1] == '\0') &&
-																		(individuos[i].letras[gen2] == '\0')))
-						gen2 = al_azar (0, 9);
-
-					char aux = individuos[i].letras[gen1];
-					individuos[i].letras[gen1] = individuos[i].letras[gen2];
-					individuos[i].letras[gen2] = aux;
-				}
+			char aux = madre->letras[gen1];
+			madre->letras[gen1] = madre->letras[gen2];
+			madre->letras[gen2] = aux;
 		}
+}
+
+void
+mutacion (struct individuos_s *restrict individuo)
+{
+	unsigned int gen1, gen2;
+
+	gen1 = al_azar (0, 9);
+	gen2 = al_azar (0, 9);
+
+	while ((gen1 == gen2) || ((individuo->letras[gen1] == '\0') &&
+														(individuo->letras[gen2] == '\0')))
+		gen2 = al_azar (0, 9);
+
+	char aux = individuo->letras[gen1];
+	individuo->letras[gen1] = individuo->letras[gen2];
+	individuo->letras[gen2] = aux;
 }
 
 unsigned int

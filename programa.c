@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,20 +20,40 @@ static const char doc[] =
 /* Opciones aceptadas */
 static const struct argp_option opciones[] = {
 	{0, 0, 0, 0, "Opciones para la población:", 1},
+
 	{"poblacion", 'p', "PORCENTAJE", 0,
 	 "El porcentaje de permutaciones que se usará como población inicial", 0},
+
 	{"poblacion-max", 'm', "NUM", 0,
 	 "La cantidad máxima de población inicial", 0},
+
+	{0, 0, 0, 0, "Opciones del AG", 2},
+
 	{"semilla", 's', "SEMILLA", 0,
 	 "Semilla para generar la población inicial", 0},
+
 	{"generaciones", 'g', "GENERACIONES", 0,
 	 "Cantidad de generaciones", 0},
+
 	{"aptitud", 'a', "APTITUD", 0,
 	 "Función de aptitud a utilizar", 0},
-	{0, 0, 0, 0, "Otras opciones", 2},
+
+	{"elite", 'e', "PORCENTAJE", 0,
+	 "Porcentaje de selección elitista", 0},
+
+	{"cruza", 'x', "PORCENTAJE", 0,
+	 "Porcentaje de población para cruza", 0},
+
+	{"mutacion", 't', "PORCENTAJE", 0,
+	 "Porcentaje de población para mutación", 0},
+
+	{0, 0, 0, 0, "Otras opciones", 3},
+
 	{"debug", 'd', 0, OPTION_ARG_OPTIONAL,
 	 "Cuánta info mostrar", 0},
+
 	{0, 0, 0, 0, "Sobre el programa:", -1},
+
 	{0, 0, 0, 0, 0, 0}
 };
 
@@ -40,7 +61,8 @@ static const struct argp_option opciones[] = {
 struct args
 {
 	char *args[5], *entrada;
-	unsigned long int *semilla, generaciones, poblacion, poblacion_maxima;
+	unsigned long int *semilla, generaciones, poblacion, poblacion_maxima,
+		cantidad_elite, cantidad_a_cruzar, cantidad_a_mutar;
 	void (*faptitud) (struct individuos_s * restrict const individuo,
 										char **restrict const operandos,
 										const unsigned int *restrict const cantidad_operandos,
@@ -164,6 +186,90 @@ parse_opt (int key, char *arg, struct argp_state *state)
 				args->faptitud = calcular_aptitud3;
 			break;
 
+		case 'e':
+			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
+
+			n_aux = strtoul (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && n_aux == ULONG_MAX)
+					|| (errno != 0 && n_aux == 0))
+				argp_failure (state, 1, errno, "Error de strtoul");
+
+			args->cantidad_elite = n_aux;
+
+			if (args->poblacion == 0)
+				argp_error (state,
+										"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
+			else if (args->poblacion > 100)
+				argp_error (state,
+										"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
+
+			if ((args->cantidad_elite +
+					 args->cantidad_a_mutar + args->cantidad_a_cruzar) >= 100)
+				argp_error (state,
+										"La suma de los porcentajes de selección, cruza y mutación no puede superar el 100%%");
+			break;
+
+		case 'x':
+			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"El porcentaje para cruza debe ser un número entero entre 1 y 100");
+
+			n_aux = strtoul (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && n_aux == ULONG_MAX)
+					|| (errno != 0 && n_aux == 0))
+				argp_failure (state, 1, errno, "Error de strtoul");
+
+			args->cantidad_a_cruzar = n_aux;
+
+			if (args->poblacion == 0)
+				argp_error (state,
+										"El porcentaje para cruza debe ser un número entero entre 1 y 100");
+			else if (args->poblacion > 100)
+				argp_error (state,
+										"El porcentaje para cruza debe ser un número entero entre 1 y 100");
+
+			if ((args->cantidad_elite +
+					 args->cantidad_a_mutar + args->cantidad_a_cruzar) >= 100)
+				argp_error (state,
+										"La suma de los porcentajes de selección, cruza y mutación no puede superar el 100%%");
+			break;
+
+		case 't':
+			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
+				if (!isdigit (arg[i]))
+					argp_error (state,
+											"El porcentaje para mutación debe ser un número entero entre 1 y 100");
+
+			n_aux = strtoul (arg, NULL, 10);
+
+			/* Verifica posibles errores de conversión */
+			if ((errno == ERANGE && n_aux == ULONG_MAX)
+					|| (errno != 0 && n_aux == 0))
+				argp_failure (state, 1, errno, "Error de strtoul");
+
+			args->cantidad_a_mutar = n_aux;
+
+			if (args->poblacion == 0)
+				argp_error (state,
+										"El porcentaje para mutación debe ser un número entero entre 1 y 100");
+			else if (args->poblacion > 100)
+				argp_error (state,
+										"El porcentaje para mutación debe ser un número entero entre 1 y 100");
+
+			if ((args->cantidad_elite +
+					 args->cantidad_a_mutar + args->cantidad_a_cruzar) >= 100)
+				argp_error (state,
+										"La suma de los porcentajes de selección, cruza y mutación no puede superar el 100%%");
+			break;
+
 		case 'd':
 			if (args->debug < 2)
 				args->debug++;
@@ -207,6 +313,9 @@ main (int argc, char **argv)
 	args.poblacion_maxima = 10000;
 	args.entrada = NULL;
 	args.semilla = NULL;
+	args.cantidad_elite = 0;
+	args.cantidad_a_mutar = 0;
+	args.cantidad_a_cruzar = 0;
 	args.generaciones = 10;
 	args.faptitud = calcular_aptitud1;
 	args.debug = 0;
@@ -215,6 +324,11 @@ main (int argc, char **argv)
 		opciones, parse_opt, 0, doc, 0, 0, "es_AR"
 	};
 	argp_parse (&argp, argc, argv, 0, 0, &args);
+
+	if (args.cantidad_elite == 0)
+		args.cantidad_elite = 10;
+	if (args.cantidad_a_mutar == 0)
+		args.cantidad_a_mutar = 10;
 
 	char *letras = NULL;
 	char **operandos = NULL;
@@ -242,6 +356,11 @@ main (int argc, char **argv)
 			else
 				args.poblacion = (args.poblacion / 100.) * permutaciones;
 
+			/* Guarda el ancho del individuo para facilitar la visualización */
+			unsigned int anchoi = 0;
+			for (unsigned int i = args.poblacion; i > 0; i /= 10)
+				anchoi++;
+
 			if (args.debug > 0)
 				printf ("Permutaciones: %lu\nPoblación: %lu\n", permutaciones,
 								args.poblacion);
@@ -255,54 +374,86 @@ main (int argc, char **argv)
 			if (args.semilla != NULL)
 				free (args.semilla);
 
-
 			if (args.debug > 1)
 				{
 					puts ("\nCálculo de aptitud inicial");
 					puts ("--------------------------");
 				}
 
+			unsigned long generacion = 0;
+			unsigned long solucion = 0;
+
 			/* Calcula aptitud de la población */
 			for (unsigned long int i = 0; i < args.poblacion; i++)
-				args.faptitud (&individuos[i], operandos,
-											 &cantidad_operandos, operadores, operacion,
-											 &args.debug, letras);
+				{
+					args.faptitud (&individuos[i], operandos,
+												 &cantidad_operandos, operadores, operacion,
+												 &args.debug, letras);
+
+					if (mpz_cmp_d (individuos[i].aptitud, 0) == 0)
+						{
+							puts ("\n¡Solución en la población inicial!");
+							for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+									 j++)
+								{
+									printf ("%c:", letras[j]);
+									for (unsigned int x = 0; x < 10; x++)
+										if (letras[j] == individuos[i].letras[x])
+											{
+												printf ("%u  ", x);
+												break;
+											}
+								}
+							mostrar_operacion (individuos, operandos, operadores,
+																 operacion);
+							solucion = 1;
+						}
+				}
 
 			/* Ordena los individuos por aptitud */
 			qsort (individuos, args.poblacion, sizeof (struct individuos_s),
 						 individuos_cmp);
 
-			/* Verifica si hay algún individuo solución */
-			if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
-				{
-					puts ("\n¡Solución en la población inicial!");
-					for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
-						{
-							char c = letras[j];
-							printf ("%c:", c);
-							for (unsigned int x = 0; x < 10; x++)
-								if (c == individuos[0].letras[x])
-									{
-										printf ("%u  ", x);
-										break;
-									}
-						}
-					mostrar_operacion (individuos, operandos, operadores, operacion);
-					exit (EXIT_SUCCESS);
-				}
-
-			/* Se toma el 5% como selección elitista
+			/* Se toma un % como selección elitista
 			 * Serían las estructuras
 			 * individuos[0] a individuos[cantidad_elite - 1] */
-			unsigned long int cantidad_elite = args.poblacion * .05;
-			if (cantidad_elite < 1)
-				cantidad_elite = 1;
+			args.cantidad_elite =
+				round (args.poblacion * args.cantidad_elite / 100.);
+			if (args.cantidad_elite < 1)
+				args.cantidad_elite = 1;
+			struct individuos_s *elite =
+				malloc (args.cantidad_elite * sizeof (struct individuos_s));
+			seleccion_elitista (&individuos, &args.cantidad_elite, &elite);
 
-			/* Cantidad de individuos restantes */
-			unsigned long int cantidad_restantes = args.poblacion - cantidad_elite;
+			/* Se toma un % para mutación */
+			args.cantidad_a_mutar =
+				round (args.poblacion * args.cantidad_a_mutar / 100.);
+			if (args.cantidad_a_mutar < 1)
+				args.cantidad_a_mutar = 1;
+			struct individuos_s *mutados =
+				malloc (args.cantidad_a_mutar * sizeof (struct individuos_s));
+			for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
+				mpz_init (mutados[i].aptitud);
+
+			/* Se toma el resto para cruza */
+			args.cantidad_a_cruzar =
+				args.poblacion - args.cantidad_elite - args.cantidad_a_mutar;
+			struct individuos_s *cruzados =
+				malloc (args.cantidad_a_cruzar * sizeof (struct individuos_s));
+			for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
+				mpz_init (cruzados[i].aptitud);
+
+			if (args.debug > 0)
+				{
+					printf ("\nElite: %lu\n", args.cantidad_elite);
+					printf ("Se mutan: %lu\n", args.cantidad_a_mutar);
+				}
+
+			struct h_aptitud *historico_aptitud =
+				malloc (args.generaciones * sizeof (struct h_aptitud));
 
 			/* CICLO ALGORITMO GENÉTICO  */
-			for (unsigned long int generacion = 0; generacion < args.generaciones;
+			for (; (generacion < args.generaciones) && (solucion == 0);
 					 generacion++)
 				{
 					if (args.debug > 0)
@@ -311,19 +462,19 @@ main (int argc, char **argv)
 							printf ("       GENERACIÓN %lu\n", generacion + 1);
 							puts ("=================================\n");
 
+							/* Muestra ya sea la población inicial o como queda después de aplicar 
+							 * selección, cruza y mutación */
 							puts ("Población (ordenada por aptitud)");
 							puts ("--------------------------------");
 							for (unsigned long int i = 0; i < args.poblacion; i++)
 								{
-									printf ("Individuo[%2lu]:  ", i);
-									char c;
-
+									printf ("Individuo[%*lu]:  ", anchoi, i);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
 										{
-											printf ("%c:", c = letras[j]);
+											printf ("%c:", letras[j]);
 											for (unsigned int x = 0; x < 10; x++)
-												if (c == individuos[i].letras[x])
+												if (letras[j] == individuos[i].letras[x])
 													{
 														printf ("%u  ", x);
 														break;
@@ -331,102 +482,365 @@ main (int argc, char **argv)
 										}
 									gmp_printf ("= %Zd\n", individuos[i].aptitud);
 								}
-
-							printf ("\nElite: %lu\n", cantidad_elite);
-							printf ("Por ranking: %lu\n\n", cantidad_restantes);
 						}
 
-					seleccion_por_ranking (&individuos, &cantidad_elite,
-																 &cantidad_restantes, 0, &args.debug);
+					seleccion_elitista (&individuos, &args.cantidad_elite, &elite);
+					/* seleccion_por_ranking (&individuos, &cantidad_elite, */
+					/* &cantidad_restantes, 0, &args.debug); */
 
+					/* Muestra los individuos elite */
 					if (args.debug > 0)
 						{
-							puts
-								("Individuos después de selección elitista y por ranking");
-							puts ("------------------------------------------------------");
-							for (unsigned long int i = 0; i < args.poblacion; i++)
+							puts ("\nIndividuos elite");
+							puts ("----------------");
+							for (unsigned long int i = 0; i < args.cantidad_elite; i++)
 								{
-									printf ("Individuo[%2lu]:  ", i);
-									char c;
-
+									printf ("Individuo[%*lu]:  ", anchoi, i);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
 										{
-											printf ("%c:", c = letras[j]);
+											printf ("%c:", letras[j]);
 											for (unsigned int x = 0; x < 10; x++)
-												if (c == individuos[i].letras[x])
+												if (letras[j] == elite[i].letras[x])
 													{
 														printf ("%u  ", x);
 														break;
 													}
 										}
-									gmp_printf ("= %Zd\n", individuos[i].aptitud);
+									gmp_printf ("= %Zd\n", elite[i].aptitud);
 								}
 						}
 
-					/* No se mutan los individuos elite */
-					mutacion (&individuos[cantidad_elite], &cantidad_restantes);
-
-					if (args.debug > 1)
+					if (args.debug > 0)
 						{
-							puts ("\nCálculo de aptitud después de mutar");
-							puts ("-----------------------------------");
+							puts ("\nIndividuos seleccionados para cruzar");
+							printf ("------------------------------------");
 						}
+					/* Cruza lo que sobra de elite y mutación */
+					for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
+						{
+							unsigned long int indice = al_azar (0, args.poblacion - 1);
+							/* unsigned long int madre = al_azar (0, args.poblacion - 1); */
+							/* unsigned long int padre = al_azar (0, args.poblacion - 1); */
 
-					for (unsigned long int i = cantidad_elite; i < cantidad_restantes;
-							 i++)
-						args.faptitud (&individuos[i], operandos,
-													 &cantidad_operandos, operadores, operacion,
-													 &args.debug, letras);
+							mpz_set (cruzados[i].aptitud, individuos[indice].aptitud);
+
+							cruzados[i].letras = malloc (10);
+							memcpy (cruzados[i].letras, individuos[indice].letras, 10);
+
+							if (args.debug == 1)
+								{
+									printf ("\nIndividuo[%*lu]:  ", anchoi, i);
+									for (unsigned int j = 0;
+											 j < (unsigned int) strlen (letras); j++)
+										{
+											printf ("%c:", letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (letras[j] == cruzados[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd", cruzados[i].aptitud);
+								}
+							else if (args.debug == 2)
+								gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi, i,
+														cruzados[i].aptitud);
+
+							cruza_ciclica (&cruzados[i], NULL);
+
+							args.faptitud (&cruzados[i], operandos,
+														 &cantidad_operandos, operadores, operacion,
+														 &args.debug, letras);
+
+							if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
+								{
+									printf ("\n\n¡Solución en la generación %lu!\n",
+													generacion + 1);
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (letras[j] == cruzados[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									mostrar_operacion (&cruzados[i], operandos,
+																		 operadores, operacion);
+									solucion = 1;
+									break;
+								}
+						}
+					if (solucion == 1)
+						break;
+					/* Muestra los individuos después de cruzarlos */
+					if (args.debug > 0)
+						{
+							if (args.debug == 1)
+								puts ("");
+							puts ("\nIndividuos después de cruzar");
+							puts ("----------------------------");
+							for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
+								{
+									printf ("Individuo[%*lu]:  ", anchoi, i);
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (letras[j] == cruzados[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd\n", cruzados[i].aptitud);
+								}
+						}
 
 					if (args.debug > 0)
 						{
+							puts ("\nIndividuos seleccionados para mutar");
+							printf ("-----------------------------------");
+						}
+					/* Muta un % y luego de mutar cada individuo verifica si es solución */
+					for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
+						{
+							unsigned long int indice = al_azar (0, args.poblacion - 1);
+
+							mpz_set (mutados[i].aptitud, individuos[indice].aptitud);
+
+							mutados[i].letras = malloc (10);
+							memcpy (mutados[i].letras, individuos[indice].letras, 10);
+
+							if (args.debug == 1)
+								{
+									printf ("\nIndividuo[%*lu]:  ", anchoi, i);
+									for (unsigned int j = 0;
+											 j < (unsigned int) strlen (letras); j++)
+										{
+											printf ("%c:", letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (letras[j] == mutados[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									gmp_printf ("= %Zd", mutados[i].aptitud);
+								}
+							else if (args.debug == 2)
+								gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi, i,
+														mutados[i].aptitud);
+
+							mutacion (&mutados[i]);
+
+							args.faptitud (&mutados[i], operandos,
+														 &cantidad_operandos, operadores, operacion,
+														 &args.debug, letras);
+
+							if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
+								{
+									printf ("\n\n¡Solución en la generación %lu!\n",
+													generacion + 1);
+									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
+											 j++)
+										{
+											printf ("%c:", letras[j]);
+											for (unsigned int x = 0; x < 10; x++)
+												if (letras[j] == mutados[i].letras[x])
+													{
+														printf ("%u  ", x);
+														break;
+													}
+										}
+									mostrar_operacion (&mutados[i], operandos,
+																		 operadores, operacion);
+									solucion = 1;
+								}
+						}
+					if (solucion == 1)
+						break;
+					/* Muestra los individuos después de mutarlos */
+					if (args.debug > 0)
+						{
+							if (args.debug == 1)
+								puts ("");
 							puts ("\nIndividuos después de mutar");
 							puts ("---------------------------");
-							for (unsigned long int i = 0; i < args.poblacion; i++)
+							for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
 								{
-									printf ("Individuo[%2lu]:  ", i);
-									char c;
-
+									printf ("Individuo[%*lu]:  ", anchoi, i);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
 										{
-											printf ("%c:", c = letras[j]);
+											printf ("%c:", letras[j]);
 											for (unsigned int x = 0; x < 10; x++)
-												if (c == individuos[i].letras[x])
+												if (letras[j] == mutados[i].letras[x])
 													{
 														printf ("%u  ", x);
 														break;
 													}
 										}
-									gmp_printf ("= %Zd\n", individuos[i].aptitud);
+									gmp_printf ("= %Zd\n", mutados[i].aptitud);
 								}
+						}
+
+					/* Se copian la selección elitista a la nueva generación */
+					for (unsigned long int i = 0; i < args.cantidad_elite; i++)
+						{
+							mpz_set (individuos[i].aptitud, elite[i].aptitud);
+							memcpy (individuos[i].letras, elite[i].letras, 10);
+						}
+
+					/* Se copian los cruzados a la nueva generación */
+					for (unsigned long int i = args.cantidad_elite;
+							 i < (args.cantidad_a_cruzar + args.cantidad_elite); i++)
+						{
+							mpz_set (individuos[i].aptitud,
+											 cruzados[i - args.cantidad_elite].aptitud);
+							memcpy (individuos[i].letras,
+											cruzados[i - args.cantidad_elite].letras, 10);
+						}
+
+					/* Se copian los mutados a la nueva generación */
+					for (unsigned long int i =
+							 args.cantidad_elite + args.cantidad_a_cruzar;
+							 i < args.poblacion; i++)
+						{
+							mpz_set (individuos[i].aptitud,
+											 mutados[i - args.cantidad_elite -
+															 args.cantidad_a_cruzar].aptitud);
+							memcpy (individuos[i].letras,
+											mutados[i - args.cantidad_elite -
+															args.cantidad_a_cruzar].letras, 10);
 						}
 
 					/* Ordena los individuos por aptitud */
 					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
 								 individuos_cmp);
 
-					/* Verifica si hay algún individuo solución */
-					if (mpz_cmp_d (individuos[0].aptitud, 0) == 0)
+					/* Guada el mejor individuo */
+					mpz_init (historico_aptitud[generacion].mejor.aptitud);
+					mpz_set (historico_aptitud[generacion].mejor.aptitud,
+									 individuos[0].aptitud);
+
+					historico_aptitud[generacion].mejor.letras = malloc (10);
+					memcpy (historico_aptitud[generacion].mejor.letras,
+									individuos[0].letras, 10);
+
+					/* Guada el peor individuo */
+					mpz_init (historico_aptitud[generacion].peor.aptitud);
+					mpz_set (historico_aptitud[generacion].peor.aptitud,
+									 individuos[args.poblacion - 1].aptitud);
+
+					historico_aptitud[generacion].peor.letras = malloc (10);
+					memcpy (historico_aptitud[generacion].peor.letras,
+									individuos[args.poblacion - 1].letras, 10);
+
+					/* Guarda la aptitud promedio */
+					mpq_t total_aptitud;
+					mpq_init (total_aptitud);
+					mpq_t media_aptitud;
+					mpq_init (media_aptitud);
+					mpq_t aptitudes;
+					mpq_init (aptitudes);
+
+					mpz_init (historico_aptitud[generacion].media);
+
+					for (unsigned long int i = 0; i < args.poblacion; i++)
+						mpz_add (historico_aptitud[generacion].media,
+										 historico_aptitud[generacion].media,
+										 individuos[i].aptitud);
+
+					mpq_set_z (total_aptitud, historico_aptitud[generacion].media);
+					mpq_set_ui (aptitudes, args.poblacion, 1);
+					mpq_div (media_aptitud, total_aptitud, aptitudes);
+
+					mpz_set_q (historico_aptitud[generacion].media, media_aptitud);
+
+					mpq_clear (total_aptitud);
+					mpq_clear (media_aptitud);
+					mpq_clear (aptitudes);
+				}
+
+			/* Si no encuentra solución imprime como quedó la poblacion final */
+			if ((args.debug > 0) && (solucion == 0))
+				{
+					puts ("\n=================================");
+					puts ("        POBLACION FINAL ");
+					puts ("=================================\n");
+
+					for (unsigned long int i = 0; i < args.poblacion; i++)
 						{
-							printf ("\n¡Solución en la generación %lu!\n",
-											generacion + 1);
-							char c;
+							printf ("Individuo[%*lu]:  ", anchoi, i);
 							for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 									 j++)
 								{
-									printf ("%c:", c = letras[j]);
+									printf ("%c:", letras[j]);
 									for (unsigned int x = 0; x < 10; x++)
-										if (c == individuos[0].letras[x])
+										if (letras[j] == individuos[i].letras[x])
 											{
 												printf ("%u  ", x);
 												break;
 											}
 								}
-							mostrar_operacion (individuos, operandos,
-																 operadores, operacion);
-							exit (EXIT_SUCCESS);
+							gmp_printf ("= %Zd\n", individuos[i].aptitud);
+						}
+				}
+
+			if (args.debug > 0)
+				{
+					puts ("\n=================================");
+					puts ("     HISTÓRICOS GENERACIONES");
+					puts ("=================================\n");
+
+					mpq_t aux;
+					mpq_init (aux);
+
+					mpq_t total_aptitud;
+					mpq_init (total_aptitud);
+
+					for (unsigned long int i = 0; i < generacion; i++)
+						{
+							mpq_set_z (aux, historico_aptitud[i].media);
+							mpq_add (total_aptitud, total_aptitud, aux);
+							gmp_printf
+								("Generación %lu, mejor = %Zd, peor = %Zd, promedio = %Zd\n",
+								 i + 1, historico_aptitud[i].mejor.aptitud,
+								 historico_aptitud[i].peor.aptitud,
+								 historico_aptitud[i].media);
+						}
+
+					mpq_t aptitudes;
+					mpq_init (aptitudes);
+					mpq_set_ui (aptitudes, generacion, 1);
+
+					mpq_div (total_aptitud, total_aptitud, aptitudes);
+
+					mpq_clear (aux);
+					mpq_clear (aptitudes);
+
+					mpz_t media_global;
+					mpz_init (media_global);
+					mpz_set_q (media_global, total_aptitud);
+
+					gmp_printf ("Generación promedio total: %Zd\n", media_global);
+
+					mpq_clear (total_aptitud);
+					mpz_clear (media_global);
+
+					for (unsigned long int i = 0; i < generacion; i++)
+						{
+							gmp_printf
+								("%lu %Zd %Zd %Zd\n",
+								 i + 1, historico_aptitud[i].mejor.aptitud,
+								 historico_aptitud[i].peor.aptitud,
+								 historico_aptitud[i].media);
 						}
 				}
 

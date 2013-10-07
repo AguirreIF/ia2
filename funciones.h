@@ -13,6 +13,12 @@ struct individuos_s
 	mpz_t aptitud;
 };
 
+struct h_aptitud
+{
+	struct individuos_s mejor, peor;
+	mpz_t media;
+};
+
 // función principal de proceso en entrada.y
 int procesar (char *restrict const entrada, char **restrict letras,
 							char ***restrict operandos, char **restrict operadores,
@@ -84,6 +90,11 @@ void calcular_operacion (char **restrict const operandos,
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
+void seleccion_elitista (struct individuos_s **restrict individuos,
+												 const unsigned long int *restrict const
+												 cantidad_elite,
+												 struct individuos_s **restrict elite);
+
 void seleccion_por_ranking (struct individuos_s **restrict individuos,
 														const unsigned long int *restrict const
 														inicio,
@@ -91,8 +102,10 @@ void seleccion_por_ranking (struct individuos_s **restrict individuos,
 														cantidad, const float rmin,
 														const unsigned int *restrict const debug);
 
-void mutacion (struct individuos_s *restrict individuos,
-							 const unsigned long int *restrict const cantidad);
+void cruza_ciclica (struct individuos_s *restrict madre,
+										struct individuos_s *restrict padre);
+
+void mutacion (struct individuos_s *restrict individuo);
 
 unsigned int al_azar (const unsigned int min, const unsigned int max);
 
