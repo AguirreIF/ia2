@@ -71,13 +71,13 @@ expresion:
 	|
 	'(' {
 		guardar_operador ("(", operadores, cantidad_operandos);
-		aux = realloc (aux, strlen (aux) + 1);
+		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	}
 	expresion
 	')' {
 		guardar_operador (")", operadores, cantidad_operandos);
-		aux = realloc (aux, strlen (aux) + 1);
+		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	};
 

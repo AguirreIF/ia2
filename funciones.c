@@ -71,7 +71,7 @@ guardar_operador (const char *restrict const operador,
 			*operadores[0] = '\0';
 		}
 	else
-		*operadores = realloc (*operadores, *cantidad_operandos + 1);
+		*operadores = realloc (*operadores, strlen (*operadores) + 2);
 	strcat (*operadores, operador);
 }
 

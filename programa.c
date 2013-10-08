@@ -908,24 +908,28 @@ main (int argc, char **argv)
 					/* historico_aptitud[i].media); */
 					/* } */
 				}
+			free (historico_aptitud);
 
 			for (unsigned long int i = 0; i < args.cantidad_elite; i++)
 				{
 					mpz_clear (elite[i].aptitud);
 					free (elite[i].letras);
 				}
+			free (elite);
 
 			for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
 				{
 					mpz_clear (cruzados[i].aptitud);
 					free (cruzados[i].letras);
 				}
+			free (cruzados);
 
 			for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
 				{
 					mpz_clear (mutados[i].aptitud);
 					free (mutados[i].letras);
 				}
+			free (mutados);
 
 			free (letras);
 			while (args.poblacion-- > 0)
