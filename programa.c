@@ -695,7 +695,7 @@ main (int argc, char **argv)
 
 							if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 								{
-									printf ("\n\n¡Solución en la generación %lu!\n",
+									printf ("\n\n¡Solución en la generación (mutación) %lu!\n",
 													generacion + 1);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
