@@ -114,4 +114,7 @@ void mostrar_operacion (const struct individuos_s *restrict const
 												const char *restrict const operadores,
 												char *restrict operacion);
 
+int iguales (struct individuos_s *restrict i1,
+						 struct individuos_s *restrict i2);
+
 #endif /* FUNCIONES_H */

@@ -438,6 +438,17 @@ main (int argc, char **argv)
 			/* Se toma el resto para cruza */
 			args.cantidad_a_cruzar =
 				args.poblacion - args.cantidad_elite - args.cantidad_a_mutar;
+			/* Si la cantidad a cruzar es impar se quita uno para dejarlo par
+			 * y ese que se quita se agrega para mutar */
+			if ((args.cantidad_a_cruzar % 2) != 0)
+				{
+					args.cantidad_a_cruzar -= 1;
+					args.cantidad_a_mutar++;
+					mutados =
+						realloc (mutados,
+										 args.cantidad_a_mutar * sizeof (struct individuos_s));
+					mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
+				}
 			struct individuos_s *cruzados =
 				malloc (args.cantidad_a_cruzar * sizeof (struct individuos_s));
 			for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
@@ -446,6 +457,7 @@ main (int argc, char **argv)
 			if (args.debug > 0)
 				{
 					printf ("\nElite: %lu\n", args.cantidad_elite);
+					printf ("Se cruzan: %lu\n", args.cantidad_a_cruzar);
 					printf ("Se mutan: %lu\n", args.cantidad_a_mutar);
 				}
 
@@ -517,59 +529,97 @@ main (int argc, char **argv)
 							printf ("------------------------------------");
 						}
 					/* Cruza lo que sobra de elite y mutación */
-					for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
+					for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i += 2)
 						{
-							unsigned long int indice = al_azar (0, args.poblacion - 1);
-							/* unsigned long int madre = al_azar (0, args.poblacion - 1); */
-							/* unsigned long int padre = al_azar (0, args.poblacion - 1); */
+							unsigned long int madre = al_azar (0, args.poblacion - 1);
+							unsigned long int padre = al_azar (0, args.poblacion - 1);
 
-							mpz_set (cruzados[i].aptitud, individuos[indice].aptitud);
+							/* Verifica que no tengan las letras en el mismo orden (sin importar los vacíos) */
+							while (iguales (&individuos[padre], &individuos[madre]) == 1)
+								padre = al_azar (0, args.poblacion - 1);
+
+							mpz_set (cruzados[i].aptitud, individuos[padre].aptitud);
+							mpz_set (cruzados[i + 1].aptitud, individuos[madre].aptitud);
 
 							cruzados[i].letras = malloc (10);
-							memcpy (cruzados[i].letras, individuos[indice].letras, 10);
+							memcpy (cruzados[i].letras, individuos[padre].letras, 10);
+							cruzados[i + 1].letras = malloc (10);
+							memcpy (cruzados[i + 1].letras, individuos[madre].letras, 10);
 
-							if (args.debug == 1)
+							/* Tiene que mostrar el individuo i y el (i + 1) */
+							for (unsigned t = 0; t < 2; t++)
 								{
-									printf ("\nIndividuo[%*lu]:  ", anchoi, i);
-									for (unsigned int j = 0;
-											 j < (unsigned int) strlen (letras); j++)
+									if (args.debug == 1)
 										{
-											printf ("%c:", letras[j]);
-											for (unsigned int x = 0; x < 10; x++)
-												if (letras[j] == cruzados[i].letras[x])
-													{
-														printf ("%u  ", x);
-														break;
-													}
+											printf ("\nIndividuo[%*lu]:  ", anchoi, i + t);
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
+												{
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == cruzados[i + t].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
+												}
+											gmp_printf ("= %Zd", cruzados[i + t].aptitud);
 										}
-									gmp_printf ("= %Zd", cruzados[i].aptitud);
+									else if (args.debug == 2)
+										gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi,
+																i + t, cruzados[i + t].aptitud);
 								}
-							else if (args.debug == 2)
-								gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi, i,
-														cruzados[i].aptitud);
 
-							cruza_ciclica (&cruzados[i], NULL);
+							/* printf ("\nMadre: "); */
+							/* for (unsigned int j = 0; j < 10; j++) */
+							/* if (cruzados[i].letras[j] != '\0') */
+							/* printf ("%c", cruzados[i].letras[j]); */
+							/* printf ("\nPadre: "); */
+							/* for (unsigned int j = 0; j < 10; j++) */
+							/* if (cruzados[i + 1].letras[j] != '\0') */
+							/* printf ("%c", cruzados[i + 1].letras[j]); */
+
+							cruza_ciclica (&cruzados[i], &cruzados[i + 1]);
+
+							/* printf ("\nHijo1: "); */
+							/* for (unsigned int j = 0; j < 10; j++) */
+							/* if (cruzados[i].letras[j] != '\0') */
+							/* printf ("%c", cruzados[i].letras[j]); */
+							/* printf ("\nHijo2: "); */
+							/* for (unsigned int j = 0; j < 10; j++) */
+							/* if (cruzados[i + 1].letras[j] != '\0') */
+							/* printf ("%c", cruzados[i + 1].letras[j]); */
+							/* puts (""); */
 
 							args.faptitud (&cruzados[i], operandos,
 														 &cantidad_operandos, operadores, operacion,
 														 &args.debug, letras);
 
+							args.faptitud (&cruzados[i + 1], operandos,
+														 &cantidad_operandos, operadores, operacion,
+														 &args.debug, letras);
+
+							int k = -1;
 							if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
+								k = i;
+							if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0)
+								k = i + 1;
+							if (k != -1)
 								{
-									printf ("\n\n¡Solución en la generación %lu!\n",
+									printf ("\n\n¡Solución en la generación (cruza) %lu!\n",
 													generacion + 1);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
 										{
 											printf ("%c:", letras[j]);
 											for (unsigned int x = 0; x < 10; x++)
-												if (letras[j] == cruzados[i].letras[x])
+												if (letras[j] == cruzados[k].letras[x])
 													{
 														printf ("%u  ", x);
 														break;
 													}
 										}
-									mostrar_operacion (&cruzados[i], operandos,
+									mostrar_operacion (&cruzados[k], operandos,
 																		 operadores, operacion);
 									solucion = 1;
 									break;
@@ -577,7 +627,6 @@ main (int argc, char **argv)
 						}
 					if (solucion == 1)
 						break;
-					/* Muestra los individuos después de cruzarlos */
 					if (args.debug > 0)
 						{
 							if (args.debug == 1)
@@ -661,6 +710,7 @@ main (int argc, char **argv)
 									mostrar_operacion (&mutados[i], operandos,
 																		 operadores, operacion);
 									solucion = 1;
+									break;
 								}
 						}
 					if (solucion == 1)
@@ -834,30 +884,30 @@ main (int argc, char **argv)
 					mpq_clear (total_aptitud);
 					mpz_clear (media_global);
 
-					for (unsigned long int i = 0; i < generacion; i++)
-						{
-							gmp_printf
-								("%lu %Zd %Zd %Zd\n",
-								 i + 1, historico_aptitud[i].mejor.aptitud,
-								 historico_aptitud[i].peor.aptitud,
-								 historico_aptitud[i].media);
-						}
+					/* for (unsigned long int i = 0; i < generacion; i++) */
+					/* { */
+					/* gmp_printf */
+					/* ("%lu %Zd %Zd %Zd\n", */
+					/* i + 1, historico_aptitud[i].mejor.aptitud, */
+					/* historico_aptitud[i].peor.aptitud, */
+					/* historico_aptitud[i].media); */
+					/* } */
 				}
 
 			/* No ejecuta cuando encuentra solución */
 			/* free (letras); */
 			/* while (args.poblacion-- > 0) */
-				/* { */
-					/* free (individuos[args.poblacion].letras); */
-					/* mpz_clear (individuos[args.poblacion].aptitud); */
-				/* } */
+			/* { */
+			/* free (individuos[args.poblacion].letras); */
+			/* mpz_clear (individuos[args.poblacion].aptitud); */
+			/* } */
 			/* free (individuos); */
 			/* while (cantidad_operandos-- > 0) */
-				/* free (operandos[cantidad_operandos]); */
+			/* free (operandos[cantidad_operandos]); */
 			/* free (operandos); */
 			/* free (operadores); */
 			/* free (operacion); */
-			exit (EXIT_FAILURE);
+			exit ((solucion == 1) ? EXIT_SUCCESS : EXIT_FAILURE);
 		}
 	else if (salida == 1)
 		{

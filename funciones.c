@@ -609,24 +609,81 @@ void
 cruza_ciclica (struct individuos_s *restrict madre,
 							 struct individuos_s *restrict padre)
 {
-	UNUSED(padre);
-	unsigned int longitud_aptitud = mpz_sizeinbase (madre->aptitud, 10);
+	char *letras_m = NULL;
 
-	while (longitud_aptitud-- > 0)
+	unsigned int numl = 0;
+
+	for (unsigned int j = 0; j < 10; j++)
+		if (madre->letras[j] != '\0')
+			{
+				letras_m = realloc (letras_m, numl + 1);
+				letras_m[numl++] = madre->letras[j];
+			}
+
+	char letras_p[numl], hijo1[numl], hijo2[numl];
+
+	numl = 0;
+
+	for (unsigned int j = 0; j < 10; j++)
+		if (padre->letras[j] != '\0')
+			letras_p[numl++] = padre->letras[j];
+
+	memset (hijo1, '\0', numl);
+	memset (hijo2, '\0', numl);
+
+	unsigned int i = al_azar (0, numl - 1);
+	while (letras_m[i] == letras_p[i])
+		i = al_azar (0, numl - 1);
+
+	/* printf ("\nInicio: %u", i); */
+
+	for (unsigned int x = 0; x < numl; x++)
 		{
-			unsigned int gen1, gen2;
-
-			gen1 = al_azar (0, 9);
-			gen2 = al_azar (0, 9);
-
-			while ((gen1 == gen2) || ((madre->letras[gen1] == '\0') &&
-																(madre->letras[gen2] == '\0')))
-				gen2 = al_azar (0, 9);
-
-			char aux = madre->letras[gen1];
-			madre->letras[gen1] = madre->letras[gen2];
-			madre->letras[gen2] = aux;
+			hijo1[i] = letras_m[i];
+			hijo2[i] = letras_p[i];
+			for (unsigned int j = 0; j < numl; j++)
+				/* Busca la letra del padre en la madre */
+				if (letras_p[i] == letras_m[j])
+					{
+						/* Verifica si cumplió el ciclo */
+						for (unsigned int h = 0; h < numl; h++)
+							{
+								/* La letra del padre ya está en el hijo de la madre */
+								/* Ciclo cumplido, copia el resto */
+								if (letras_p[j] == hijo1[h])
+									{
+										hijo1[j] = letras_m[j];
+										hijo2[j] = letras_p[j];
+										/* Recorreo todas las letras */
+										for (unsigned int u = 0; u < numl; u++)
+											{
+												if (hijo1[u] == '\0')
+													{
+														/* Se guardan intercambiando padre y madre */
+														hijo1[u] = letras_p[u];
+														hijo2[u] = letras_m[u];
+													}
+											}
+										x = numl;
+										break;
+									}
+							}
+						i = j;
+						break;
+					}
 		}
+
+	numl = 0;
+	for (unsigned int j = 0; j < 10; j++)
+		if (madre->letras[j] != '\0')
+			madre->letras[j] = hijo1[numl++];
+
+	numl = 0;
+	for (unsigned int j = 0; j < 10; j++)
+		if (padre->letras[j] != '\0')
+			padre->letras[j] = hijo2[numl++];
+
+	free (letras_m);
 }
 
 void
@@ -721,4 +778,40 @@ mostrar_operacion (const struct individuos_s *restrict const
 
 	printf ("\nOperación: %s\n", operacion_completa);
 	free (operacion_completa);
+}
+
+
+int
+iguales (struct individuos_s *restrict i1, struct individuos_s *restrict i2)
+{
+	char *letras_i1 = NULL;
+
+	unsigned int numl = 0;
+
+	for (unsigned int j = 0; j < 10; j++)
+		if (i1->letras[j] != '\0')
+			{
+				letras_i1 = realloc (letras_i1, numl + 1);
+				letras_i1[numl++] = i1->letras[j];
+			}
+
+	char letras_i2[numl];
+
+	numl = 0;
+
+	for (unsigned int j = 0; j < 10; j++)
+		if (i2->letras[j] != '\0')
+			letras_i2[numl++] = i2->letras[j];
+
+	int salida = 1;
+
+	for (unsigned int j = 0; j < numl; j++)
+		if (letras_i1[j] != letras_i2[j])
+			{
+				salida = -1;
+				break;
+			}
+
+	free (letras_i1);
+	return salida;
 }
