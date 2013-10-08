@@ -95,6 +95,14 @@ void seleccion_elitista (struct individuos_s **restrict individuos,
 												 cantidad_elite,
 												 struct individuos_s **restrict elite);
 
+void seleccion_elitista_con_ranking (struct individuos_s **restrict
+																		 individuos,
+																		 struct individuos_s **restrict elite,
+																		 const unsigned long int *restrict const
+																		 cantidad, const float rmin,
+																		 const unsigned int *restrict const
+																		 debug);
+
 void seleccion_por_ranking (struct individuos_s **restrict individuos,
 														const unsigned long int *restrict const
 														inicio,

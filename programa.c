@@ -423,7 +423,8 @@ main (int argc, char **argv)
 				args.cantidad_elite = 1;
 			struct individuos_s *elite =
 				malloc (args.cantidad_elite * sizeof (struct individuos_s));
-			seleccion_elitista (&individuos, &args.cantidad_elite, &elite);
+			seleccion_elitista_con_ranking (&individuos, &elite,
+																			&args.cantidad_elite, 0, &args.debug);
 
 			/* Se toma un % para mutación */
 			args.cantidad_a_mutar =
@@ -496,9 +497,9 @@ main (int argc, char **argv)
 								}
 						}
 
-					seleccion_elitista (&individuos, &args.cantidad_elite, &elite);
-					/* seleccion_por_ranking (&individuos, &cantidad_elite, */
-					/* &cantidad_restantes, 0, &args.debug); */
+					seleccion_elitista_con_ranking (&individuos, &elite,
+																					&args.cantidad_elite, 0,
+																					&args.debug);
 
 					/* Muestra los individuos elite */
 					if (args.debug > 0)
