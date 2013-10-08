@@ -546,11 +546,9 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 			/* Hace la cantidad de copias correspondientes */
 			for (unsigned int n = 0; n < copias_e; n++, indice_nuevos++)
 				{
-					mpz_init ((*elite)[indice_nuevos].aptitud);
 					mpz_set ((*elite)[indice_nuevos].aptitud,
 									 (*individuos)[indice].aptitud);
 
-					(*elite)[indice_nuevos].letras = malloc (10);
 					memcpy ((*elite)[indice_nuevos].letras,
 									(*individuos)[indice].letras, 10);
 				}
@@ -561,12 +559,8 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 	 * copia de la parte decimal hasta completar la cantidad */
 	for (unsigned int n = 0; copias_totales < *cantidad; n++, indice_nuevos++)
 		{
-			mpz_init ((*elite)[indice_nuevos].aptitud);
 			mpz_set ((*elite)[indice_nuevos].aptitud, extras[n]->aptitud);
-
-			(*elite)[indice_nuevos].letras = malloc (10);
 			memcpy ((*elite)[indice_nuevos].letras, extras[n]->letras, 10);
-
 			copias_totales++;
 		}
 

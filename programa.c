@@ -423,8 +423,11 @@ main (int argc, char **argv)
 				args.cantidad_elite = 1;
 			struct individuos_s *elite =
 				malloc (args.cantidad_elite * sizeof (struct individuos_s));
-			seleccion_elitista_con_ranking (&individuos, &elite,
-																			&args.cantidad_elite, 0, &args.debug);
+			for (unsigned long int i = 0; i < args.cantidad_elite; i++)
+				{
+					mpz_init (elite[i].aptitud);
+					elite[i].letras = malloc (10);
+				}
 
 			/* Se toma un % para mutación */
 			args.cantidad_a_mutar =
@@ -434,7 +437,10 @@ main (int argc, char **argv)
 			struct individuos_s *mutados =
 				malloc (args.cantidad_a_mutar * sizeof (struct individuos_s));
 			for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
-				mpz_init (mutados[i].aptitud);
+				{
+					mpz_init (mutados[i].aptitud);
+					mutados[i].letras = malloc (10);
+				}
 
 			/* Se toma el resto para cruza */
 			args.cantidad_a_cruzar =
@@ -449,11 +455,15 @@ main (int argc, char **argv)
 						realloc (mutados,
 										 args.cantidad_a_mutar * sizeof (struct individuos_s));
 					mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
+					mutados[args.cantidad_a_mutar - 1].letras = malloc (10);
 				}
 			struct individuos_s *cruzados =
 				malloc (args.cantidad_a_cruzar * sizeof (struct individuos_s));
 			for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
-				mpz_init (cruzados[i].aptitud);
+				{
+					mpz_init (cruzados[i].aptitud);
+					cruzados[i].letras = malloc (10);
+				}
 
 			if (args.debug > 0)
 				{
@@ -540,12 +550,10 @@ main (int argc, char **argv)
 								padre = al_azar (0, args.poblacion - 1);
 
 							mpz_set (cruzados[i].aptitud, individuos[padre].aptitud);
-							mpz_set (cruzados[i + 1].aptitud, individuos[madre].aptitud);
-
-							cruzados[i].letras = malloc (10);
 							memcpy (cruzados[i].letras, individuos[padre].letras, 10);
-							cruzados[i + 1].letras = malloc (10);
+
 							memcpy (cruzados[i + 1].letras, individuos[madre].letras, 10);
+							mpz_set (cruzados[i + 1].aptitud, individuos[madre].aptitud);
 
 							/* Tiene que mostrar el individuo i y el (i + 1) */
 							for (unsigned t = 0; t < 2; t++)
@@ -663,8 +671,6 @@ main (int argc, char **argv)
 							unsigned long int indice = al_azar (0, args.poblacion - 1);
 
 							mpz_set (mutados[i].aptitud, individuos[indice].aptitud);
-
-							mutados[i].letras = malloc (10);
 							memcpy (mutados[i].letras, individuos[indice].letras, 10);
 
 							if (args.debug == 1)
@@ -695,8 +701,9 @@ main (int argc, char **argv)
 
 							if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 								{
-									printf ("\n\n¡Solución en la generación (mutación) %lu!\n",
-													generacion + 1);
+									printf
+										("\n\n¡Solución en la generación (mutación) %lu!\n",
+										 generacion + 1);
 									for (unsigned int j = 0; j < (unsigned int) strlen (letras);
 											 j++)
 										{
@@ -865,6 +872,13 @@ main (int argc, char **argv)
 								 i + 1, historico_aptitud[i].mejor.aptitud,
 								 historico_aptitud[i].peor.aptitud,
 								 historico_aptitud[i].media);
+
+							free (historico_aptitud[i].mejor.letras);
+							free (historico_aptitud[i].peor.letras);
+
+							mpz_clear (historico_aptitud[i].mejor.aptitud);
+							mpz_clear (historico_aptitud[i].peor.aptitud);
+							mpz_clear (historico_aptitud[i].media);
 						}
 
 					mpq_t aptitudes;
@@ -895,19 +909,37 @@ main (int argc, char **argv)
 					/* } */
 				}
 
-			/* No ejecuta cuando encuentra solución */
-			/* free (letras); */
-			/* while (args.poblacion-- > 0) */
-			/* { */
-			/* free (individuos[args.poblacion].letras); */
-			/* mpz_clear (individuos[args.poblacion].aptitud); */
-			/* } */
-			/* free (individuos); */
-			/* while (cantidad_operandos-- > 0) */
-			/* free (operandos[cantidad_operandos]); */
-			/* free (operandos); */
-			/* free (operadores); */
-			/* free (operacion); */
+			for (unsigned long int i = 0; i < args.cantidad_elite; i++)
+				{
+					mpz_clear (elite[i].aptitud);
+					free (elite[i].letras);
+				}
+
+			for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
+				{
+					mpz_clear (cruzados[i].aptitud);
+					free (cruzados[i].letras);
+				}
+
+			for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
+				{
+					mpz_clear (mutados[i].aptitud);
+					free (mutados[i].letras);
+				}
+
+			free (letras);
+			while (args.poblacion-- > 0)
+				{
+					free (individuos[args.poblacion].letras);
+					mpz_clear (individuos[args.poblacion].aptitud);
+				}
+			free (individuos);
+			while (cantidad_operandos-- > 0)
+				free (operandos[cantidad_operandos]);
+			free (operandos);
+			free (operadores);
+			free (operacion);
+
 			exit ((solucion == 1) ? EXIT_SUCCESS : EXIT_FAILURE);
 		}
 	else if (salida == 1)
