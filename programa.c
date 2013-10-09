@@ -861,19 +861,16 @@ main (int argc, char **argv)
 						}
 				}
 
+			mpq_t aux;
+			mpq_t total_aptitud;
 			if (args.debug > 0)
 				{
-					puts ("\n=================================");
-					puts ("     HISTÓRICOS GENERACIONES");
-					puts ("=================================\n");
-
-					mpq_t aux;
 					mpq_init (aux);
-
-					mpq_t total_aptitud;
 					mpq_init (total_aptitud);
-
-					for (unsigned long int i = 0; i < generacion; i++)
+				}
+			for (unsigned long int i = 0; i < generacion; i++)
+				{
+					if (args.debug > 0)
 						{
 							mpq_set_z (aux, historico_aptitud[i].media);
 							mpq_add (total_aptitud, total_aptitud, aux);
@@ -882,14 +879,19 @@ main (int argc, char **argv)
 								 i + 1, historico_aptitud[i].mejor.aptitud,
 								 historico_aptitud[i].peor.aptitud,
 								 historico_aptitud[i].media);
-
-							free (historico_aptitud[i].mejor.letras);
-							free (historico_aptitud[i].peor.letras);
-
-							mpz_clear (historico_aptitud[i].mejor.aptitud);
-							mpz_clear (historico_aptitud[i].peor.aptitud);
-							mpz_clear (historico_aptitud[i].media);
 						}
+					free (historico_aptitud[i].mejor.letras);
+					free (historico_aptitud[i].peor.letras);
+
+					mpz_clear (historico_aptitud[i].mejor.aptitud);
+					mpz_clear (historico_aptitud[i].peor.aptitud);
+					mpz_clear (historico_aptitud[i].media);
+				}
+			if (args.debug > 0)
+				{
+					puts ("\n=================================");
+					puts ("     HISTÓRICOS GENERACIONES");
+					puts ("=================================\n");
 
 					mpq_t aptitudes;
 					mpq_init (aptitudes);
