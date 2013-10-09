@@ -812,7 +812,7 @@ void
 mostrar_operacion (const struct individuos_s *restrict const
 									 individuo, char **restrict const operandos,
 									 const char *restrict const operadores,
-									 char *restrict operacion)
+									 const char *restrict operacion)
 {
 	unsigned int n_operando = 0, n_operador = 0;
 
@@ -838,23 +838,13 @@ mostrar_operacion (const struct individuos_s *restrict const
 			/* operando */
 			else
 				{
-					/* Convierte el operando en su representación numérica */
-					unsigned int columna = 0;
+					char *operando_str = NULL;
+
+					convertir_operando_a_numeros (individuo, operandos[n_operando],
+																				&operando_str);
+
 					const unsigned int longitud_operando =
-						(int) strlen (operandos[n_operando]);
-					char *operando_str = malloc (longitud_operando + 1);
-					// recorre todos los caracteres del operando
-					do
-						{
-							const char caracter_buscado = operandos[n_operando][columna];
-							// recorre todos los caracteres del individuo hasta encontrar el valor que corresponda
-							// con el caracter seleccionado del operando
-							for (unsigned int indice = 0; indice < 10; indice++)
-								if (caracter_buscado == individuo->letras[indice])
-									operando_str[columna] = '0' + indice;
-						}
-					while (++columna < longitud_operando);
-					operando_str[columna] = '\0';
+						(unsigned int) strlen (operandos[n_operando]);
 
 					if (*operacion == '\0')
 						{
