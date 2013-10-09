@@ -62,8 +62,7 @@ guardar_operando (const char *restrict const operando,
 // guarda el operador
 void
 guardar_operador (const char *restrict const operador,
-									char **restrict operadores,
-									const unsigned int *restrict const cantidad_operandos)
+									char **restrict operadores)
 {
 	if (*operadores == NULL)
 		{

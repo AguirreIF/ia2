@@ -46,37 +46,37 @@ expresion:
 	operando
 	|
 	expresion '+' {
-		guardar_operador ("+", operadores, cantidad_operandos);
+		guardar_operador ("+", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	} expresion
 	|
 	expresion '-' {
-		guardar_operador ("-", operadores, cantidad_operandos);
+		guardar_operador ("-", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	} expresion
 	|
 	expresion '*' {
-		guardar_operador ("*", operadores, cantidad_operandos);
+		guardar_operador ("*", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	} expresion
 	|
 	expresion '/' {
-		guardar_operador ("/", operadores, cantidad_operandos);
+		guardar_operador ("/", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	} expresion
 	|
 	'(' {
-		guardar_operador ("(", operadores, cantidad_operandos);
+		guardar_operador ("(", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	}
 	expresion
 	')' {
-		guardar_operador (")", operadores, cantidad_operandos);
+		guardar_operador (")", operadores);
 		aux = realloc (aux, strlen (aux) + 2);
 		strcat(aux, "0");
 	};

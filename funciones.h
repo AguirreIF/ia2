@@ -39,8 +39,7 @@ void guardar_operando (const char *restrict const operando,
 
 // guarda el operador
 void guardar_operador (const char *restrict const operador,
-											 char **operadores,
-											 const unsigned int *restrict const cantidad_operandos);
+											 char **operadores);
 
 // genera la población inicial aleatoriamente
 void generar_poblacion_inicial (struct individuos_s **restrict individuos,
