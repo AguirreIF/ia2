@@ -25,7 +25,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Retrieved from: http://en.literateprograms.org/Shunting_yard_algorithm_(C)?oldid=18970
 */
 
-#include <gmp.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>

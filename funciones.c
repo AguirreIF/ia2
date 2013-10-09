@@ -879,7 +879,6 @@ mostrar_operacion (const struct individuos_s *restrict const
 	free (operacion_completa);
 }
 
-
 int
 iguales (struct individuos_s *restrict i1, struct individuos_s *restrict i2)
 {

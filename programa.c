@@ -475,7 +475,9 @@ main (int argc, char **argv)
 			struct h_aptitud *historico_aptitud =
 				malloc (args.generaciones * sizeof (struct h_aptitud));
 
-			/* CICLO ALGORITMO GENÉTICO  */
+			/* ============================================================= */
+			/*                  CICLO ALGORITMO GENÉTICO                     */
+			/* ============================================================= */
 			for (; (generacion < args.generaciones) && (solucion == 0);
 					 generacion++)
 				{
@@ -507,10 +509,12 @@ main (int argc, char **argv)
 								}
 						}
 
+					/* ============================================================= */
+					/*                          SELECCIÓN                            */
+					/* ============================================================= */
 					seleccion_elitista_con_ranking (&individuos, &elite,
 																					&args.cantidad_elite, 0,
 																					&args.debug);
-
 					/* Muestra los individuos elite */
 					if (args.debug > 0)
 						{
@@ -534,6 +538,9 @@ main (int argc, char **argv)
 								}
 						}
 
+					/* ============================================================= */
+					/*                             CRUZA                             */
+					/* ============================================================= */
 					if (args.debug > 0)
 						{
 							puts ("\nIndividuos seleccionados para cruzar");
@@ -660,6 +667,9 @@ main (int argc, char **argv)
 								}
 						}
 
+					/* ============================================================= */
+					/*                          MUTACIÓN                             */
+					/* ============================================================= */
 					if (args.debug > 0)
 						{
 							puts ("\nIndividuos seleccionados para mutar");
