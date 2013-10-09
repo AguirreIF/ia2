@@ -407,6 +407,7 @@ main (int argc, char **argv)
 							mostrar_operacion (individuos, operandos, operadores,
 																 operacion);
 							solucion = 1;
+							break;
 						}
 				}
 
