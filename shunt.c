@@ -25,9 +25,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Retrieved from: http://en.literateprograms.org/Shunting_yard_algorithm_(C)?oldid=18970
 */
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
 #include "funciones.h"
 
 struct op_s **opstack = NULL;

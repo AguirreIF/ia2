@@ -1,11 +1,5 @@
-#include <inttypes.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
 #include "funciones.h"
+#include "random.h"
 
 // verifica que la entrada esté en el rango [a-zA-Z]
 // y convierte a minúsculas
@@ -83,9 +77,9 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 	const size_t len = strlen (letras);
 
 	if (semilla != NULL)
-		srand (*semilla);
+		init_genrand (*semilla);
 	else
-		srand ((time (0) & 0xFFFF) | (getpid () << 16));
+			init_genrand ((time (0) & 0xFFFF) | (getpid () << 16));
 
 	for (unsigned long int n = 0; n < *poblacion; n++)
 		{
@@ -808,7 +802,7 @@ mutacion (struct individuos_s *restrict individuo)
 unsigned int
 al_azar (const unsigned int min, const unsigned int max)
 {
-	return (min + rand () / (RAND_MAX / (max - min + 1) + 1));
+	return (genrand_res53 () * (max - min + 1) + min);
 }
 
 void

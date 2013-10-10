@@ -1,15 +1,6 @@
 #include <argp.h>
-#include <ctype.h>
-#include <errno.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
 #include "funciones.h"
+#include "random.h"
 
 /* Info varia */
 const char *argp_program_version = "void";
@@ -463,6 +454,14 @@ main (int argc, char **argv)
 					/* ============================================================= */
 					/*                      POBLACIÓN INICIAL                        */
 					/* ============================================================= */
+					/* De la segunda corrida en adelante hay que cambiar de semilla
+					 * para que los aleatorios no sean iguales */
+					if (corrida_n > 0)
+						{
+							if (args.semilla == NULL)
+								args.semilla = malloc (sizeof (unsigned long int));
+							*args.semilla = genrand_int32 ();
+						}
 					generar_poblacion_inicial (&individuos, letras, &args.poblacion,
 																		 args.semilla);
 					if (args.debug > 2)
@@ -1006,11 +1005,8 @@ main (int argc, char **argv)
 							mpz_clear (media_global);
 						}
 
-					/* Que haga la pausa solo si queden corridas por hacer */
-					if ((args.corridas > 1) && (corrida_n < args.corridas))
-						sleep (1);
-					else
-						/* Una vez finalizadas todas las corridas libera toda la memoria */
+					/* Una vez finalizadas todas las corridas libera toda la memoria */
+					if (corrida_n == args.corridas)
 						{
 							if (args.semilla != NULL)
 								free (args.semilla);
@@ -1069,6 +1065,8 @@ main (int argc, char **argv)
 							mpz_clear (peor_aptitud);
 						}
 				}
+
+			/* exit ((solucion == 1) ? EXIT_SUCCESS : EXIT_FAILURE); */
 			exit (EXIT_SUCCESS);
 		}
 	else if (salida == 1)
