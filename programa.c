@@ -294,7 +294,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 			break;
 
 		case 'd':
-			if (args->debug < 2)
+			if (args->debug < 4)
 				args->debug++;
 			break;
 
@@ -457,12 +457,15 @@ main (int argc, char **argv)
 			for (unsigned long int corrida_n = 0; corrida_n < args.corridas;
 					 corrida_n++)
 				{
+					puts ("\n|||||||||||||||||||||||||||||||||");
+					printf ("|       CORRIDA %lu\n", corrida_n + 1);
+					puts ("|||||||||||||||||||||||||||||||||");
 					/* ============================================================= */
 					/*                      POBLACIÓN INICIAL                        */
 					/* ============================================================= */
 					generar_poblacion_inicial (&individuos, letras, &args.poblacion,
 																		 args.semilla);
-					if (args.debug > 1)
+					if (args.debug > 2)
 						{
 							puts ("\nCálculo de aptitud inicial");
 							puts ("--------------------------");
@@ -531,9 +534,9 @@ main (int argc, char **argv)
 					for (; (generacion < args.generaciones) && (solucion == 0);
 							 generacion++)
 						{
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
-									puts ("\n=================================");
+									puts ("=================================");
 									printf ("       GENERACIÓN %lu\n", generacion + 1);
 									puts ("=================================\n");
 
@@ -566,7 +569,7 @@ main (int argc, char **argv)
 																							&args.cantidad_elite, 0,
 																							&args.debug);
 							/* Muestra los individuos elite */
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
 									puts ("\nIndividuos elite");
 									puts ("----------------");
@@ -598,7 +601,7 @@ main (int argc, char **argv)
 									free (peores);
 									peores = NULL;
 								}
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
 									puts ("\nIndividuos seleccionados para cruzar");
 									printf ("------------------------------------");
@@ -626,7 +629,7 @@ main (int argc, char **argv)
 									/* Tiene que mostrar el individuo i y el (i + 1) */
 									for (unsigned t = 0; t < 2; t++)
 										{
-											if (args.debug == 1)
+											if (args.debug == 2)
 												{
 													printf ("\nIndividuo[%*lu]:  ", anchoi, i + t);
 													for (unsigned int j = 0;
@@ -642,7 +645,7 @@ main (int argc, char **argv)
 														}
 													gmp_printf ("= %Zd", cruzados[i + t].aptitud);
 												}
-											else if (args.debug == 2)
+											else if (args.debug == 3)
 												gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi,
 																		i + t, cruzados[i + t].aptitud);
 										}
@@ -714,9 +717,9 @@ main (int argc, char **argv)
 								}
 							if (solucion == 1)
 								break;
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
-									if (args.debug == 1)
+									if (args.debug == 2)
 										puts ("");
 									puts ("\nIndividuos después de cruzar");
 									puts ("----------------------------");
@@ -744,7 +747,7 @@ main (int argc, char **argv)
 							/* ============================================================= */
 							unsigned long int *peores_m = NULL;
 							unsigned long int n_peores_m = 0;
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
 									puts ("\nIndividuos seleccionados para mutar");
 									printf ("-----------------------------------");
@@ -757,7 +760,7 @@ main (int argc, char **argv)
 									mpz_set (mutados[i].aptitud, individuos[indice].aptitud);
 									memcpy (mutados[i].letras, individuos[indice].letras, 10);
 
-									if (args.debug == 1)
+									if (args.debug == 2)
 										{
 											printf ("\nIndividuo[%*lu]:  ", anchoi, i);
 											for (unsigned int j = 0;
@@ -773,7 +776,7 @@ main (int argc, char **argv)
 												}
 											gmp_printf ("= %Zd", mutados[i].aptitud);
 										}
-									else if (args.debug == 2)
+									else if (args.debug == 3)
 										gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi, i,
 																mutados[i].aptitud);
 
@@ -823,9 +826,9 @@ main (int argc, char **argv)
 							if (solucion == 1)
 								break;
 							/* Muestra los individuos después de mutarlos */
-							if (args.debug > 0)
+							if (args.debug > 1)
 								{
-									if (args.debug == 1)
+									if (args.debug == 2)
 										puts ("");
 									puts ("\nIndividuos después de mutar");
 									puts ("---------------------------");
@@ -937,7 +940,7 @@ main (int argc, char **argv)
 						}
 
 					/* Si no encuentra solución imprime como quedó la poblacion final */
-					if ((args.debug > 0) && (solucion == 0))
+					if ((args.debug > 1) && (solucion == 0))
 						{
 							puts ("\n=================================");
 							puts ("        POBLACION FINAL ");
@@ -961,7 +964,7 @@ main (int argc, char **argv)
 								}
 						}
 
-					if (args.debug > 0)
+					if (args.debug > 1)
 						{
 							puts ("\n=================================");
 							puts ("     HISTÓRICOS GENERACIONES");

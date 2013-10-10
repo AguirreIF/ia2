@@ -124,7 +124,7 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	mpz_init_set_str (resultado_deseado, operando, 10);
 	free (operando);
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			puts ("");
 			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
@@ -145,7 +145,7 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 											&resultado_obtenido, debug);
 	if (resultado_obtenido == NULL)
 		{
-			if (*debug > 1)
+			if (*debug > 2)
 				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			mpz_clear (resultado_deseado);
@@ -180,7 +180,7 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 			y = resultado_deseado_str;
 		}
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
 			printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
@@ -203,7 +203,7 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	for (int i = m; i > -1; i--)
 		mpz_add_ui (aptitud1, aptitud1,
 								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10));
-	if (*debug > 1)
+	if (*debug > 2)
 		gmp_printf ("Aptitud: %Zd + ", aptitud1);
 
 	/* segunda parte de la fórmula, */
@@ -212,7 +212,7 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	for (unsigned int i = 0; i < sobra; i++)
 		mpz_add_ui (aptitud2, aptitud2,
 								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
-	if (*debug > 1)
+	if (*debug > 2)
 		gmp_printf ("%Zd\n", aptitud2);
 
 	mpz_add (aptitud, aptitud1, aptitud2);
@@ -246,7 +246,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	mpz_init_set_str (resultado_deseado, operando, 10);
 	free (operando);
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			puts ("");
 			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
@@ -267,7 +267,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 											&resultado_obtenido, debug);
 	if (resultado_obtenido == NULL)
 		{
-			if (*debug > 1)
+			if (*debug > 2)
 				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			mpz_clear (resultado_deseado);
@@ -302,7 +302,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 			y = resultado_deseado_str;
 		}
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
 			printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
@@ -328,7 +328,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 		mpz_add_ui (aptitud1, aptitud1,
 								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) *
 								 ((j++) + 1)));
-	if (*debug > 1)
+	if (*debug > 2)
 		gmp_printf ("Aptitud: %Zd + ", aptitud1);
 
 	/* segunda parte de la fórmula, */
@@ -337,7 +337,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 	for (unsigned int i = 0; i < sobra; i++)
 		mpz_add_ui (aptitud2, aptitud2,
 								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
-	if (*debug > 1)
+	if (*debug > 2)
 		gmp_printf ("%Zd\n", aptitud2);
 
 	mpz_add (aptitud, aptitud1, aptitud2);
@@ -371,7 +371,7 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 
 	mpz_init_set_str (resultado_deseado, operando, 10);
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			puts ("");
 			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
@@ -392,7 +392,7 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 											&resultado_obtenido, debug);
 	if (resultado_obtenido == NULL)
 		{
-			if (*debug > 1)
+			if (*debug > 2)
 				puts ("\nIndividuo inválido");
 			mpz_set_si (individuo->aptitud, -1);
 			return;
@@ -403,7 +403,7 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 	ancho =
 		(strlen (resultado_obtenido_str) >
 		 strlen (operando) ? strlen (resultado_obtenido_str) : strlen (operando));
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			printf ("Resultado obtenido: %*s\n", ancho, resultado_obtenido_str);
 			printf (" Resultado deseado: %s\n", operando);
@@ -417,7 +417,7 @@ calcular_aptitud3 (struct individuos_s *restrict const individuo,
 	mpz_sub (aptitud, resultado_deseado, *resultado_obtenido);
 	mpz_abs (aptitud, aptitud);
 
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			char *aptitud_str = mpz_get_str (NULL, 10, aptitud);
 			printf ("           Aptitud: %*s\n", ancho, aptitud_str);
@@ -536,7 +536,7 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 					copias_extras++;
 				}
 
-			if (*debug > 1)
+			if (*debug > 2)
 				printf ("individuo %lu: %u + %u copias\n", indice + 1, copias_e,
 								copias_d);
 
@@ -578,10 +578,10 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 			free (extras);
 		}
 
-	if (*debug > 1)
+	if (*debug > 2)
 		printf ("\nCopias totales: %lu\n", copias_totales);
 
-	if (*debug > 1)
+	if (*debug > 2)
 		puts ("");
 }
 

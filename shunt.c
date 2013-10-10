@@ -223,7 +223,7 @@ calcular_operacion (char **restrict const operandos,
 	nnumstack = 0;
 
 	char *operacion_completa = NULL;
-	if (*debug > 1)
+	if (*debug > 2)
 		{
 			operacion_completa = malloc (1);
 			operacion_completa[0] = '\0';
@@ -238,7 +238,7 @@ calcular_operacion (char **restrict const operandos,
 			/* operador */
 			if (*tipo == '0')
 				{
-					if (*debug > 1)
+					if (*debug > 2)
 						{
 							operacion_completa =
 								realloc (operacion_completa, strlen (operacion_completa) + 2);
@@ -265,7 +265,7 @@ calcular_operacion (char **restrict const operandos,
 					const unsigned int longitud_operando =
 						(unsigned int) strlen (operandos[n_operando]);
 
-					if (*debug > 1)
+					if (*debug > 2)
 						{
 							operacion_completa =
 								realloc (operacion_completa,
@@ -311,7 +311,7 @@ calcular_operacion (char **restrict const operandos,
 			/* Guarda el resultado en la pila */
 			push_numstack (resultado);
 		}
-	if (*debug > 1)
+	if (*debug > 2)
 		gmp_printf ("\nOperación: %s\n", operacion_completa);
 	*resultado_op = malloc (sizeof (mpz_t));
 	mpz_init (**resultado_op);
