@@ -593,6 +593,11 @@ main (int argc, char **argv)
 							/* ============================================================= */
 							mpz_set_ui (peor_aptitud, 0);
 							n_peores = 0;
+							if (peores != NULL)
+								{
+									free (peores);
+									peores = NULL;
+								}
 							if (args.debug > 0)
 								{
 									puts ("\nIndividuos seleccionados para cruzar");
@@ -707,15 +712,6 @@ main (int argc, char **argv)
 											break;
 										}
 								}
-							/* Se reemplaza la aptitud -1 por 9 (longitud del peor individuo) */
-							if (p_a != NULL)
-								free (p_a);
-							p_a = mpz_get_str (NULL, 10, peor_aptitud);
-							for (char *p = p_a; *p; p++)
-								*p = '9';
-							for (unsigned long int i = 0; i < n_peores; i++)
-								mpz_set_str (cruzados[peores[i]].aptitud, p_a, 10);
-
 							if (solucion == 1)
 								break;
 							if (args.debug > 0)
@@ -746,8 +742,8 @@ main (int argc, char **argv)
 							/* ============================================================= */
 							/*                          MUTACIÓN                             */
 							/* ============================================================= */
-							mpz_set_ui (peor_aptitud, 0);
-							n_peores = 0;
+							unsigned long int *peores_m = NULL;
+							unsigned long int n_peores_m = 0;
 							if (args.debug > 0)
 								{
 									puts ("\nIndividuos seleccionados para mutar");
@@ -794,11 +790,12 @@ main (int argc, char **argv)
 									/* Se guardan las posiciones de los que tienen aptitud -1 */
 									if (mpz_cmp_si (mutados[i].aptitud, -1) == 0)
 										{
-											peores =
-												realloc (peores,
-																 (n_peores + 1) * sizeof (unsigned long int));
-											peores[n_peores] = i;
-											n_peores++;
+											peores_m =
+												realloc (peores_m,
+																 (n_peores_m +
+																	1) * sizeof (unsigned long int));
+											peores_m[n_peores_m] = i;
+											n_peores_m++;
 										}
 
 									if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
@@ -823,15 +820,6 @@ main (int argc, char **argv)
 											break;
 										}
 								}
-							/* Se reemplaza la aptitud -1 por 9 (longitud del peor individuo) */
-							if (p_a != NULL)
-								free (p_a);
-							p_a = mpz_get_str (NULL, 10, peor_aptitud);
-							for (char *p = p_a; *p; p++)
-								*p = '9';
-							for (unsigned long int i = 0; i < n_peores; i++)
-								mpz_set_str (mutados[peores[i]].aptitud, p_a, 10);
-
 							if (solucion == 1)
 								break;
 							/* Muestra los individuos después de mutarlos */
@@ -859,6 +847,16 @@ main (int argc, char **argv)
 											gmp_printf ("= %Zd\n", mutados[i].aptitud);
 										}
 								}
+							/* Se reemplaza la aptitud -1 por 9 (longitud del peor individuo) */
+							if (p_a != NULL)
+								free (p_a);
+							p_a = mpz_get_str (NULL, 10, peor_aptitud);
+							for (char *p = p_a; *p; p++)
+								*p = '9';
+							for (unsigned long int i = 0; i < n_peores_m; i++)
+								mpz_set_str (mutados[peores_m[i]].aptitud, p_a, 10);
+							for (unsigned long int i = 0; i < n_peores; i++)
+								mpz_set_str (cruzados[peores[i]].aptitud, p_a, 10);
 
 							/* Se copian la selección elitista a la nueva generación */
 							for (unsigned long int i = 0; i < args.cantidad_elite; i++)
@@ -938,13 +936,6 @@ main (int argc, char **argv)
 							mpq_clear (aptitudes);
 						}
 
-					/* Se libera todo lo referente a la aptitud -1 */
-					if (peores != NULL)
-						free (peores);
-					if (p_a != NULL)
-						free (p_a);
-					mpz_clear (peor_aptitud);
-
 					/* Si no encuentra solución imprime como quedó la poblacion final */
 					if ((args.debug > 0) && (solucion == 0))
 						{
@@ -1012,7 +1003,8 @@ main (int argc, char **argv)
 							mpz_clear (media_global);
 						}
 
-					if (corrida_n < args.corridas)
+					/* Que haga la pausa solo si queden corridas por hacer */
+					if ((args.corridas > 1) && (corrida_n < args.corridas))
 						sleep (1);
 					else
 						/* Una vez finalizadas todas las corridas libera toda la memoria */
@@ -1065,6 +1057,13 @@ main (int argc, char **argv)
 									mpz_clear (historico_aptitud[i].media);
 								}
 							free (historico_aptitud);
+
+							/* Se libera todo lo referente a la aptitud -1 */
+							if (peores != NULL)
+								free (peores);
+							if (p_a != NULL)
+								free (p_a);
+							mpz_clear (peor_aptitud);
 						}
 				}
 			exit (EXIT_SUCCESS);
