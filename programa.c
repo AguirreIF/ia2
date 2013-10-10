@@ -110,7 +110,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
 				if (!isdigit (arg[i]))
 					argp_error (state,
-											"La población máxima debe ser un número entero mayor a 0");
+											"La población máxima debe ser un número entero mayor o igual a 10");
 
 			n_aux = strtoul (arg, NULL, 10);
 
@@ -121,9 +121,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
 
 			args->poblacion_maxima = n_aux;
 
-			if (args->poblacion_maxima == 0)
+			if (args->poblacion_maxima < 10)
 				argp_error (state,
-										"La población máxima debe ser un número entero mayor a 0");
+											"La población máxima debe ser un número entero mayor o igual a 10");
 			break;
 
 		case 'g':
