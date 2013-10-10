@@ -448,7 +448,10 @@ convertir_operando_a_numeros (const struct individuos_s *restrict const
 		// con el caracter seleccionado del operando
 		for (unsigned int indice = 0; indice < 10; indice++)
 			if (operando_str[columna] == individuo->letras[indice])
-				(*operando)[columna] = '0' + indice;
+				{
+					(*operando)[columna] = '0' + indice;
+					break;
+				}
 	while (++columna < longitud_operando);
 	(*operando)[columna] = '\0';
 }
