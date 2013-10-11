@@ -124,128 +124,6 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
 				{
 					char c = letras[j];
-					printf ("%c:", c = letras[j]);
-					for (unsigned int x = 0; x < 10; x++)
-						if (c == individuo->letras[x])
-							{
-								printf ("%u  ", x);
-								break;
-							}
-				}
-		}
-
-	/* Calcula el resultado obtenido */
-	calcular_operacion (operandos, individuo, operadores, operacion,
-											&resultado_obtenido, debug);
-	if (resultado_obtenido == NULL)
-		{
-			if (*debug > 2)
-				puts ("\nIndividuo inválido");
-			mpz_set_si (individuo->aptitud, -1);
-			mpz_clear (resultado_deseado);
-			return;
-		}
-
-	/* Se convierte ambos a char y se hacen las comparaciones */
-	char *resultado_deseado_str = NULL;
-	resultado_deseado_str = mpz_get_str (NULL, 10, resultado_deseado);
-	mpz_clear (resultado_deseado);
-
-	char *resultado_obtenido_str = NULL;
-	resultado_obtenido_str = mpz_get_str (NULL, 10, *resultado_obtenido);
-	mpz_clear (*resultado_obtenido);
-	free (resultado_obtenido);
-
-	unsigned int m, t;
-	const char *restrict y;
-	const char *restrict x;
-	if (strlen (resultado_obtenido_str) >= strlen (resultado_deseado_str))
-		{
-			m = strlen (resultado_deseado_str) - 1;
-			x = resultado_deseado_str;
-			t = strlen (resultado_obtenido_str) - 1;
-			y = resultado_obtenido_str;
-		}
-	else
-		{
-			m = strlen (resultado_obtenido_str) - 1;
-			x = resultado_obtenido_str;
-			t = strlen (resultado_deseado_str) - 1;
-			y = resultado_deseado_str;
-		}
-
-	if (*debug > 2)
-		{
-			printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
-			printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
-		}
-
-	mpz_t aptitud;
-	mpz_init (aptitud);
-
-	mpz_t aptitud1, aptitud2;
-	mpz_init (aptitud1);
-	mpz_init (aptitud2);
-
-	/* cuántos dígitos de más tiene el resultado más largo en */
-	/* comparación con el más corto */
-	unsigned const int sobra = t - m;
-
-	/* primera parte de la fórmula, */
-	/* va de atrás para adelante porque la unidad está en la última */
-	/* posición del array */
-	for (int i = m; i > -1; i--)
-		mpz_add_ui (aptitud1, aptitud1,
-								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) * 10));
-	if (*debug > 2)
-		gmp_printf ("Aptitud: %Zd + ", aptitud1);
-
-	/* segunda parte de la fórmula, */
-	/* va de adelante para atrás porque la unidad más grande está en */
-	/* la primera posición del array */
-	for (unsigned int i = 0; i < sobra; i++)
-		mpz_add_ui (aptitud2, aptitud2,
-								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
-	if (*debug > 2)
-		gmp_printf ("%Zd\n", aptitud2);
-
-	mpz_add (aptitud, aptitud1, aptitud2);
-
-	mpz_set (individuo->aptitud, aptitud);
-
-	mpz_clear (aptitud);
-	mpz_clear (aptitud1);
-	mpz_clear (aptitud2);
-
-	free (resultado_deseado_str);
-	free (resultado_obtenido_str);
-}
-
-void
-calcular_aptitud2 (struct individuos_s *restrict const individuo,
-									 char **restrict const operandos,
-									 const unsigned int *restrict const cantidad_operandos,
-									 const char *restrict const operadores,
-									 char *const operacion,
-									 const unsigned int *restrict const debug,
-									 const char *restrict const letras)
-{
-	mpz_t resultado_deseado, *resultado_obtenido = NULL;
-	char *operando = NULL;
-
-	/* Calcula el resultado deseado */
-	convertir_operando_a_numeros (individuo,
-																operandos[*cantidad_operandos - 1],
-																&operando);
-	mpz_init_set_str (resultado_deseado, operando, 10);
-	free (operando);
-
-	if (*debug > 2)
-		{
-			puts ("");
-			for (unsigned int j = 0; j < (unsigned int) strlen (letras); j++)
-				{
-					char c = letras[j];
 					printf ("%c:", c);
 					for (unsigned int x = 0; x < 10; x++)
 						if (c == individuo->letras[x])
@@ -347,7 +225,7 @@ calcular_aptitud2 (struct individuos_s *restrict const individuo,
 }
 
 void
-calcular_aptitud3 (struct individuos_s *restrict const individuo,
+calcular_aptitud2 (struct individuos_s *restrict const individuo,
 									 char **restrict const operandos,
 									 const unsigned int *restrict const cantidad_operandos,
 									 const char *restrict const operadores,

@@ -184,20 +184,18 @@ parse_opt (int key, char *arg, struct argp_state *state)
 			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
 				if (!isdigit (arg[i]))
 					argp_error (state,
-											"Debe elegir entre las funciones de aptitud 1, 2 o 3");
+											"Debe elegir entre las funciones de aptitud 1 o 2");
 
 			unsigned int aptitud = atoi (arg);
 
 			if (aptitud < 1 || aptitud > 3)
 				argp_error (state,
-										"Debe elegir entre las funciones de aptitud 1, 2 o 3");
+										"Debe elegir entre las funciones de aptitud 1 o 2");
 
 			if (atoi (arg) == 1)
 				args->faptitud = calcular_aptitud1;
-			else if (atoi (arg) == 2)
+			else
 				args->faptitud = calcular_aptitud2;
-			else if (atoi (arg) == 3)
-				args->faptitud = calcular_aptitud3;
 			break;
 
 		case 'e':
