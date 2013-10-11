@@ -98,11 +98,6 @@ void calcular_operacion (char **restrict const operandos,
 
 int individuos_cmp (const void *ptr1, const void *ptr2);
 
-void seleccion_elitista (struct individuos_s **restrict individuos,
-												 const unsigned long int *restrict const
-												 cantidad_elite,
-												 struct individuos_s **restrict elite);
-
 void seleccion_elitista_con_ranking (struct individuos_s **restrict
 																		 individuos,
 																		 struct individuos_s **restrict elite,
@@ -111,12 +106,10 @@ void seleccion_elitista_con_ranking (struct individuos_s **restrict
 																		 const unsigned int *restrict const
 																		 debug);
 
-void seleccion_por_ranking (struct individuos_s **restrict individuos,
-														const unsigned long int *restrict const
-														inicio,
-														const unsigned long int *restrict const
-														cantidad, const float rmin,
-														const unsigned int *restrict const debug);
+unsigned long int seleccion_por_ruleta (const struct individuos_s *restrict
+																				const individuos,
+																				const unsigned long int *restrict
+																				const poblacion);
 
 void cruza_ciclica (struct individuos_s *restrict madre,
 										struct individuos_s *restrict padre);
@@ -124,6 +117,8 @@ void cruza_ciclica (struct individuos_s *restrict madre,
 void mutacion (struct individuos_s *restrict individuo);
 
 unsigned int al_azar (const unsigned int min, const unsigned int max);
+
+double al_azar_d (const double min, const double max);
 
 void mostrar_operacion (const struct individuos_s *restrict const
 												individuo, char **restrict const operandos,

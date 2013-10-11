@@ -79,7 +79,7 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 	if (semilla != NULL)
 		init_genrand (*semilla);
 	else
-			init_genrand ((time (0) & 0xFFFF) | (getpid () << 16));
+		init_genrand ((time (0) & 0xFFFF) | (getpid () << 16));
 
 	for (unsigned long int n = 0; n < *poblacion; n++)
 		{
@@ -465,21 +465,6 @@ individuos_cmp (const void *const ptr1, const void *const ptr2)
 }
 
 void
-seleccion_elitista (struct individuos_s **restrict individuos,
-										const unsigned long int *restrict const cantidad_elite,
-										struct individuos_s **restrict elite)
-{
-	for (unsigned long int indice = 0; indice < *cantidad_elite; indice++)
-		{
-			mpz_init ((*elite)[indice].aptitud);
-			mpz_set ((*elite)[indice].aptitud, (*individuos)[indice].aptitud);
-
-			(*elite)[indice].letras = malloc (10);
-			memcpy ((*elite)[indice].letras, (*individuos)[indice].letras, 10);
-		}
-}
-
-void
 seleccion_elitista_con_ranking (struct individuos_s **individuos,
 																struct individuos_s **restrict elite,
 																const unsigned long int *restrict const
@@ -579,126 +564,61 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 		puts ("");
 }
 
-void
-seleccion_por_ranking (struct individuos_s **individuos,
-											 const unsigned long int *restrict const inicio,
-											 const unsigned long int *restrict const
-											 cantidad, const float rmin,
-											 const unsigned int *restrict const debug)
+unsigned long int
+seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
+											const unsigned long int *restrict const poblacion)
 {
-	struct individuos_s *seleccionados =
-		malloc (*cantidad * sizeof (struct individuos_s)), **extras = NULL;
+	unsigned long int total_aptitud = 0;
+	/* Suma las aptitudes */
+	for (unsigned long int i = 0; i < *poblacion; i++)
+		total_aptitud += mpz_get_ui (individuos[i].aptitud);
 
-	unsigned long int copias_totales = 0, indice_nuevos = 0, copias_extras = 0;
+	struct ruleta_s
+	{
+		unsigned long int indice;
+		double desde;
+		double hasta;
+	};
+	struct ruleta_s *ruleta = malloc (*poblacion * sizeof (struct ruleta_s));
 
-	for (unsigned long int indice = 0;
-			 (indice < *cantidad) && (copias_totales < *cantidad); indice++)
+	/* double anterior = 0, rango, total = 0, chico = 100, grande = 0; */
+	double anterior = 0, rango;
+	for (unsigned long int i = 0; i < *poblacion; i++)
 		{
-			float copias;
-			unsigned int copias_e, copias_d = 0;
+			rango =
+				((1 -
+					(mpz_get_ui (individuos[i].aptitud) / (double) total_aptitud)) /
+				 (*poblacion - 1)) * 10;
 
-			if (*cantidad == 1)
-				copias_e = 1;
-			else
-				{
-					/* Total de copias con decimales */
-					copias =
-						rmin +
-						2. * (((*cantidad - indice) * (1. - rmin)) / (*cantidad - 1));
-					/* Copias por la parte entera */
-					copias_e = copias;
-					/* Copias por la parte decimal */
-					copias_d = round (copias) - copias_e;
-				}
+			ruleta[i].indice = i;
+			ruleta[i].desde = anterior;
+			ruleta[i].hasta = anterior + rango;
 
-			/* Se hace la copia por la parte decimal si corresponde */
-			if (copias_d > 0)
-				{
-					extras =
-						realloc (extras,
-										 (copias_extras + 1) * sizeof (struct individuos_s *));
+			anterior += rango;
 
-					extras[copias_extras] = malloc (sizeof (struct individuos_s));
-
-					mpz_init (extras[copias_extras]->aptitud);
-					mpz_set (extras[copias_extras]->aptitud,
-									 (*individuos)[indice].aptitud);
-
-					extras[copias_extras]->letras = malloc (10);
-					memcpy (extras[copias_extras]->letras,
-									(*individuos)[indice].letras, 10);
-
-					copias_extras++;
-				}
-
-			if (*debug > 1)
-				printf ("individuo %lu: %u + %u copias\n", indice + 1, copias_e,
-								copias_d);
-
-			/* Verifica que copias_e no supere a cantidad.
-			 * Puede pasar si cantidad es muy chica */
-			if ((copias_e + copias_totales) >= *cantidad)
-				copias_e = *cantidad - copias_totales;
-
-			/* Hace la cantidad de copias correspondientes */
-			for (unsigned int n = 0; n < copias_e; n++, indice_nuevos++)
-				{
-					mpz_init (seleccionados[indice_nuevos].aptitud);
-					mpz_set (seleccionados[indice_nuevos].aptitud,
-									 (*individuos)[indice].aptitud);
-
-					seleccionados[indice_nuevos].letras = malloc (10);
-					memcpy (seleccionados[indice_nuevos].letras,
-									(*individuos)[indice].letras, 10);
-				}
-			copias_totales += copias_e;
+			/* total += rango; */
 		}
 
-	/* Si no alcanzaron las copias de la parte entera 
-	 * copia de la parte decimal hasta completar la cantidad */
-	for (unsigned int n = 0; copias_totales < *cantidad; n++, indice_nuevos++)
-		{
-			mpz_init (seleccionados[indice_nuevos].aptitud);
-			mpz_set (seleccionados[indice_nuevos].aptitud, extras[n]->aptitud);
+	/* for (unsigned long int i = 0; i < *poblacion; i++) */
+	/* gmp_printf ("Rango [%lu]: %.15f a %.15f (%.15f - %.15f)\t%Zd\n", ruleta[i].indice, ruleta[i].desde, ruleta[i].hasta, \ */
+	/* ruleta[i].hasta - ruleta[i].desde, al_azar_d(ruleta[0].hasta, ruleta[*poblacion - 1].desde), individuos[i].aptitud); */
 
-			seleccionados[indice_nuevos].letras = malloc (10);
-			memcpy (seleccionados[indice_nuevos].letras, extras[n]->letras, 10);
-
-			copias_totales++;
-		}
-
-	/* Libera todo la memoria reservada para las copias extras */
-	if (extras != NULL)
-		{
-			for (unsigned int n = 0; n < copias_extras; n++)
+	/* double aleatorio; */
+	/* for (unsigned int i = 0; i < 9; i++) */
+	/* { */
+	double aleatorio =
+		al_azar_d (ruleta[0].desde, ruleta[*poblacion - 1].hasta);
+	for (unsigned int i = 0; i < 9; i++)
+		for (unsigned long int i = 0; i < *poblacion; i++)
+			if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
 				{
-					mpz_clear (extras[n]->aptitud);
-					free (extras[n]->letras);
-					free (extras[n]);
+					free (ruleta);
+					return i;
 				}
-			free (extras);
-		}
-
-	if (*debug > 1)
-		printf ("\nCopias totales: %lu\n", copias_totales);
-
-	/* Se copian los individuos seleccionados a la estructura original */
-	for (unsigned long int indice = 0; indice < *cantidad; indice++)
-		{
-			mpz_set ((*individuos)[indice + *inicio].aptitud,
-							 seleccionados[indice].aptitud);
-
-			memcpy ((*individuos)[indice + *inicio].letras,
-							seleccionados[indice].letras, 10);
-
-			mpz_clear (seleccionados[indice].aptitud);
-			free (seleccionados[indice].letras);
-		}
-
-	if (*debug > 1)
-		puts ("");
-
-	free (seleccionados);
+	/* gmp_printf ("Individuo [%lu]: %.15f a %.15f (%.15f)\t%Zd\n", ruleta[i].indice, ruleta[i].desde, ruleta[i].hasta, aleatorio, individuos[i].aptitud); */
+	/* } */
+	/* exit(EXIT_SUCCESS); */
+	return -1;
 }
 
 void
@@ -803,6 +723,12 @@ unsigned int
 al_azar (const unsigned int min, const unsigned int max)
 {
 	return (genrand_res53 () * (max - min + 1) + min);
+}
+
+double
+al_azar_d (const double min, const double max)
+{
+	return ((genrand_res53 () * (max - min)) + min);
 }
 
 void

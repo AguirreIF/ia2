@@ -692,14 +692,14 @@ main (int argc, char **argv)
 											 i += 2)
 										{
 											unsigned long int madre =
-												al_azar (0, args.poblacion - 1);
+												seleccion_por_ruleta (individuos, &args.poblacion);
 											unsigned long int padre =
-												al_azar (0, args.poblacion - 1);
+												seleccion_por_ruleta (individuos, &args.poblacion);
 
 											/* Verifica que no tengan las letras en el mismo orden (sin importar los vacíos) */
 											while (iguales (&individuos[padre], &individuos[madre])
 														 == 1)
-												padre = al_azar (0, args.poblacion - 1);
+												padre = seleccion_por_ruleta (individuos, &args.poblacion);
 
 											mpz_set (cruzados[i].aptitud,
 															 individuos[padre].aptitud);
@@ -849,7 +849,7 @@ main (int argc, char **argv)
 											 i++)
 										{
 											unsigned long int indice =
-												al_azar (0, args.poblacion - 1);
+												seleccion_por_ruleta (individuos, &args.poblacion);
 
 											mpz_set (mutados[i].aptitud,
 															 individuos[indice].aptitud);
