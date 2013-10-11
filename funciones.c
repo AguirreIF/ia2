@@ -453,7 +453,6 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 
 	struct ruleta_s
 	{
-		unsigned long int indice;
 		double desde;
 		double hasta;
 	};
@@ -468,10 +467,8 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 					(mpz_get_ui (individuos[i].aptitud) / (double) total_aptitud)) /
 				 (*poblacion - 1)) * 10;
 
-			ruleta[i].indice = i;
 			ruleta[i].desde = anterior;
 			ruleta[i].hasta = anterior + rango;
-
 			anterior += rango;
 
 			/* total += rango; */
@@ -486,13 +483,12 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 	/* { */
 	double aleatorio =
 		al_azar_d (ruleta[0].desde, ruleta[*poblacion - 1].hasta);
-	for (unsigned int i = 0; i < 9; i++)
-		for (unsigned long int i = 0; i < *poblacion; i++)
-			if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
-				{
-					free (ruleta);
-					return i;
-				}
+	for (unsigned long int i = 0; i < *poblacion; i++)
+		if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
+			{
+				free (ruleta);
+				return i;
+			}
 	/* gmp_printf ("Individuo [%lu]: %.15f a %.15f (%.15f)\t%Zd\n", ruleta[i].indice, ruleta[i].desde, ruleta[i].hasta, aleatorio, individuos[i].aptitud); */
 	/* } */
 	/* exit(EXIT_SUCCESS); */
