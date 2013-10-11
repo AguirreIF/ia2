@@ -430,9 +430,8 @@ main (int argc, char **argv)
 					 * porque se toman de a 2 individuos */
 					if ((args.cantidad_a_cruzar % 2) != 0)
 						{
-							args.cantidad_a_cruzar -= 1;
 							/* El restante lo agrego a mutación */
-							if (args.cantidad_a_mutar != 0)
+							if (args.cantidad_a_mutar > 0)
 								{
 									args.cantidad_a_mutar++;
 									mutados =
@@ -441,9 +440,10 @@ main (int argc, char **argv)
 														 sizeof (struct individuos_s));
 									mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
 									mutados[args.cantidad_a_mutar - 1].letras = malloc (10);
+									args.cantidad_a_cruzar -= 1;
 								}
-							/* Si no hay mutación se agrega a elite */
-							else if (args.cantidad_elite != 0)
+							/* Si no hay mutación se intenta agregar a elite */
+							else if (args.cantidad_elite > 0)
 								{
 									args.cantidad_elite++;
 									elite =
@@ -452,8 +452,10 @@ main (int argc, char **argv)
 														 sizeof (struct individuos_s));
 									mpz_init (elite[args.cantidad_elite - 1].aptitud);
 									elite[args.cantidad_elite - 1].letras = malloc (10);
+									args.cantidad_a_cruzar -= 1;
 								}
-							/* Si no hay mutación ni elite queda suelto */
+							/* Si no hay mutación ni elite queda una cantidad
+							 * a cruzar impar y listo */
 						}
 					cruzados =
 						malloc (args.cantidad_a_cruzar * sizeof (struct individuos_s));
@@ -461,6 +463,46 @@ main (int argc, char **argv)
 						{
 							mpz_init (cruzados[i].aptitud);
 							cruzados[i].letras = malloc (10);
+						}
+				}
+
+			/* Puede que por los rendondeos me quede un individuo sin asignar a
+			 * selección, cruza o mutación */
+			if ((args.poblacion - args.cantidad_elite - args.cantidad_a_cruzar -
+					 args.cantidad_a_mutar) > 0)
+				{
+					/* Primero intento asignarlo a mutación */
+					if (args.cantidad_a_mutar > 0)
+						{
+							args.cantidad_a_mutar++;
+							mutados =
+								realloc (mutados,
+												 args.cantidad_a_mutar *
+												 sizeof (struct individuos_s));
+							mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
+							mutados[args.cantidad_a_mutar - 1].letras = malloc (10);
+						}
+					/* Si no hay mutación se intenta agregar a elite */
+					else if (args.cantidad_elite > 0)
+						{
+							args.cantidad_elite++;
+							elite =
+								realloc (elite,
+												 args.cantidad_elite * sizeof (struct individuos_s));
+							mpz_init (elite[args.cantidad_elite - 1].aptitud);
+							elite[args.cantidad_elite - 1].letras = malloc (10);
+						}
+					/* Si no hay mutación ni elite queda una cantidad
+					 * a cruzar impar y listo */
+					else
+						{
+							args.cantidad_a_cruzar++;
+							cruzados =
+								realloc (cruzados,
+												 args.cantidad_a_cruzar *
+												 sizeof (struct individuos_s));
+							mpz_init (cruzados[args.cantidad_a_cruzar - 1].aptitud);
+							cruzados[args.cantidad_a_cruzar - 1].letras = malloc (10);
 						}
 				}
 
@@ -611,21 +653,22 @@ main (int argc, char **argv)
 											for (unsigned long int i = 0; i < args.cantidad_elite;
 													 i++)
 												{
-													printf ("\nIndividuo[%*lu]:  ", anchoi, i + t);
+													printf ("Individuo[%*lu]:  ", anchoi, i);
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
 														{
 															printf ("%c:", letras[j]);
 															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == cruzados[i + t].letras[x])
+																if (letras[j] == elite[i].letras[x])
 																	{
 																		printf ("%u  ", x);
 																		break;
 																	}
 														}
-													gmp_printf ("= %Zd", cruzados[i + t].aptitud);
+													gmp_printf ("= %Zd\n", elite[i].aptitud);
 												}
 										}
+								}
 
 							/* ============================================================= */
 							/*                             CRUZA                             */
@@ -1017,7 +1060,6 @@ main (int argc, char **argv)
 									gmp_printf ("= %Zd\n", individuos[i].aptitud);
 								}
 						}
-
 					if (args.debug > 1)
 						{
 							puts ("\n=================================");
@@ -1060,7 +1102,7 @@ main (int argc, char **argv)
 							mpz_clear (media_global);
 						}
 
-					/* Una vez finalizadas todas las corridas libera toda la memoria */
+					/* Una vez finalizadas todas las corridas libera la memoria */
 					if (corrida_n == args.corridas)
 						{
 							if (args.semilla != NULL)
