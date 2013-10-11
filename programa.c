@@ -514,6 +514,13 @@ main (int argc, char **argv)
 			struct h_aptitud *historico_aptitud =
 				malloc (args.generaciones * sizeof (struct h_aptitud));
 
+			/* Guarda el estado anterior de la solución */
+			struct individuos_s anterior[2];
+			anterior[0].letras = malloc (10);
+			mpz_init (anterior[0].aptitud);
+			anterior[1].letras = malloc (10);
+			mpz_init (anterior[1].aptitud);
+
 			/* ============================================================= */
 			/*                    CICLO DE LAS CORRIDAS                      */
 			/* ============================================================= */
@@ -587,7 +594,7 @@ main (int argc, char **argv)
 									mostrar_operacion (&individuos[i], operandos, operadores,
 																		 operacion);
 									solucion = 1;
-									puts("");
+									puts ("");
 									break;
 								}
 						}
@@ -763,6 +770,14 @@ main (int argc, char **argv)
 																				cruzados[i + t].aptitud);
 												}
 
+											/* Copia el estado anterior antes de cruzar */
+											memcpy (anterior[0].letras, cruzados[i].letras, 10);
+											mpz_set (anterior[0].aptitud, cruzados[i].aptitud);
+
+											/* Copia el estado anterior antes de calcular la aptitud */
+											memcpy (anterior[1].letras, cruzados[i].letras, 10);
+											mpz_set (anterior[1].aptitud, cruzados[i].aptitud);
+
 											cruza_ciclica (&cruzados[i], &cruzados[i + 1]);
 
 											args.faptitud (&cruzados[i], operandos,
@@ -805,27 +820,46 @@ main (int argc, char **argv)
 
 											int k = -1;
 											if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
-												k = i;
-											if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0)
-												k = i + 1;
+												k = 0;
+											if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0){
+												i++;
+												k = 1;
+											}
 											if (k != -1)
 												{
 													printf
-														("\n\n¡Solución en la generación (cruza) %lu!\n",
+														("\n\n¡Solución por cruza en la generación %lu!\n",
 														 generacion + 1);
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
 														{
 															printf ("%c:", letras[j]);
 															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == cruzados[k].letras[x])
+																if (letras[j] == cruzados[i].letras[x])
 																	{
 																		printf ("%u  ", x);
 																		break;
 																	}
 														}
-													mostrar_operacion (&cruzados[k], operandos,
+													mostrar_operacion (&cruzados[i], operandos,
 																						 operadores, operacion);
+
+													/* Muestra el estado anterior del individuo solución */
+													gmp_printf ("\nEstado anterior (%Zd)\n",
+																			anterior[k].aptitud);
+													for (unsigned int j = 0;
+															 j < (unsigned int) strlen (letras); j++)
+														{
+															printf ("%c:", letras[j]);
+															for (unsigned int x = 0; x < 10; x++)
+																if (letras[j] == anterior[k].letras[x])
+																	{
+																		printf ("%u  ", x);
+																		break;
+																	}
+														}
+													mostrar_operacion (&anterior[k], operandos, operadores,
+																						 operacion);
 													solucion = 1;
 													break;
 												}
@@ -907,6 +941,10 @@ main (int argc, char **argv)
 												gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi,
 																		i, mutados[i].aptitud);
 
+											/* Copia el estado anterior antes de calcular la aptitud */
+											memcpy (anterior[0].letras, mutados[i].letras, 10);
+											mpz_set (anterior[0].aptitud, mutados[i].aptitud);
+
 											mutacion (&mutados[i]);
 
 											args.faptitud (&mutados[i], operandos,
@@ -931,7 +969,7 @@ main (int argc, char **argv)
 											if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 												{
 													printf
-														("\n\n¡Solución en la generación (mutación) %lu!\n",
+														("\n\n¡Solución por mutación en la generación %lu!\n",
 														 generacion + 1);
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
@@ -946,6 +984,23 @@ main (int argc, char **argv)
 														}
 													mostrar_operacion (&mutados[i], operandos,
 																						 operadores, operacion);
+
+													/* Muestra el estado anterior del individuo solución */
+													gmp_printf ("\nEstado anterior (%Zd)\n",
+																			anterior[0].aptitud);
+													for (unsigned int j = 0;
+															 j < (unsigned int) strlen (letras); j++)
+														{
+															printf ("%c:", letras[j]);
+															for (unsigned int x = 0; x < 10; x++)
+																if (letras[j] == anterior[0].letras[x])
+																	{
+																		printf ("%u  ", x);
+																		break;
+																	}
+														}
+													mostrar_operacion (&anterior[0], operandos, operadores,
+																						 operacion);
 													solucion = 1;
 													break;
 												}
