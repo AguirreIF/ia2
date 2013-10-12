@@ -661,37 +661,26 @@ mostrar_operacion (const struct individuos_s *restrict const
 	free (operacion_completa);
 }
 
-int
-iguales (struct individuos_s *restrict i1, struct individuos_s *restrict i2)
+unsigned int
+iguales (const struct individuos_s *restrict const i1,
+				 const struct individuos_s *restrict const i2)
 {
-	char *letras_i1 = NULL;
-
-	unsigned int numl = 0;
-
-	for (unsigned int j = 0; j < 10; j++)
-		if (i1->letras[j] != '\0')
-			{
-				letras_i1 = realloc (letras_i1, numl + 1);
-				letras_i1[numl++] = i1->letras[j];
-			}
-
-	char letras_i2[numl];
-
-	numl = 0;
-
-	for (unsigned int j = 0; j < 10; j++)
-		if (i2->letras[j] != '\0')
-			letras_i2[numl++] = i2->letras[j];
-
-	int salida = 1;
-
-	for (unsigned int j = 0; j < numl; j++)
-		if (letras_i1[j] != letras_i2[j])
-			{
-				salida = -1;
-				break;
-			}
-
-	free (letras_i1);
-	return salida;
+	unsigned int j = 0;
+	for (unsigned int i = 0; i < 10; i++)
+		{
+			/* Avanza hasta la primer letra del 1er individuo */
+			if (i1->letras[i] == '\0')
+				continue;
+			/* Avanza hasta la primer letra del 2do individuo */
+			while (i2->letras[j] == '\0')
+				j++;
+			if (i1->letras[i] == i2->letras[j])
+				{
+					j++;
+					continue;
+				}
+			else
+				return 0;
+		}
+	return 1;
 }
