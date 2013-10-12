@@ -684,3 +684,20 @@ iguales (const struct individuos_s *restrict const i1,
 		}
 	return 1;
 }
+
+void
+diff_t (const struct timespec *restrict const comienzo_t,
+				const struct timespec *restrict const fin_t,
+				struct timespec *restrict const total_t)
+{
+	if ((fin_t->tv_nsec - comienzo_t->tv_nsec) < 0)
+		{
+			total_t->tv_sec = fin_t->tv_sec - comienzo_t->tv_sec - 1;
+			total_t->tv_nsec = 1000000000 + fin_t->tv_nsec - comienzo_t->tv_nsec;
+		}
+	else
+		{
+			total_t->tv_sec = fin_t->tv_sec - comienzo_t->tv_sec;
+			total_t->tv_nsec = fin_t->tv_nsec - comienzo_t->tv_nsec;
+		}
+}

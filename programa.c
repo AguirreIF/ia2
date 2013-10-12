@@ -521,6 +521,9 @@ main (int argc, char **argv)
 			anterior[1].letras = malloc (10);
 			mpz_init (anterior[1].aptitud);
 
+			struct timespec comienzo_t, fin_t, *total_t =
+				malloc (args.generaciones * sizeof (struct timespec));
+
 			/* ============================================================= */
 			/*                    CICLO DE LAS CORRIDAS                      */
 			/* ============================================================= */
@@ -615,6 +618,7 @@ main (int argc, char **argv)
 					for (; (generacion < args.generaciones) && (solucion == 0);
 							 generacion++)
 						{
+							clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &comienzo_t);
 							if (args.debug > 1)
 								{
 									puts ("=================================");
@@ -800,8 +804,13 @@ main (int argc, char **argv)
 												}
 											if (k != -1)
 												{
+													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
+													diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+
+													if (args.debug > 1)
+														puts ("");
 													printf
-														("\n\n¡Solución por cruza en la generación %lu!\n",
+														("\n¡Solución por cruza en la generación %lu!\n",
 														 generacion + 1);
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
@@ -833,6 +842,8 @@ main (int argc, char **argv)
 														}
 													mostrar_operacion (&anterior[k], operandos,
 																						 operadores, operacion);
+													if (args.debug > 0)
+														puts ("");
 													solucion = 1;
 													break;
 												}
@@ -936,8 +947,13 @@ main (int argc, char **argv)
 
 											if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 												{
+													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
+													diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+
+													if (args.debug > 1)
+														puts ("");
 													printf
-														("\n\n¡Solución por mutación en la generación %lu!\n",
+														("\n¡Solución por mutación en la generación %lu!\n",
 														 generacion + 1);
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
@@ -969,6 +985,8 @@ main (int argc, char **argv)
 														}
 													mostrar_operacion (&anterior[0], operandos,
 																						 operadores, operacion);
+													if (args.debug > 0)
+														puts ("");
 													solucion = 1;
 													break;
 												}
@@ -1088,6 +1106,20 @@ main (int argc, char **argv)
 							mpq_clear (total_aptitud);
 							mpq_clear (media_aptitud);
 							mpq_clear (aptitudes);
+							/* Si encuentra solución no llega hasta acá */
+							clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
+							diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+						}
+					/* Calcula el tiempo total de ejecución de la generación */
+					if (args.debug > 0)
+						{
+							unsigned long int gen =
+								(solucion == 1) ? generacion + 1 : generacion;
+							for (unsigned long int i = 0; i < gen; i++)
+								printf
+									("Tiempo de ejecución de la generación %lu: %lds --> %ldms --> %ldns\n",
+									 i + 1, total_t[i].tv_sec, (total_t[i].tv_nsec / 1000000),
+									 total_t[i].tv_nsec);
 						}
 
 					/* Si no encuentra solución imprime como quedó la poblacion final */

@@ -119,4 +119,8 @@ void mostrar_operacion (const struct individuos_s *restrict const
 unsigned int iguales (const struct individuos_s *restrict const i1,
 						 const struct individuos_s *restrict const i2);
 
+void diff_t (const struct timespec *restrict const comienzo,
+						 const struct timespec *restrict const fin,
+						 struct timespec *restrict const total);
+
 #endif /* FUNCIONES_H */
