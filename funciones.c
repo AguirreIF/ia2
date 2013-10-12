@@ -446,7 +446,13 @@ unsigned long int
 seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 											const unsigned long int *restrict const poblacion)
 {
+	/* Si la peor aptitud no entra en un unsigned long int devuelve
+	 * un número al azar*/
+	if (mpz_fits_ulong_p (individuos[*poblacion - 1].aptitud) == 0)
+		return al_azar (0, *poblacion - 1);
+
 	unsigned long int total_aptitud = 0;
+
 	/* Suma las aptitudes */
 	for (unsigned long int i = 0; i < *poblacion; i++)
 		total_aptitud += mpz_get_ui (individuos[i].aptitud);
@@ -458,7 +464,6 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 	};
 	struct ruleta_s *ruleta = malloc (*poblacion * sizeof (struct ruleta_s));
 
-	/* double anterior = 0, rango, total = 0, chico = 100, grande = 0; */
 	double anterior = 0, rango;
 	for (unsigned long int i = 0; i < *poblacion; i++)
 		{
@@ -470,29 +475,19 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 			ruleta[i].desde = anterior;
 			ruleta[i].hasta = anterior + rango;
 			anterior += rango;
-
-			/* total += rango; */
 		}
 
-	/* for (unsigned long int i = 0; i < *poblacion; i++) */
-	/* gmp_printf ("Rango [%lu]: %.15f a %.15f (%.15f - %.15f)\t%Zd\n", ruleta[i].indice, ruleta[i].desde, ruleta[i].hasta, \ */
-	/* ruleta[i].hasta - ruleta[i].desde, al_azar_d(ruleta[0].hasta, ruleta[*poblacion - 1].desde), individuos[i].aptitud); */
-
-	/* double aleatorio; */
-	/* for (unsigned int i = 0; i < 9; i++) */
-	/* { */
 	double aleatorio =
 		al_azar_d (ruleta[0].desde, ruleta[*poblacion - 1].hasta);
 	for (unsigned long int i = 0; i < *poblacion; i++)
 		if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
 			{
+				aleatorio = i;
+				break;
 				free (ruleta);
-				return i;
 			}
-	/* gmp_printf ("Individuo [%lu]: %.15f a %.15f (%.15f)\t%Zd\n", ruleta[i].indice, ruleta[i].desde, ruleta[i].hasta, aleatorio, individuos[i].aptitud); */
-	/* } */
-	/* exit(EXIT_SUCCESS); */
-	return -1;
+
+	return aleatorio;
 }
 
 void

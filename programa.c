@@ -609,15 +609,6 @@ main (int argc, char **argv)
 					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
 								 individuos_cmp);
 
-					if (args.debug > 0)
-						{
-							if (mpz_fits_ulong_p
-									(individuos[args.poblacion - 1].aptitud) != 0)
-								puts ("Se utiliza selección por ruleta");
-							else
-								puts ("Se utiliza selección por azar");
-						}
-
 					/* ============================================================= */
 					/*                  CICLO ALGORITMO GENÉTICO                     */
 					/* ============================================================= */
@@ -705,34 +696,15 @@ main (int argc, char **argv)
 									for (unsigned long int i = 0; i < args.cantidad_a_cruzar;
 											 i += 2)
 										{
-											unsigned long int madre;
-											unsigned long int padre;
-											if (mpz_fits_ulong_p
-													(individuos[args.poblacion - 1].aptitud) != 0)
-												{
-													madre =
-														seleccion_por_ruleta (individuos,
-																									&args.poblacion);
-													padre =
-														seleccion_por_ruleta (individuos,
-																									&args.poblacion);
-												}
-											else
-												{
-													madre = al_azar (0, args.poblacion - 1);
-													padre = al_azar (0, args.poblacion - 1);
-												}
+											unsigned long int madre =
+												seleccion_por_ruleta (individuos, &args.poblacion);
+											unsigned long int padre =
+												seleccion_por_ruleta (individuos, &args.poblacion);
 
 											/* Verifica que no tengan las letras en el mismo orden (sin importar los vacíos) */
-											while (iguales (&individuos[padre], &individuos[madre])
-														 == 1)
-												if (mpz_fits_ulong_p
-														(individuos[args.poblacion - 1].aptitud) != 0)
-													padre =
-														seleccion_por_ruleta (individuos,
-																									&args.poblacion);
-												else
-													padre = al_azar (0, args.poblacion - 1);
+											while (iguales (&individuos[padre], &individuos[madre]))
+												padre =
+													seleccion_por_ruleta (individuos, &args.poblacion);
 
 											mpz_set (cruzados[i].aptitud,
 															 individuos[padre].aptitud);
@@ -821,10 +793,11 @@ main (int argc, char **argv)
 											int k = -1;
 											if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
 												k = 0;
-											if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0){
-												i++;
-												k = 1;
-											}
+											if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0)
+												{
+													i++;
+													k = 1;
+												}
 											if (k != -1)
 												{
 													printf
@@ -858,8 +831,8 @@ main (int argc, char **argv)
 																		break;
 																	}
 														}
-													mostrar_operacion (&anterior[k], operandos, operadores,
-																						 operacion);
+													mostrar_operacion (&anterior[k], operandos,
+																						 operadores, operacion);
 													solucion = 1;
 													break;
 												}
@@ -908,13 +881,8 @@ main (int argc, char **argv)
 									for (unsigned long int i = 0; i < args.cantidad_a_mutar;
 											 i++)
 										{
-											unsigned long int indice;
-											if (mpz_fits_ulong_p
-													(individuos[args.poblacion - 1].aptitud) != 0)
-												indice =
-													seleccion_por_ruleta (individuos, &args.poblacion);
-											else
-												indice = al_azar (0, args.poblacion - 1);
+											unsigned long int indice =
+												seleccion_por_ruleta (individuos, &args.poblacion);
 
 											mpz_set (mutados[i].aptitud,
 															 individuos[indice].aptitud);
@@ -999,8 +967,8 @@ main (int argc, char **argv)
 																		break;
 																	}
 														}
-													mostrar_operacion (&anterior[0], operandos, operadores,
-																						 operacion);
+													mostrar_operacion (&anterior[0], operandos,
+																						 operadores, operacion);
 													solucion = 1;
 													break;
 												}
