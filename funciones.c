@@ -483,8 +483,8 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 		if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
 			{
 				aleatorio = i;
-				break;
 				free (ruleta);
+				break;
 			}
 
 	return aleatorio;
