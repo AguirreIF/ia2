@@ -574,18 +574,50 @@ cruza_ciclica (struct individuos_s *restrict madre,
 void
 mutacion (struct individuos_s *restrict individuo)
 {
-	unsigned int gen1, gen2;
+	/* Calcula la cantidad de cambios según la
+	 * longitud de la aptitud */
+	unsigned int aptitud, cambios = 0;
+	if (mpz_fits_ulong_p (individuo->aptitud))
+		{
+			aptitud = mpz_get_ui (individuo->aptitud);
+			unsigned int x = aptitud;
+			do
+				cambios++;
+			while ((x /= 10) > 0);
+			cambios += round (aptitud / pow (10, cambios));
+			if (cambios == 1)
+				cambios++;
+		}
+	else
+		cambios = mpz_sizeinbase (individuo->aptitud, 10);
 
-	gen1 = al_azar (0, 9);
-	gen2 = al_azar (0, 9);
+	/* Obtiene un número al azar por cada cambio */
+	unsigned int genes[cambios];
+	for (unsigned int i = 0; i < cambios; i++)
+		genes[i] = al_azar (0, 9);
 
-	while ((gen1 == gen2) || ((individuo->letras[gen1] == '\0') &&
-														(individuo->letras[gen2] == '\0')))
-		gen2 = al_azar (0, 9);
+	/* Verifica que los números extremos no sean iguales */
+	while (genes[0] == genes[cambios - 1])
+		genes[0] = al_azar (0, 9);
 
-	char aux = individuo->letras[gen1];
-	individuo->letras[gen1] = individuo->letras[gen2];
-	individuo->letras[gen2] = aux;
+	/* Verifica en los números de adentro que uno no sea
+	 * igual al siguiente */
+	for (unsigned int i = 0; i < (cambios - 1); i++)
+		while (genes[i] == genes[i + 1])
+			if ((cambios > 2) && (i == (cambios - 2)))
+				while ((genes[i] == genes[i - 1]) || (genes[i] == genes[i + 1]))
+					genes[i] = al_azar (0, 9);
+			else
+				genes[i + 1] = al_azar (0, 9);
+
+	/* Hace los intercambios */
+	char c;
+	for (unsigned int i = 0; i < (cambios - 1); i++)
+		{
+			c = individuo->letras[genes[i]];
+			individuo->letras[genes[i]] = individuo->letras[genes[i + 1]];
+			individuo->letras[genes[i + 1]] = c;
+		}
 }
 
 unsigned int
