@@ -612,6 +612,10 @@ main (int argc, char **argv)
 					qsort (individuos, args.poblacion, sizeof (struct individuos_s),
 								 individuos_cmp);
 
+					/* Prepara la estructura de la ruleta */
+					struct ruleta_s *ruleta =
+						malloc (args.poblacion * sizeof (struct ruleta_s));
+
 					/* ============================================================= */
 					/*                  CICLO ALGORITMO GENÉTICO                     */
 					/* ============================================================= */
@@ -680,6 +684,8 @@ main (int argc, char **argv)
 										}
 								}
 
+							/* Arma la ruleta para cruza y mutación */
+							armar_ruleta (individuos, &args.poblacion, ruleta);
 							/* ============================================================= */
 							/*                             CRUZA                             */
 							/* ============================================================= */
@@ -701,14 +707,14 @@ main (int argc, char **argv)
 											 i += 2)
 										{
 											unsigned long int madre =
-												seleccion_por_ruleta (individuos, &args.poblacion);
+												seleccion_por_ruleta (&args.poblacion, ruleta);
 											unsigned long int padre =
-												seleccion_por_ruleta (individuos, &args.poblacion);
+												seleccion_por_ruleta (&args.poblacion, ruleta);
 
 											/* Verifica que no tengan las letras en el mismo orden (sin importar los vacíos) */
 											while (iguales (&individuos[padre], &individuos[madre]))
 												padre =
-													seleccion_por_ruleta (individuos, &args.poblacion);
+													seleccion_por_ruleta (&args.poblacion, ruleta);
 
 											mpz_set (cruzados[i].aptitud,
 															 individuos[padre].aptitud);
@@ -893,7 +899,7 @@ main (int argc, char **argv)
 											 i++)
 										{
 											unsigned long int indice =
-												seleccion_por_ruleta (individuos, &args.poblacion);
+												seleccion_por_ruleta (&args.poblacion, ruleta);
 
 											mpz_set (mutados[i].aptitud,
 															 individuos[indice].aptitud);
@@ -1187,6 +1193,7 @@ main (int argc, char **argv)
 							mpq_clear (total_aptitud);
 							mpz_clear (media_global);
 						}
+					free (ruleta);
 
 					/* Una vez finalizadas todas las corridas libera la memoria */
 					if (corrida_n == args.corridas)

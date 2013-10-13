@@ -442,9 +442,10 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 		puts ("");
 }
 
-unsigned long int
-seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
-											const unsigned long int *restrict const poblacion)
+void
+armar_ruleta (const struct individuos_s *restrict const individuos,
+							const unsigned long int *restrict const poblacion,
+							struct ruleta_s *restrict const ruleta)
 {
 	double total_aptitud = 0;
 
@@ -454,13 +455,6 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 		 * lo suma, su aporte sería marginal, muy cercano a 0 */
 		if (mpz_fits_ulong_p (individuos[i].aptitud))
 			total_aptitud += (1. / mpz_get_ui (individuos[i].aptitud));
-
-	struct ruleta_s
-	{
-		double desde;
-		double hasta;
-	};
-	struct ruleta_s *ruleta = malloc (*poblacion * sizeof (struct ruleta_s));
 
 	unsigned int ancho = 0;
 	unsigned int x = mpz_get_ui (individuos[*poblacion - 1].aptitud);
@@ -478,16 +472,17 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 			ruleta[i].hasta = anterior + rango;
 			anterior += rango;
 		}
+}
 
+unsigned long int
+seleccion_por_ruleta (const unsigned long int *restrict const poblacion,
+											const struct ruleta_s *restrict const ruleta)
+{
 	double aleatorio =
 		al_azar_d (ruleta[0].desde, ruleta[*poblacion - 1].hasta);
 	for (unsigned long int i = 0; i < *poblacion; i++)
 		if ((aleatorio >= ruleta[i].desde) && (aleatorio < ruleta[i].hasta))
-			{
-				aleatorio = i;
-				free (ruleta);
-				break;
-			}
+			aleatorio = i;
 	return aleatorio;
 }
 

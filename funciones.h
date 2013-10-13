@@ -22,6 +22,12 @@ struct individuos_s
 	mpz_t aptitud;
 };
 
+struct ruleta_s
+{
+	double desde;
+	double hasta;
+};
+
 struct h_aptitud
 {
 	struct individuos_s mejor, peor;
@@ -97,10 +103,14 @@ void seleccion_elitista_con_ranking (struct individuos_s **restrict
 																		 const unsigned int *restrict const
 																		 debug);
 
-unsigned long int seleccion_por_ruleta (const struct individuos_s *restrict
-																				const individuos,
-																				const unsigned long int *restrict
-																				const poblacion);
+void armar_ruleta (const struct individuos_s *restrict const individuos,
+									 const unsigned long int *restrict const poblacion,
+									 struct ruleta_s *restrict const ruleta);
+
+unsigned long int seleccion_por_ruleta (const unsigned long int *restrict
+																				const poblacion,
+																				const struct ruleta_s *restrict const
+																				ruleta);
 
 void cruza_ciclica (struct individuos_s *restrict madre,
 										struct individuos_s *restrict padre);
@@ -117,7 +127,7 @@ void mostrar_operacion (const struct individuos_s *restrict const
 												const char *restrict operacion);
 
 unsigned int iguales (const struct individuos_s *restrict const i1,
-						 const struct individuos_s *restrict const i2);
+											const struct individuos_s *restrict const i2);
 
 void diff_t (const struct timespec *restrict const comienzo,
 						 const struct timespec *restrict const fin,
