@@ -446,16 +446,14 @@ unsigned long int
 seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 											const unsigned long int *restrict const poblacion)
 {
-	/* Si la peor aptitud no entra en un unsigned long int devuelve
-	 * un número al azar*/
-	if (mpz_fits_ulong_p (individuos[*poblacion - 1].aptitud) == 0)
-		return al_azar (0, *poblacion - 1);
-
-	unsigned long int total_aptitud = 0;
+	double total_aptitud = 0;
 
 	/* Suma las aptitudes */
 	for (unsigned long int i = 0; i < *poblacion; i++)
-		total_aptitud += mpz_get_ui (individuos[i].aptitud);
+		/* Si la aptitud no entra en un unsigned long int no
+		 * lo suma, su aporte sería marginal, muy cercano a 0 */
+		if (mpz_fits_ulong_p (individuos[i].aptitud))
+			total_aptitud += (1. / mpz_get_ui (individuos[i].aptitud));
 
 	struct ruleta_s
 	{
@@ -464,13 +462,17 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 	};
 	struct ruleta_s *ruleta = malloc (*poblacion * sizeof (struct ruleta_s));
 
+	unsigned int ancho = 0;
+	unsigned int x = mpz_get_ui (individuos[*poblacion - 1].aptitud);
+	/* Define la cantidad de ranuras como 10^(longitud de la aptitud más grande) */
+	while ((x /= 10) > 0)
+		ancho++;
+
 	double anterior = 0, rango;
 	for (unsigned long int i = 0; i < *poblacion; i++)
 		{
-			rango =
-				((1 -
-					(mpz_get_ui (individuos[i].aptitud) / (double) total_aptitud)) /
-				 (*poblacion - 1)) * 10;
+			rango = (1. / mpz_get_ui (individuos[i].aptitud)) / total_aptitud;
+			rango *= pow (10, ancho);
 
 			ruleta[i].desde = anterior;
 			ruleta[i].hasta = anterior + rango;
@@ -486,7 +488,6 @@ seleccion_por_ruleta (const struct individuos_s *restrict const individuos,
 				free (ruleta);
 				break;
 			}
-
 	return aleatorio;
 }
 
