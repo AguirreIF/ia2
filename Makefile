@@ -1,5 +1,5 @@
 CC       := cc
-CFLAGS   := -g -Wall -Wextra -pedantic -std=gnu99
+CFLAGS   := -O3 -g -Wall -Wextra -pedantic -std=gnu99 -march=native
 LDFLAGS  := -lm -lgmp -lrt
 
 SRC := programa.c funciones.c entrada.tab.c entrada.c shunt.c random.c
