@@ -657,6 +657,7 @@ main (int argc, char **argv)
 							if (args.cantidad_elite > 0)
 								{
 									seleccion_elitista_con_ranking (&individuos, &elite,
+																									&args.poblacion,
 																									&args.cantidad_elite, 0,
 																									&args.debug);
 									/* Muestra los individuos elite */

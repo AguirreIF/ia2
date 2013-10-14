@@ -99,6 +99,8 @@ void seleccion_elitista_con_ranking (struct individuos_s **restrict
 																		 individuos,
 																		 struct individuos_s **restrict elite,
 																		 const unsigned long int *restrict const
+																		 poblacion,
+																		 const unsigned long int *restrict const
 																		 cantidad, const float rmin,
 																		 const unsigned int *restrict const
 																		 debug);

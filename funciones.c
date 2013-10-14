@@ -346,6 +346,8 @@ void
 seleccion_elitista_con_ranking (struct individuos_s **individuos,
 																struct individuos_s **restrict elite,
 																const unsigned long int *restrict const
+																poblacion,
+																const unsigned long int *restrict const
 																cantidad, const float rmin,
 																const unsigned int *restrict const debug)
 {
@@ -366,7 +368,7 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 					/* Total de copias con decimales */
 					copias =
 						rmin +
-						2. * (((*cantidad - indice) * (1. - rmin)) / (*cantidad - 1));
+						2. * (((*poblacion - indice) * (1. - rmin)) / (*poblacion - 1));
 					/* Copias por la parte entera */
 					copias_e = copias;
 					/* Copias por la parte decimal */
