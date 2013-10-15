@@ -520,8 +520,13 @@ main (int argc, char **argv)
 			anterior[1].letras = malloc (10);
 			mpz_init (anterior[1].aptitud);
 
-			struct timespec comienzo_t, fin_t, *total_t =
-				malloc (args.generaciones * sizeof (struct timespec));
+			struct timespec *comienzo_t, *fin_t, *total_t;
+			if (args.debug > 0)
+				{
+					comienzo_t = malloc (sizeof (struct timespec));
+					fin_t = malloc (sizeof (struct timespec));
+					total_t = malloc (args.generaciones * sizeof (struct timespec));
+				}
 
 			/* ============================================================= */
 			/*                    CICLO DE LAS CORRIDAS                      */
@@ -620,7 +625,8 @@ main (int argc, char **argv)
 					for (; (generacion < args.generaciones) && (solucion == 0);
 							 generacion++)
 						{
-							clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &comienzo_t);
+							if (args.debug > 0)
+								clock_gettime (CLOCK_PROCESS_CPUTIME_ID, comienzo_t);
 							if (args.debug > 1)
 								{
 									puts ("=================================");
@@ -809,8 +815,12 @@ main (int argc, char **argv)
 												}
 											if (k != -1)
 												{
-													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
-													diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+													if (args.debug > 0)
+														{
+															clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+															diff_t (comienzo_t, fin_t,
+																			&total_t[generacion]);
+														}
 
 													if (args.debug > 1)
 														puts ("");
@@ -956,8 +966,12 @@ main (int argc, char **argv)
 
 											if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 												{
-													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
-													diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+													if (args.debug > 0)
+														{
+															clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+															diff_t (comienzo_t, fin_t,
+																			&total_t[generacion]);
+														}
 
 													if (args.debug > 1)
 														puts ("");
@@ -1120,19 +1134,28 @@ main (int argc, char **argv)
 							mpq_clear (media_aptitud);
 							mpq_clear (aptitudes);
 							/* Si encuentra solución no llega hasta acá */
-							clock_gettime (CLOCK_PROCESS_CPUTIME_ID, &fin_t);
-							diff_t (&comienzo_t, &fin_t, &total_t[generacion]);
+							if (args.debug > 0)
+								{
+									clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+									diff_t (comienzo_t, fin_t, &total_t[generacion]);
+								}
 						}
 					/* Calcula el tiempo total de ejecución de la generación */
 					if (args.debug > 0)
 						{
 							unsigned long int gen =
 								(solucion == 1) ? generacion + 1 : generacion;
+							unsigned int tiempo = 0;
 							for (unsigned long int i = 0; i < gen; i++)
-								printf
-									("Tiempo de ejecución de la generación %lu: %lds --> %ldms --> %ldns\n",
-									 i + 1, total_t[i].tv_sec, (total_t[i].tv_nsec / 1000000),
-									 total_t[i].tv_nsec);
+								{
+									tiempo +=
+										((total_t[i].tv_sec * 1000) +
+										 (total_t[i].tv_nsec / 1000000));
+									printf
+										("Tiempo de ejecución de la generación %lu: %ums\n",
+										 i + 1, tiempo);
+									tiempo = 0;
+								}
 						}
 
 					/* Si no encuentra solución imprime como quedó la poblacion final */
@@ -1266,6 +1289,13 @@ main (int argc, char **argv)
 								free (p_a);
 							mpz_clear (peor_aptitud);
 						}
+				}
+
+			if (args.debug > 0)
+				{
+					free (comienzo_t);
+					free (fin_t);
+					free (total_t);
 				}
 
 			/* exit ((solucion == 1) ? EXIT_SUCCESS : EXIT_FAILURE); */
