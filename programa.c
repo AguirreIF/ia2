@@ -529,9 +529,12 @@ main (int argc, char **argv)
 			for (unsigned long int corrida_n = 0; corrida_n < args.corridas;
 					 corrida_n++)
 				{
-					puts ("\n|||||||||||||||||||||||||||||||||");
-					printf ("|       CORRIDA %lu\n", corrida_n + 1);
-					puts ("|||||||||||||||||||||||||||||||||");
+					if (args.debug > 0)
+						{
+							puts ("\n|||||||||||||||||||||||||||||||||");
+							printf ("|       CORRIDA %lu\n", corrida_n + 1);
+							puts ("|||||||||||||||||||||||||||||||||");
+						}
 					/* ============================================================= */
 					/*                      POBLACIÓN INICIAL                        */
 					/* ============================================================= */
@@ -812,8 +815,12 @@ main (int argc, char **argv)
 													if (args.debug > 1)
 														puts ("");
 													printf
-														("\n¡Solución por cruza en la generación %lu!\n",
+														("\n¡Solución por cruza en la generación %lu",
 														 generacion + 1);
+													if (args.debug == 0)
+														printf (" de la corrida %lu!\n", corrida_n);
+													else
+														puts ("!");
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
 														{
@@ -955,8 +962,12 @@ main (int argc, char **argv)
 													if (args.debug > 1)
 														puts ("");
 													printf
-														("\n¡Solución por mutación en la generación %lu!\n",
+														("\n¡Solución por mutación en la generación %lu",
 														 generacion + 1);
+													if (args.debug == 0)
+														printf (" de la corrida %lu!\n", corrida_n);
+													else
+														puts ("!");
 													for (unsigned int j = 0;
 															 j < (unsigned int) strlen (letras); j++)
 														{
