@@ -827,7 +827,7 @@ main (int argc, char **argv)
 													printf
 														("\n¡Solución por cruza en la generación %lu",
 														 generacion + 1);
-													if (args.debug == 0)
+													if ((args.debug == 0) && (args.corridas > 1))
 														printf (" de la corrida %lu!\n", corrida_n);
 													else
 														puts ("!");
@@ -978,7 +978,7 @@ main (int argc, char **argv)
 													printf
 														("\n¡Solución por mutación en la generación %lu",
 														 generacion + 1);
-													if (args.debug == 0)
+													if ((args.debug == 0) && (args.corridas > 1))
 														printf (" de la corrida %lu!\n", corrida_n);
 													else
 														puts ("!");
