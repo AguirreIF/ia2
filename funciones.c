@@ -173,18 +173,17 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 			y = resultado_deseado_str;
 		}
 
-	if (*debug > 2)
-		{
-			printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
-			printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
-		}
-
 	mpz_t aptitud;
 	mpz_init (aptitud);
 
 	mpz_t aptitud1, aptitud2;
-	mpz_init (aptitud1);
-	mpz_init (aptitud2);
+	if (*debug > 2)
+		{
+			printf ("Resultado obtenido: %*s\n", t + 1, resultado_obtenido_str);
+			printf (" Resultado deseado: %*s\n", t + 1, resultado_deseado_str);
+			mpz_init (aptitud1);
+			mpz_init (aptitud2);
+		}
 
 	/* cuántos dígitos de más tiene el resultado más largo en */
 	/* comparación con el más corto */
@@ -193,31 +192,43 @@ calcular_aptitud1 (struct individuos_s *restrict const individuo,
 	/* primera parte de la fórmula, */
 	/* va de atrás para adelante porque la unidad está en la última */
 	/* posición del array */
+	/* multiplica por (i+1) en vez de por 10, empezando con i = 0 */
 	unsigned int j = 0;
-	for (int i = m; i > -1; i--)
-		/* multiplicar por (i+1) en vez de por 10, empezando con i = 0 */
-		mpz_add_ui (aptitud1, aptitud1,
-								(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) *
-								 ((j++) + 1)));
 	if (*debug > 2)
-		gmp_printf ("Aptitud: %Zd + ", aptitud1);
+		{
+			for (int i = m; i > -1; i--)
+				mpz_add_ui (aptitud1, aptitud1,
+										(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) *
+										 ((j++) + 1)));
+			gmp_printf ("Aptitud: %Zd + ", aptitud1);
+		}
+	else
+		for (int i = m; i > -1; i--)
+			mpz_add_ui (aptitud, aptitud,
+									(abs (((int) x[i] - '0') - ((int) y[i + sobra] - '0')) *
+									 ((j++) + 1)));
 
 	/* segunda parte de la fórmula, */
 	/* va de adelante para atrás porque la unidad más grande está en */
 	/* la primera posición del array */
-	for (unsigned int i = 0; i < sobra; i++)
-		mpz_add_ui (aptitud2, aptitud2,
-								(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
 	if (*debug > 2)
-		gmp_printf ("%Zd\n", aptitud2);
-
-	mpz_add (aptitud, aptitud1, aptitud2);
+		{
+			for (unsigned int i = 0; i < sobra; i++)
+				mpz_add_ui (aptitud2, aptitud2,
+										(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
+			gmp_printf ("%Zd\n", aptitud2);
+			mpz_add (aptitud, aptitud1, aptitud2);
+			mpz_clear (aptitud1);
+			mpz_clear (aptitud2);
+		}
+	else
+		for (unsigned int i = 0; i < sobra; i++)
+			mpz_add_ui (aptitud, aptitud,
+									(((int) y[i] - '0') * ((int) pow (10, (sobra - i + 1)))));
 
 	mpz_set (individuo->aptitud, aptitud);
 
 	mpz_clear (aptitud);
-	mpz_clear (aptitud1);
-	mpz_clear (aptitud2);
 
 	free (resultado_obtenido_str);
 	free (resultado_deseado_str);
