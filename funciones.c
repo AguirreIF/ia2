@@ -1,5 +1,4 @@
 #include "funciones.h"
-#include "random.h"
 
 // verifica que la entrada esté en el rango [a-zA-Z]
 // y convierte a minúsculas
@@ -77,9 +76,9 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 	const size_t len = strlen (letras);
 
 	if (semilla != NULL)
-		init_genrand (*semilla);
+		mt_seed32new (*semilla);
 	else
-		init_genrand ((time (0) & 0xFFFF) | (getpid () << 16));
+		mt_seed ();
 
 	for (unsigned long int n = 0; n < *poblacion; n++)
 		{
@@ -90,7 +89,7 @@ generar_poblacion_inicial (struct individuos_s **restrict individuos,
 
 			for (unsigned int columna = 0; columna < 10; columna++)
 				{
-					const unsigned int aleatorio = al_azar (columna, 9);
+					unsigned int aleatorio = al_azar (0, 9);
 					const char caracter = (*individuos)[n].letras[aleatorio];
 					(*individuos)[n].letras[aleatorio] =
 						(*individuos)[n].letras[columna];
@@ -618,16 +617,16 @@ mutacion (struct individuos_s *restrict individuo)
 		}
 }
 
-unsigned int
+unsigned long int
 al_azar (const unsigned int min, const unsigned int max)
 {
-	return (genrand_res53 () * (max - min + 1) + min);
+	return (min + mt_llrand () / (UINT64_MAX / (max - min + 1) + 1));
 }
 
 double
 al_azar_d (const double min, const double max)
 {
-	return ((genrand_res53 () * (max - min)) + min);
+	return ((mt_ldrand () * (max - min)) + min);
 }
 
 void

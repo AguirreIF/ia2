@@ -13,6 +13,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include "mtwist.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -119,7 +120,7 @@ void cruza_ciclica (struct individuos_s *restrict madre,
 
 void mutacion (struct individuos_s *restrict individuo);
 
-unsigned int al_azar (const unsigned int min, const unsigned int max);
+unsigned long al_azar (const unsigned int min, const unsigned int max);
 
 double al_azar_d (const double min, const double max);
 

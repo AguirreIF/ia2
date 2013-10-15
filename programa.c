@@ -1,6 +1,5 @@
 #include <argp.h>
 #include "funciones.h"
-#include "random.h"
 
 /* Info varia */
 const char *argp_program_version = "void";
@@ -539,11 +538,7 @@ main (int argc, char **argv)
 					/* De la segunda corrida en adelante hay que cambiar de semilla
 					 * para que los aleatorios no sean iguales */
 					if (corrida_n > 0)
-						{
-							if (args.semilla == NULL)
-								args.semilla = malloc (sizeof (unsigned long int));
-							*args.semilla = genrand_int32 ();
-						}
+						args.semilla = NULL;
 					generar_poblacion_inicial (&individuos, letras, &args.poblacion,
 																		 args.semilla);
 					if (args.debug > 2)

@@ -1,8 +1,8 @@
 CC       := cc
-CFLAGS   := -O3 -g -Wall -Wextra -pedantic -std=gnu99 -march=native
+CFLAGS   := -g -Wall -Wextra -pedantic -std=gnu99 -march=native -fgnu89-inline
 LDFLAGS  := -lm -lgmp -lrt
 
-SRC := programa.c funciones.c entrada.tab.c entrada.c shunt.c random.c
+SRC := programa.c funciones.c entrada.tab.c entrada.c shunt.c mtwist.c
 OBJ := $(SRC:.c=.o)
 
 all: programa
