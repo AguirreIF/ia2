@@ -521,6 +521,9 @@ main (int argc, char **argv)
 			mpz_init (anterior[1].aptitud);
 
 			struct timespec *comienzo_t, *fin_t, *total_t;
+			comienzo_t = NULL;
+			fin_t = NULL;
+			total_t = NULL;
 			if (args.debug > 0)
 				{
 					comienzo_t = malloc (sizeof (struct timespec));
