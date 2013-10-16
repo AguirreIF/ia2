@@ -711,15 +711,22 @@ main (int argc, char **argv)
 											puts ("\nIndividuos seleccionados para cruzar");
 											printf ("------------------------------------");
 										}
-									for (unsigned long int i = 0; i < args.cantidad_a_cruzar;
-											 i += 2)
+								}
+							for (unsigned long int i = 0; i < args.cantidad_a_cruzar;
+									 i += 2)
+								{
+									unsigned long int madre, padre;
+									/* Cruza los individuos hasta que los hijos sean distintos
+									 * o se haya intentado 4 veces, para que no quede en un
+									 * bucle si la operación es muy simple */
+									unsigned int intentos = 0;
+									do
 										{
-											unsigned long int madre =
-												seleccion_por_ruleta (&args.poblacion, ruleta);
-											unsigned long int padre =
-												seleccion_por_ruleta (&args.poblacion, ruleta);
+											madre = seleccion_por_ruleta (&args.poblacion, ruleta);
+											padre = seleccion_por_ruleta (&args.poblacion, ruleta);
 
-											/* Verifica que no tengan las letras en el mismo orden (sin importar los vacíos) */
+											/* Verifica que no tengan las letras en el mismo orden
+											 * (sin importar los vacíos) */
 											while (iguales (&individuos[padre], &individuos[madre]))
 												padre =
 													seleccion_por_ruleta (&args.poblacion, ruleta);
@@ -734,142 +741,143 @@ main (int argc, char **argv)
 											mpz_set (cruzados[i + 1].aptitud,
 															 individuos[madre].aptitud);
 
-											/* Tiene que mostrar el individuo i y el (i + 1) */
-											for (unsigned t = 0; t < 2; t++)
-												{
-													if (args.debug == 2)
-														{
-															printf ("\nIndividuo[%*lu]:  ", anchoi, i + t);
-															for (unsigned int j = 0;
-																	 j < (unsigned int) strlen (letras); j++)
-																{
-																	printf ("%c:", letras[j]);
-																	for (unsigned int x = 0; x < 10; x++)
-																		if (letras[j] ==
-																				cruzados[i + t].letras[x])
-																			{
-																				printf ("%u  ", x);
-																				break;
-																			}
-																}
-															gmp_printf ("= %Zd", cruzados[i + t].aptitud);
-														}
-													else if (args.debug == 3)
-														gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ",
-																				anchoi, i + t,
-																				cruzados[i + t].aptitud);
-												}
-
 											/* Copia el estado anterior antes de cruzar */
 											memcpy (anterior[0].letras, cruzados[i].letras, 10);
 											mpz_set (anterior[0].aptitud, cruzados[i].aptitud);
 
 											/* Copia el estado anterior antes de calcular la aptitud */
-											memcpy (anterior[1].letras, cruzados[i].letras, 10);
-											mpz_set (anterior[1].aptitud, cruzados[i].aptitud);
+											memcpy (anterior[1].letras, cruzados[i + 1].letras, 10);
+											mpz_set (anterior[1].aptitud, cruzados[i + 1].aptitud);
 
 											cruza_ciclica (&cruzados[i], &cruzados[i + 1]);
-
-											args.faptitud (&cruzados[i], operandos,
-																		 &cantidad_operandos, operadores,
-																		 operacion, &args.debug, letras);
-
-											/* Se guarda la aptitud del peor individuo */
-											if (mpz_cmp (cruzados[i].aptitud, peor_aptitud) > 0)
-												mpz_set (peor_aptitud, cruzados[i].aptitud);
-
-											/* Se guardan las posiciones de los que tienen aptitud -1 */
-											if (mpz_cmp_si (cruzados[i].aptitud, -1) == 0)
-												{
-													peores =
-														realloc (peores,
-																		 (n_peores +
-																			1) * sizeof (unsigned long int));
-													peores[n_peores] = i;
-													n_peores++;
-												}
-
-											args.faptitud (&cruzados[i + 1], operandos,
-																		 &cantidad_operandos, operadores,
-																		 operacion, &args.debug, letras);
-
-											/* Se guarda la aptitud del peor individuo */
-											if (mpz_cmp (cruzados[i + 1].aptitud, peor_aptitud) > 0)
-												mpz_set (peor_aptitud, cruzados[i + 1].aptitud);
-
-											/* Se guardan las posiciones de los que tienen aptitud -1 */
-											if (mpz_cmp_si (cruzados[i + 1].aptitud, -1) == 0)
-												{
-													peores =
-														realloc (peores,
-																		 (n_peores +
-																			1) * sizeof (unsigned long int));
-													peores[n_peores] = i + 1;
-													n_peores++;
-												}
-
-											int k = -1;
-											if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
-												k = 0;
-											if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0)
-												{
-													i++;
-													k = 1;
-												}
-											if (k != -1)
-												{
-													if (args.debug > 0)
-														{
-															clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
-															diff_t (comienzo_t, fin_t,
-																			&total_t[generacion]);
-														}
-
-													if (args.debug > 1)
-														puts ("");
-													printf
-														("\n¡Solución por cruza en la generación %lu",
-														 generacion + 1);
-													if ((args.debug == 0) && (args.corridas > 1))
-														printf (" de la corrida %lu!\n", corrida_n);
-													else
-														puts ("!");
-													for (unsigned int j = 0;
-															 j < (unsigned int) strlen (letras); j++)
-														{
-															printf ("%c:", letras[j]);
-															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == cruzados[i].letras[x])
-																	{
-																		printf ("%u  ", x);
-																		break;
-																	}
-														}
-													mostrar_operacion (&cruzados[i], operandos,
-																						 operadores, operacion);
-
-													/* Muestra el estado anterior del individuo solución */
-													gmp_printf ("\nEstado anterior (%Zd)\n",
-																			anterior[k].aptitud);
-													for (unsigned int j = 0;
-															 j < (unsigned int) strlen (letras); j++)
-														{
-															printf ("%c:", letras[j]);
-															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == anterior[k].letras[x])
-																	{
-																		printf ("%u  ", x);
-																		break;
-																	}
-														}
-													mostrar_operacion (&anterior[k], operandos,
-																						 operadores, operacion);
-													if (args.debug > 0)
-														puts ("");
-													solucion = 1;
-													break;
-												}
+											intentos++;
 										}
+									while ((iguales (&anterior[0], &cruzados[i])
+													|| iguales (&anterior[1], &cruzados[i + 1]))
+												 && (intentos < 5));
+
+									/* Tiene que mostrar el individuo i y el (i + 1) */
+									if (args.debug == 2)
+										for (unsigned t = 0; t < 2; t++)
+											{
+												printf ("\nIndividuo[%*lu]:  ", anchoi, i + t);
+												for (unsigned int j = 0;
+														 j < (unsigned int) strlen (letras); j++)
+													{
+														printf ("%c:", letras[j]);
+														for (unsigned int x = 0; x < 10; x++)
+															if (letras[j] == anterior[t].letras[x])
+																{
+																	printf ("%u  ", x);
+																	break;
+																}
+													}
+												gmp_printf ("= %Zd", anterior[t].aptitud);
+											}
+									else if (args.debug == 3)
+										for (unsigned t = 0; t < 2; t++)
+											gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ",
+																	anchoi, i + t, anterior[t].aptitud);
+
+									args.faptitud (&cruzados[i], operandos,
+																 &cantidad_operandos, operadores,
+																 operacion, &args.debug, letras);
+
+									/* Se guarda la aptitud del peor individuo */
+									if (mpz_cmp (cruzados[i].aptitud, peor_aptitud) > 0)
+										mpz_set (peor_aptitud, cruzados[i].aptitud);
+
+									/* Se guardan las posiciones de los que tienen aptitud -1 */
+									if (mpz_cmp_si (cruzados[i].aptitud, -1) == 0)
+										{
+											peores =
+												realloc (peores,
+																 (n_peores + 1) * sizeof (unsigned long int));
+											peores[n_peores] = i;
+											n_peores++;
+										}
+
+									args.faptitud (&cruzados[i + 1], operandos,
+																 &cantidad_operandos, operadores,
+																 operacion, &args.debug, letras);
+
+									/* Se guarda la aptitud del peor individuo */
+									if (mpz_cmp (cruzados[i + 1].aptitud, peor_aptitud) > 0)
+										mpz_set (peor_aptitud, cruzados[i + 1].aptitud);
+
+									/* Se guardan las posiciones de los que tienen aptitud -1 */
+									if (mpz_cmp_si (cruzados[i + 1].aptitud, -1) == 0)
+										{
+											peores =
+												realloc (peores,
+																 (n_peores + 1) * sizeof (unsigned long int));
+											peores[n_peores] = i + 1;
+											n_peores++;
+										}
+
+									int k = -1;
+									if (mpz_cmp_d (cruzados[i].aptitud, 0) == 0)
+										k = 0;
+									if (mpz_cmp_d (cruzados[i + 1].aptitud, 0) == 0)
+										{
+											i++;
+											k = 1;
+										}
+									if (k != -1)
+										{
+											if (args.debug > 0)
+												{
+													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+													diff_t (comienzo_t, fin_t, &total_t[generacion]);
+												}
+
+											if (args.debug > 1)
+												puts ("");
+											printf
+												("\n¡Solución por cruza en la generación %lu",
+												 generacion + 1);
+											if ((args.debug == 0) && (args.corridas > 1))
+												printf (" de la corrida %lu!\n", corrida_n);
+											else
+												puts ("!");
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
+												{
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == cruzados[i].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
+												}
+											mostrar_operacion (&cruzados[i], operandos,
+																				 operadores, operacion);
+
+											/* Muestra el estado anterior del individuo solución */
+											gmp_printf ("\nEstado anterior (%Zd)\n",
+																	anterior[k].aptitud);
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
+												{
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == anterior[k].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
+												}
+											mostrar_operacion (&anterior[k], operandos,
+																				 operadores, operacion);
+											if (args.debug > 0)
+												puts ("");
+											solucion = 1;
+											break;
+										}
+								}
+							if (args.cantidad_a_cruzar > 0)
+								{
 									if (solucion == 1)
 										break;
 									if (args.debug > 1)
