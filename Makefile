@@ -1,5 +1,8 @@
 CC       := cc
-CFLAGS   := -g -Wall -Wextra -pedantic -std=gnu99 -march=native -fgnu89-inline
+CFLAGS   := -O3 -g -Wall -Wextra -pedantic -std=gnu99 -march=native -fgnu89-inline -fopenmp \
+			-pthread -ftree-parallelize-loops=2 -fexpensive-optimizations -funroll-loops \
+			-fmove-loop-invariants -fprefetch-loop-arrays -ftree-loop-optimize \
+			-ftree-vect-loop-version -ftree-vectorize
 LDFLAGS  := -lm -lgmp -lrt
 
 SRC := programa.c funciones.c entrada.tab.c entrada.c shunt.c mtwist.c
