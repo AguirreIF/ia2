@@ -23,6 +23,23 @@ struct individuos_s
 	mpz_t aptitud;
 };
 
+/* Estructura para pasar datos de main a parse_opt */
+struct args
+{
+	char *args[14], *entrada;
+	unsigned int p_elite, p_cruzar, p_mutar;
+	unsigned long int *semilla, generaciones, poblacion, poblacion_maxima,
+		cantidad_elite, cantidad_a_cruzar, cantidad_a_mutar, corridas;
+	void (*faptitud) (struct individuos_s * restrict const individuo,
+										char **restrict const operandos,
+										const unsigned int *restrict const cantidad_operandos,
+										const char *restrict const operadores,
+										char *const operacion,
+										const unsigned int *restrict const debug,
+										const char *restrict const letras);
+	unsigned int debug;
+};
+
 struct ruleta_s
 {
 	double desde;
@@ -135,5 +152,11 @@ unsigned int iguales (const struct individuos_s *restrict const i1,
 void diff_t (const struct timespec *restrict const comienzo,
 						 const struct timespec *restrict const fin,
 						 struct timespec *restrict const total);
+
+void cantidades (struct args *restrict const args,
+								 struct individuos_s **restrict individuos,
+								 struct individuos_s **restrict elite,
+								 struct individuos_s **restrict cruzados,
+								 struct individuos_s **restrict mutados);
 
 #endif /* FUNCIONES_H */

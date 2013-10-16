@@ -766,3 +766,114 @@ diff_t (const struct timespec *restrict const comienzo_t,
 			total_t->tv_nsec = fin_t->tv_nsec - comienzo_t->tv_nsec;
 		}
 }
+
+void
+cantidades (struct args *restrict const args,
+						struct individuos_s **restrict individuos,
+						struct individuos_s **restrict elite,
+						struct individuos_s **restrict cruzados,
+						struct individuos_s **restrict mutados)
+{
+	unsigned int inicializar, c_elite = 0, c_cruzar = 0, c_mutar = 0;
+	inicializar = (*individuos == NULL) ? 1 : 0;
+
+	*individuos =
+		realloc (*individuos, args->poblacion * sizeof (struct individuos_s));
+
+	if (args->p_elite != 0)
+		{
+			c_elite = round (args->poblacion * args->p_elite / 100.);
+			if (c_elite < 1)
+				c_elite = 1;
+		}
+
+	if (args->p_mutar != 0)
+		{
+			c_mutar = round (args->poblacion * args->p_mutar / 100.);
+			if (c_mutar < 1)
+				c_mutar = 1;
+		}
+
+	if (args->p_cruzar != 0)
+		{
+			c_cruzar = round (args->poblacion * args->p_cruzar / 100.);
+			if ((c_cruzar % 2) != 0)
+				{
+					/* El restante lo agrego a mutación */
+					if (args->p_mutar > 0)
+						{
+							c_mutar++;
+							c_cruzar -= 1;
+						}
+					/* Si no hay mutación se intenta agregar a elite */
+					else if (args->p_elite > 0)
+						{
+							c_elite++;
+							c_cruzar -= 1;
+						}
+					/* Si no hay mutación ni elite queda una cantidad
+					 * a cruzar impar y listo */
+				}
+		}
+
+	/* Puede que por los rendondeos me quede un individuo sin asignar a
+	 * selección, cruza o mutación */
+	if ((args->poblacion - c_elite - c_cruzar - c_mutar) > 0)
+		{
+			/* Primero intento asignarlo a mutación */
+			if (args->p_mutar > 0)
+				c_mutar++;
+			/* Si no hay mutación se intenta agregar a elite */
+			else if (args->p_elite > 0)
+				c_elite++;
+			/* Si no hay mutación ni elite queda una cantidad
+			 * a cruzar impar y listo */
+			else
+				c_cruzar++;
+		}
+
+	*elite = realloc (*elite, c_elite * sizeof (struct individuos_s));
+	*cruzados = realloc (*cruzados, c_cruzar * sizeof (struct individuos_s));
+	*mutados = realloc (*mutados, c_mutar * sizeof (struct individuos_s));
+
+	if (inicializar)
+		{
+			for (unsigned long int i = 0; i < c_elite; i++)
+				{
+					mpz_init ((*elite)[i].aptitud);
+					(*elite)[i].letras = malloc (10);
+				}
+			for (unsigned long int i = 0; i < c_cruzar; i++)
+				{
+					mpz_init ((*cruzados)[i].aptitud);
+					(*cruzados)[i].letras = malloc (10);
+				}
+			for (unsigned long int i = 0; i < c_mutar; i++)
+				{
+					mpz_init ((*mutados)[i].aptitud);
+					(*mutados)[i].letras = malloc (10);
+				}
+		}
+	else
+		{
+			for (unsigned int i = args->cantidad_elite; i < c_elite; i++)
+				{
+					mpz_init ((*elite)[i].aptitud);
+					(*elite)[i].letras = malloc (10);
+				}
+			for (unsigned int i = args->cantidad_a_cruzar; i < c_cruzar; i++)
+				{
+					mpz_init ((*cruzados)[i].aptitud);
+					(*cruzados)[i].letras = malloc (10);
+				}
+			for (unsigned int i = args->cantidad_a_mutar; i < c_mutar; i++)
+				{
+					mpz_init ((*mutados)[i].aptitud);
+					(*mutados)[i].letras = malloc (10);
+				}
+		}
+
+	args->cantidad_elite = c_elite;
+	args->cantidad_a_cruzar = c_cruzar;
+	args->cantidad_a_mutar = c_mutar;
+}

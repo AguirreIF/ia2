@@ -50,22 +50,6 @@ static const struct argp_option opciones[] = {
 	{0, 0, 0, 0, 0, 0}
 };
 
-/* Estructura para pasar datos de main a parse_opt */
-struct args
-{
-	char *args[11], *entrada;
-	unsigned long int *semilla, generaciones, poblacion, poblacion_maxima,
-		cantidad_elite, cantidad_a_cruzar, cantidad_a_mutar, corridas;
-	void (*faptitud) (struct individuos_s * restrict const individuo,
-										char **restrict const operandos,
-										const unsigned int *restrict const cantidad_operandos,
-										const char *restrict const operadores,
-										char *const operacion,
-										const unsigned int *restrict const debug,
-										const char *restrict const letras);
-	unsigned int debug;
-};
-
 /* Función que hace el parsing de las opciones */
 static error_t
 parse_opt (int key, char *arg, struct argp_state *state)
@@ -201,7 +185,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
 				if (!isdigit (arg[i]))
 					argp_error (state,
-											"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
+											"El porcentaje de población elitista debe ser un número entero entre 0 y 100");
 
 			n_aux = strtoul (arg, NULL, 10);
 
@@ -210,21 +194,18 @@ parse_opt (int key, char *arg, struct argp_state *state)
 					|| (errno != 0 && n_aux == 0))
 				argp_failure (state, 1, errno, "Error de strtoul");
 
-			args->cantidad_elite = n_aux;
+			args->p_elite = n_aux;
 
-			if (args->poblacion == 0)
+			if (args->p_elite > 100)
 				argp_error (state,
-										"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
-			else if (args->poblacion > 100)
-				argp_error (state,
-										"El porcentaje de población elitista debe ser un número entero entre 1 y 100");
+										"El porcentaje de población elitista debe ser un número entero entre 0 y 100");
 			break;
 
 		case 'x':
 			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
 				if (!isdigit (arg[i]))
 					argp_error (state,
-											"El porcentaje para cruza debe ser un número entero entre 1 y 100");
+											"El porcentaje para cruza debe ser un número entero entre 0 y 100");
 
 			n_aux = strtoul (arg, NULL, 10);
 
@@ -233,21 +214,18 @@ parse_opt (int key, char *arg, struct argp_state *state)
 					|| (errno != 0 && n_aux == 0))
 				argp_failure (state, 1, errno, "Error de strtoul");
 
-			args->cantidad_a_cruzar = n_aux;
+			args->p_cruzar = n_aux;
 
-			if (args->poblacion == 0)
+			if (args->p_cruzar > 100)
 				argp_error (state,
-										"El porcentaje para cruza debe ser un número entero entre 1 y 100");
-			else if (args->poblacion > 100)
-				argp_error (state,
-										"El porcentaje para cruza debe ser un número entero entre 1 y 100");
+										"El porcentaje para cruza debe ser un número entero entre 0 y 100");
 			break;
 
 		case 't':
 			for (unsigned int i = 0; i < (unsigned int) strlen (arg); i++)
 				if (!isdigit (arg[i]))
 					argp_error (state,
-											"El porcentaje para mutación debe ser un número entero entre 1 y 100");
+											"El porcentaje para mutación debe ser un número entero entre 0 y 100");
 
 			n_aux = strtoul (arg, NULL, 10);
 
@@ -256,14 +234,11 @@ parse_opt (int key, char *arg, struct argp_state *state)
 					|| (errno != 0 && n_aux == 0))
 				argp_failure (state, 1, errno, "Error de strtoul");
 
-			args->cantidad_a_mutar = n_aux;
+			args->p_mutar = n_aux;
 
-			if (args->poblacion == 0)
+			if (args->p_mutar > 100)
 				argp_error (state,
-										"El porcentaje para mutación debe ser un número entero entre 1 y 100");
-			else if (args->poblacion > 100)
-				argp_error (state,
-										"El porcentaje para mutación debe ser un número entero entre 1 y 100");
+										"El porcentaje para mutación debe ser un número entero entre 0 y 100");
 			break;
 
 		case 'd':
@@ -309,9 +284,9 @@ main (int argc, char **argv)
 	args.poblacion_maxima = 10000;
 	args.entrada = NULL;
 	args.semilla = NULL;
-	args.cantidad_elite = 0;
-	args.cantidad_a_mutar = 0;
-	args.cantidad_a_cruzar = 0;
+	args.p_elite = 0;
+	args.p_mutar = 0;
+	args.p_cruzar = 0;
 	args.generaciones = 10;
 	args.corridas = 1;
 	args.faptitud = calcular_aptitud1;
@@ -322,25 +297,22 @@ main (int argc, char **argv)
 	};
 	argp_parse (&argp, argc, argv, 0, 0, &args);
 
-	if ((args.cantidad_elite == 0) && (args.cantidad_a_cruzar == 0)
-			&& (args.cantidad_a_mutar == 0))
+	if ((args.p_elite == 0) && (args.p_cruzar == 0) && (args.p_mutar == 0))
 		{
-			args.cantidad_elite = 10;
-			args.cantidad_a_cruzar = 80;
-			args.cantidad_a_mutar = 10;
+			args.p_elite = 10;
+			args.p_cruzar = 80;
+			args.p_mutar = 10;
 		}
 	else
 		{
-			if ((args.cantidad_elite +
-					 args.cantidad_a_mutar + args.cantidad_a_cruzar) > 100)
+			if ((args.p_elite + args.p_mutar + args.p_cruzar) > 100)
 				{
 					fprintf (stderr,
 									 "La suma de los porcentajes de selección, cruza y mutación no puede superar el 100%%\n");
 					exit (EXIT_FAILURE);
 				}
 			/* Si la suma de los porcentajes no da 100% obliga a completarlos */
-			else if ((args.cantidad_elite +
-								args.cantidad_a_mutar + args.cantidad_a_cruzar) < 100)
+			else if ((args.p_elite + args.p_mutar + args.p_cruzar) < 100)
 				{
 					fprintf (stderr,
 									 "Si se especifica un valor para selección, cruza o mutación,\n");
@@ -384,124 +356,12 @@ main (int argc, char **argv)
 			if (args.debug > 0)
 				printf ("Permutaciones: %lu\nPoblación: %lu\n",
 								permutaciones, args.poblacion);
-			struct individuos_s *individuos =
-				malloc (args.poblacion * sizeof (struct individuos_s));
 
+			struct individuos_s *individuos = NULL;
 			struct individuos_s *elite = NULL;
-			if (args.cantidad_elite != 0)
-				{
-					args.cantidad_elite =
-						round (args.poblacion * args.cantidad_elite / 100.);
-					if (args.cantidad_elite < 1)
-						args.cantidad_elite = 1;
-					elite = malloc (args.cantidad_elite * sizeof (struct individuos_s));
-					for (unsigned long int i = 0; i < args.cantidad_elite; i++)
-						{
-							mpz_init (elite[i].aptitud);
-							elite[i].letras = malloc (10);
-						}
-				}
-
-			struct individuos_s *mutados = NULL;
-			if (args.cantidad_a_mutar != 0)
-				{
-					args.cantidad_a_mutar =
-						round (args.poblacion * args.cantidad_a_mutar / 100.);
-					if (args.cantidad_a_mutar < 1)
-						args.cantidad_a_mutar = 1;
-					mutados =
-						malloc (args.cantidad_a_mutar * sizeof (struct individuos_s));
-					for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
-						{
-							mpz_init (mutados[i].aptitud);
-							mutados[i].letras = malloc (10);
-						}
-				}
-
 			struct individuos_s *cruzados = NULL;
-			if (args.cantidad_a_cruzar != 0)
-				{
-					args.cantidad_a_cruzar =
-						round (args.poblacion * args.cantidad_a_cruzar / 100.);
-					/* La cantidad a cruzar siempre tiene que ser par
-					 * porque se toman de a 2 individuos */
-					if ((args.cantidad_a_cruzar % 2) != 0)
-						{
-							/* El restante lo agrego a mutación */
-							if (args.cantidad_a_mutar > 0)
-								{
-									args.cantidad_a_mutar++;
-									mutados =
-										realloc (mutados,
-														 args.cantidad_a_mutar *
-														 sizeof (struct individuos_s));
-									mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
-									mutados[args.cantidad_a_mutar - 1].letras = malloc (10);
-									args.cantidad_a_cruzar -= 1;
-								}
-							/* Si no hay mutación se intenta agregar a elite */
-							else if (args.cantidad_elite > 0)
-								{
-									args.cantidad_elite++;
-									elite =
-										realloc (elite,
-														 args.cantidad_elite *
-														 sizeof (struct individuos_s));
-									mpz_init (elite[args.cantidad_elite - 1].aptitud);
-									elite[args.cantidad_elite - 1].letras = malloc (10);
-									args.cantidad_a_cruzar -= 1;
-								}
-							/* Si no hay mutación ni elite queda una cantidad
-							 * a cruzar impar y listo */
-						}
-					cruzados =
-						malloc (args.cantidad_a_cruzar * sizeof (struct individuos_s));
-					for (unsigned long int i = 0; i < args.cantidad_a_cruzar; i++)
-						{
-							mpz_init (cruzados[i].aptitud);
-							cruzados[i].letras = malloc (10);
-						}
-				}
-
-			/* Puede que por los rendondeos me quede un individuo sin asignar a
-			 * selección, cruza o mutación */
-			if ((args.poblacion - args.cantidad_elite - args.cantidad_a_cruzar -
-					 args.cantidad_a_mutar) > 0)
-				{
-					/* Primero intento asignarlo a mutación */
-					if (args.cantidad_a_mutar > 0)
-						{
-							args.cantidad_a_mutar++;
-							mutados =
-								realloc (mutados,
-												 args.cantidad_a_mutar *
-												 sizeof (struct individuos_s));
-							mpz_init (mutados[args.cantidad_a_mutar - 1].aptitud);
-							mutados[args.cantidad_a_mutar - 1].letras = malloc (10);
-						}
-					/* Si no hay mutación se intenta agregar a elite */
-					else if (args.cantidad_elite > 0)
-						{
-							args.cantidad_elite++;
-							elite =
-								realloc (elite,
-												 args.cantidad_elite * sizeof (struct individuos_s));
-							mpz_init (elite[args.cantidad_elite - 1].aptitud);
-							elite[args.cantidad_elite - 1].letras = malloc (10);
-						}
-					/* Si no hay mutación ni elite queda una cantidad
-					 * a cruzar impar y listo */
-					else
-						{
-							args.cantidad_a_cruzar++;
-							cruzados =
-								realloc (cruzados,
-												 args.cantidad_a_cruzar *
-												 sizeof (struct individuos_s));
-							mpz_init (cruzados[args.cantidad_a_cruzar - 1].aptitud);
-							cruzados[args.cantidad_a_cruzar - 1].letras = malloc (10);
-						}
-				}
+			struct individuos_s *mutados = NULL;
+			cantidades (&args, &individuos, &elite, &cruzados, &mutados);
 
 			if (args.debug > 0)
 				{
@@ -622,6 +482,8 @@ main (int argc, char **argv)
 					struct ruleta_s *ruleta =
 						malloc (args.poblacion * sizeof (struct ruleta_s));
 
+					/* Recorta la población en un x% cada y generaciones */
+					/* unsigned int recortar = 0; */
 					/* ============================================================= */
 					/*                  CICLO ALGORITMO GENÉTICO                     */
 					/* ============================================================= */
@@ -658,6 +520,22 @@ main (int argc, char **argv)
 										}
 								}
 
+							/* if ((recortar == 7) && (args.poblacion > 30)) */
+							/* { */
+							/* if ((args.poblacion - (args.poblacion * .2)) >= 30) */
+							/* { */
+							/* args.poblacion -= (args.poblacion * .2); */
+							/* cantidades (&args, &individuos, &elite, &cruzados, */
+							/* &mutados); */
+							/* recortar = 0; */
+							/* if (args.debug > 0) */
+							/* { */
+							/* printf ("\nElite: %lu\n", args.cantidad_elite); */
+							/* printf ("Se cruzan: %lu\n", args.cantidad_a_cruzar); */
+							/* printf ("Se mutan: %lu\n", args.cantidad_a_mutar); */
+							/* } */
+							/* } */
+							/* } */
 							/* ============================================================= */
 							/*                          SELECCIÓN                            */
 							/* ============================================================= */
@@ -1151,6 +1029,7 @@ main (int argc, char **argv)
 									clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
 									diff_t (comienzo_t, fin_t, &total_t[generacion]);
 								}
+							/* recortar++; */
 						}
 					/* ============================================================= */
 					/*              FIN CICLO ALGORITMO GENÉTICO                     */
