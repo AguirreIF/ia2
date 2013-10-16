@@ -575,10 +575,10 @@ main (int argc, char **argv)
 							/* ============================================================= */
 							/*                             CRUZA                             */
 							/* ============================================================= */
+							mpz_set_ui (peor_aptitud, 0);
+							n_peores = 0;
 							if (args.cantidad_a_cruzar > 0)
 								{
-									mpz_set_ui (peor_aptitud, 0);
-									n_peores = 0;
 									if (peores != NULL)
 										{
 											free (peores);
