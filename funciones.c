@@ -361,97 +361,106 @@ seleccion_elitista_con_ranking (struct individuos_s **individuos,
 																cantidad, const float rmin,
 																const unsigned int *restrict const debug)
 {
-	struct individuos_s **extras = NULL;
-
+	struct individuos_s **reserva = NULL;
 	unsigned long int copias_totales = 0, indice_nuevos = 0, copias_extras = 0;
 
 	for (unsigned long int indice = 0;
 			 (indice < *cantidad) && (copias_totales < *cantidad); indice++)
 		{
-			float copias;
-			unsigned int copias_e, copias_d = 0;
+			unsigned int copias = 0;
 
 			if (*cantidad == 1)
-				copias_e = 1;
+				copias = 1;
 			else
+				/* Total de copias redondeada */
+				copias = round (rmin +
+												2. * (((*poblacion - indice) * (1. - rmin)) /
+															(*poblacion - 1)));
+
+			/* Verifica que copias no supere a cantidad.
+			 * Puede pasar si cantidad es muy chica */
+			if ((copias + copias_totales) >= *cantidad)
+				copias = *cantidad - copias_totales;
+
+			/* Primero verifica que no se haya copiado el individuo */
+			unsigned int copiar = 1;
+			for (unsigned long int i = 0; i < copias_totales; i++)
 				{
-					/* Total de copias con decimales */
-					copias =
-						rmin +
-						2. * (((*poblacion - indice) * (1. - rmin)) / (*poblacion - 1));
-					/* Copias por la parte entera */
-					copias_e = copias;
-					/* Copias por la parte decimal */
-					copias_d = round (copias) - copias_e;
+					copiar = 0;
+					for (unsigned int j = 0; (j < 10) && (!copiar); j++)
+						if ((*elite)[i].letras[j] != (*individuos)[indice].letras[j])
+							copiar = 1;
+					if (copiar == 0)
+						break;
 				}
 
-			/* Se hace la copia por la parte decimal si corresponde */
-			if (copias_d > 0)
+			if (copiar)
 				{
-					extras =
-						realloc (extras,
-										 (copias_extras + 1) * sizeof (struct individuos_s *));
+					/* Hace la cantidad de copias correspondientes */
+					for (unsigned int n = 0; n < copias; n++, indice_nuevos++)
+						{
+							mpz_set ((*elite)[indice_nuevos].aptitud,
+											 (*individuos)[indice].aptitud);
 
-					extras[copias_extras] = malloc (sizeof (struct individuos_s));
+							memcpy ((*elite)[indice_nuevos].letras,
+											(*individuos)[indice].letras, 10);
+						}
+					copias_totales += copias;
+				}
+			/* Si no se hace copia por las dudas mantener en reserva
+			 * por si al final no se llega a la cantidad */
+			else if (copias > 0)
+				{
+					unsigned int a_copiar = copias_extras + copias;
+					reserva =
+						realloc (reserva, a_copiar * sizeof (struct individuos_s *));
 
-					mpz_init (extras[copias_extras]->aptitud);
-					mpz_set (extras[copias_extras]->aptitud,
-									 (*individuos)[indice].aptitud);
+					for (unsigned int i = copias_extras; i < a_copiar; i++)
+						{
+							reserva[i] = malloc (sizeof (struct individuos_s));
 
-					extras[copias_extras]->letras = malloc (10);
-					memcpy (extras[copias_extras]->letras,
-									(*individuos)[indice].letras, 10);
+							mpz_init (reserva[i]->aptitud);
+							mpz_set (reserva[i]->aptitud, (*individuos)[indice].aptitud);
 
-					copias_extras++;
+							reserva[i]->letras = malloc (10);
+							memcpy (reserva[i]->letras, (*individuos)[indice].letras, 10);
+
+							copias_extras++;
+						}
 				}
 
 			if (*debug > 2)
-				printf ("individuo %lu: %u + %u copias\n", indice + 1, copias_e,
-								copias_d);
-
-			/* Verifica que copias_e no supere a cantidad.
-			 * Puede pasar si cantidad es muy chica */
-			if ((copias_e + copias_totales) >= *cantidad)
-				copias_e = *cantidad - copias_totales;
-
-			/* Hace la cantidad de copias correspondientes */
-			for (unsigned int n = 0; n < copias_e; n++, indice_nuevos++)
 				{
-					mpz_set ((*elite)[indice_nuevos].aptitud,
-									 (*individuos)[indice].aptitud);
-
-					memcpy ((*elite)[indice_nuevos].letras,
-									(*individuos)[indice].letras, 10);
+					if (copiar)
+						printf ("Individuo %lu: %u copias\n", indice + 1, copias);
+					else
+						printf ("Individuo %lu: 0 copias\n", indice + 1);
 				}
-			copias_totales += copias_e;
 		}
 
 	/* Si no alcanzaron las copias de la parte entera 
 	 * copia de la parte decimal hasta completar la cantidad */
 	for (unsigned int n = 0; copias_totales < *cantidad; n++, indice_nuevos++)
 		{
-			mpz_set ((*elite)[indice_nuevos].aptitud, extras[n]->aptitud);
-			memcpy ((*elite)[indice_nuevos].letras, extras[n]->letras, 10);
+			mpz_set ((*elite)[indice_nuevos].aptitud, reserva[n]->aptitud);
+			memcpy ((*elite)[indice_nuevos].letras, reserva[n]->letras, 10);
 			copias_totales++;
-		}
-
-	/* Libera todo la memoria reservada para las copias extras */
-	if (extras != NULL)
-		{
-			for (unsigned int n = 0; n < copias_extras; n++)
-				{
-					mpz_clear (extras[n]->aptitud);
-					free (extras[n]->letras);
-					free (extras[n]);
-				}
-			free (extras);
 		}
 
 	if (*debug > 2)
 		printf ("\nCopias totales: %lu\n", copias_totales);
 
-	if (*debug > 2)
-		puts ("");
+	/* Libera todo la memoria reservada para las copias extras */
+	if (reserva != NULL)
+		{
+			for (unsigned int n = 0; n < copias_extras; n++)
+				{
+					mpz_clear (reserva[n]->aptitud);
+					free (reserva[n]->letras);
+					free (reserva[n]);
+				}
+			free (reserva);
+		}
 }
 
 void
