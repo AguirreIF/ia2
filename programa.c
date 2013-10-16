@@ -918,117 +918,115 @@ main (int argc, char **argv)
 											puts ("\nIndividuos seleccionados para mutar");
 											printf ("-----------------------------------");
 										}
-									/* Muta un % y luego de mutar cada individuo verifica si es solución */
-									for (unsigned long int i = 0; i < args.cantidad_a_mutar;
-											 i++)
+								}
+							for (unsigned long int i = 0; i < args.cantidad_a_mutar; i++)
+								{
+									unsigned long int indice =
+										seleccion_por_ruleta (&args.poblacion, ruleta);
+
+									mpz_set (mutados[i].aptitud, individuos[indice].aptitud);
+									memcpy (mutados[i].letras, individuos[indice].letras, 10);
+
+									if (args.debug == 2)
 										{
-											unsigned long int indice =
-												seleccion_por_ruleta (&args.poblacion, ruleta);
-
-											mpz_set (mutados[i].aptitud,
-															 individuos[indice].aptitud);
-											memcpy (mutados[i].letras, individuos[indice].letras,
-															10);
-
-											if (args.debug == 2)
+											printf ("\nIndividuo[%*lu]:  ", anchoi, i);
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
 												{
-													printf ("\nIndividuo[%*lu]:  ", anchoi, i);
-													for (unsigned int j = 0;
-															 j < (unsigned int) strlen (letras); j++)
-														{
-															printf ("%c:", letras[j]);
-															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == mutados[i].letras[x])
-																	{
-																		printf ("%u  ", x);
-																		break;
-																	}
-														}
-													gmp_printf ("= %Zd", mutados[i].aptitud);
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == mutados[i].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
 												}
-											else if (args.debug == 3)
-												gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi,
-																		i, mutados[i].aptitud);
-
-											/* Copia el estado anterior antes de calcular la aptitud */
-											memcpy (anterior[0].letras, mutados[i].letras, 10);
-											mpz_set (anterior[0].aptitud, mutados[i].aptitud);
-
-											mutacion (&mutados[i]);
-
-											args.faptitud (&mutados[i], operandos,
-																		 &cantidad_operandos, operadores,
-																		 operacion, &args.debug, letras);
-
-											/* Se guarda la aptitud del peor individuo */
-											if (mpz_cmp (mutados[i].aptitud, peor_aptitud) > 0)
-												mpz_set (peor_aptitud, mutados[i].aptitud);
-
-											/* Se guardan las posiciones de los que tienen aptitud -1 */
-											if (mpz_cmp_si (mutados[i].aptitud, -1) == 0)
-												{
-													peores_m =
-														realloc (peores_m,
-																		 (n_peores_m +
-																			1) * sizeof (unsigned long int));
-													peores_m[n_peores_m] = i;
-													n_peores_m++;
-												}
-
-											if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
-												{
-													if (args.debug > 0)
-														{
-															clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
-															diff_t (comienzo_t, fin_t,
-																			&total_t[generacion]);
-														}
-
-													if (args.debug > 1)
-														puts ("");
-													printf
-														("\n¡Solución por mutación en la generación %lu",
-														 generacion + 1);
-													if ((args.debug == 0) && (args.corridas > 1))
-														printf (" de la corrida %lu!\n", corrida_n);
-													else
-														puts ("!");
-													for (unsigned int j = 0;
-															 j < (unsigned int) strlen (letras); j++)
-														{
-															printf ("%c:", letras[j]);
-															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == mutados[i].letras[x])
-																	{
-																		printf ("%u  ", x);
-																		break;
-																	}
-														}
-													mostrar_operacion (&mutados[i], operandos,
-																						 operadores, operacion);
-
-													/* Muestra el estado anterior del individuo solución */
-													gmp_printf ("\nEstado anterior (%Zd)\n",
-																			anterior[0].aptitud);
-													for (unsigned int j = 0;
-															 j < (unsigned int) strlen (letras); j++)
-														{
-															printf ("%c:", letras[j]);
-															for (unsigned int x = 0; x < 10; x++)
-																if (letras[j] == anterior[0].letras[x])
-																	{
-																		printf ("%u  ", x);
-																		break;
-																	}
-														}
-													mostrar_operacion (&anterior[0], operandos,
-																						 operadores, operacion);
-													if (args.debug > 0)
-														puts ("");
-													solucion = 1;
-													break;
-												}
+											gmp_printf ("= %Zd", mutados[i].aptitud);
 										}
+									else if (args.debug == 3)
+										gmp_printf ("\nIndividuo[%*lu] aptitud: %Zd ", anchoi,
+																i, mutados[i].aptitud);
+
+									/* Copia el estado anterior antes de calcular la aptitud */
+									memcpy (anterior[0].letras, mutados[i].letras, 10);
+									mpz_set (anterior[0].aptitud, mutados[i].aptitud);
+
+									mutacion (&mutados[i]);
+
+									args.faptitud (&mutados[i], operandos,
+																 &cantidad_operandos, operadores,
+																 operacion, &args.debug, letras);
+
+									/* Se guarda la aptitud del peor individuo */
+									if (mpz_cmp (mutados[i].aptitud, peor_aptitud) > 0)
+										mpz_set (peor_aptitud, mutados[i].aptitud);
+
+									/* Se guardan las posiciones de los que tienen aptitud -1 */
+									if (mpz_cmp_si (mutados[i].aptitud, -1) == 0)
+										{
+											peores_m =
+												realloc (peores_m,
+																 (n_peores_m +
+																	1) * sizeof (unsigned long int));
+											peores_m[n_peores_m] = i;
+											n_peores_m++;
+										}
+
+									if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
+										{
+											if (args.debug > 0)
+												{
+													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+													diff_t (comienzo_t, fin_t, &total_t[generacion]);
+												}
+
+											if (args.debug > 1)
+												puts ("");
+											printf
+												("\n¡Solución por mutación en la generación %lu",
+												 generacion + 1);
+											if ((args.debug == 0) && (args.corridas > 1))
+												printf (" de la corrida %lu!\n", corrida_n);
+											else
+												puts ("!");
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
+												{
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == mutados[i].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
+												}
+											mostrar_operacion (&mutados[i], operandos,
+																				 operadores, operacion);
+
+											/* Muestra el estado anterior del individuo solución */
+											gmp_printf ("\nEstado anterior (%Zd)\n",
+																	anterior[0].aptitud);
+											for (unsigned int j = 0;
+													 j < (unsigned int) strlen (letras); j++)
+												{
+													printf ("%c:", letras[j]);
+													for (unsigned int x = 0; x < 10; x++)
+														if (letras[j] == anterior[0].letras[x])
+															{
+																printf ("%u  ", x);
+																break;
+															}
+												}
+											mostrar_operacion (&anterior[0], operandos,
+																				 operadores, operacion);
+											if (args.debug > 0)
+												puts ("");
+											solucion = 1;
+											break;
+										}
+								}
+							if (args.cantidad_a_mutar > 0)
+								{
 									if (solucion == 1)
 										break;
 									/* Muestra los individuos después de mutarlos */
@@ -1057,7 +1055,9 @@ main (int argc, char **argv)
 												}
 										}
 								}
-							/* Se reemplaza la aptitud -1 por 9 (longitud del peor individuo) */
+
+							/* Se reemplaza la aptitud -1 por 9 (longitud del peor individuo)
+							 * en los cruzados y mutados */
 							if (p_a != NULL)
 								free (p_a);
 							p_a = mpz_get_str (NULL, 10, peor_aptitud);
@@ -1086,17 +1086,18 @@ main (int argc, char **argv)
 								}
 
 							/* Se copian los mutados a la nueva generación */
-							for (unsigned long int i =
-									 args.cantidad_elite + args.cantidad_a_cruzar;
-									 i < args.poblacion; i++)
-								{
-									mpz_set (individuos[i].aptitud,
-													 mutados[i - args.cantidad_elite -
-																	 args.cantidad_a_cruzar].aptitud);
-									memcpy (individuos[i].letras,
-													mutados[i - args.cantidad_elite -
-																	args.cantidad_a_cruzar].letras, 10);
-								}
+							if (args.cantidad_a_mutar > 0)
+								for (unsigned long int i =
+										 args.cantidad_elite + args.cantidad_a_cruzar;
+										 i < args.poblacion; i++)
+									{
+										mpz_set (individuos[i].aptitud,
+														 mutados[i - args.cantidad_elite -
+																		 args.cantidad_a_cruzar].aptitud);
+										memcpy (individuos[i].letras,
+														mutados[i - args.cantidad_elite -
+																		args.cantidad_a_cruzar].letras, 10);
+									}
 
 							/* Ordena los individuos por aptitud */
 							qsort (individuos, args.poblacion, sizeof (struct individuos_s),
@@ -1151,6 +1152,9 @@ main (int argc, char **argv)
 									diff_t (comienzo_t, fin_t, &total_t[generacion]);
 								}
 						}
+					/* ============================================================= */
+					/*              FIN CICLO ALGORITMO GENÉTICO                     */
+					/* ============================================================= */
 					/* Calcula el tiempo total de ejecución de la generación */
 					if (args.debug > 0)
 						{
@@ -1301,6 +1305,9 @@ main (int argc, char **argv)
 							mpz_clear (peor_aptitud);
 						}
 				}
+			/* ============================================================= */
+			/*                FIN CICLO DE LAS CORRIDAS                      */
+			/* ============================================================= */
 
 			if (args.debug > 0)
 				{
