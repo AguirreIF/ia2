@@ -1,6 +1,6 @@
 CC       := cc
-CFLAGS   := -O3 -g -Wall -Wextra -pedantic -std=gnu99 -march=native -fgnu89-inline -fopenmp \
-			-pthread -ftree-parallelize-loops=2 -fexpensive-optimizations -funroll-loops \
+CFLAGS   := -O3 -g -Wall -Wextra -pedantic -std=gnu99 -march=native -fgnu89-inline \
+			-fexpensive-optimizations -funroll-loops \
 			-fmove-loop-invariants -fprefetch-loop-arrays -ftree-loop-optimize \
 			-ftree-vect-loop-version -ftree-vectorize
 LDFLAGS  := -lm -lgmp -lrt

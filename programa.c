@@ -388,7 +388,7 @@ main (int argc, char **argv)
 				{
 					comienzo_t = malloc (sizeof (struct timespec));
 					fin_t = malloc (sizeof (struct timespec));
-					total_t = malloc (args.generaciones * sizeof (struct timespec));
+					total_t = malloc (args.corridas * sizeof (struct timespec));
 				}
 
 			/* ============================================================= */
@@ -398,6 +398,8 @@ main (int argc, char **argv)
 					 corrida_n++)
 				{
 					if (args.debug > 0)
+						clock_gettime (CLOCK_PROCESS_CPUTIME_ID, comienzo_t);
+					if ((args.debug > 0) && (args.corridas > 1))
 						{
 							puts ("\n|||||||||||||||||||||||||||||||||");
 							printf ("|       CORRIDA %lu\n", corrida_n + 1);
@@ -490,8 +492,6 @@ main (int argc, char **argv)
 					for (; (generacion < args.generaciones) && (solucion == 0);
 							 generacion++)
 						{
-							if (args.debug > 0)
-								clock_gettime (CLOCK_PROCESS_CPUTIME_ID, comienzo_t);
 							if (args.debug > 1)
 								{
 									puts ("=================================");
@@ -703,12 +703,6 @@ main (int argc, char **argv)
 										}
 									if (k != -1)
 										{
-											if (args.debug > 0)
-												{
-													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
-													diff_t (comienzo_t, fin_t, &total_t[generacion]);
-												}
-
 											if (args.debug > 1)
 												puts ("");
 											printf
@@ -852,12 +846,6 @@ main (int argc, char **argv)
 
 									if (mpz_cmp_d (mutados[i].aptitud, 0) == 0)
 										{
-											if (args.debug > 0)
-												{
-													clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
-													diff_t (comienzo_t, fin_t, &total_t[generacion]);
-												}
-
 											if (args.debug > 1)
 												puts ("");
 											printf
@@ -1023,33 +1011,25 @@ main (int argc, char **argv)
 							mpq_clear (total_aptitud);
 							mpq_clear (media_aptitud);
 							mpq_clear (aptitudes);
-							/* Si encuentra solución no llega hasta acá */
-							if (args.debug > 0)
-								{
-									clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
-									diff_t (comienzo_t, fin_t, &total_t[generacion]);
-								}
-							/* recortar++; */
+							recortar++;
 						}
 					/* ============================================================= */
 					/*              FIN CICLO ALGORITMO GENÉTICO                     */
 					/* ============================================================= */
-					/* Calcula el tiempo total de ejecución de la generación */
+					/* Imprime el tiempo que lleva cada corrida */
 					if (args.debug > 0)
 						{
-							unsigned long int gen =
-								(solucion == 1) ? generacion + 1 : generacion;
+							clock_gettime (CLOCK_PROCESS_CPUTIME_ID, fin_t);
+							diff_t (comienzo_t, fin_t, &total_t[corrida_n]);
 							unsigned int tiempo = 0;
-							for (unsigned long int i = 0; i < gen; i++)
-								{
-									tiempo +=
-										((total_t[i].tv_sec * 1000) +
-										 (total_t[i].tv_nsec / 1000000));
-									printf
-										("Tiempo de ejecución de la generación %lu: %ums\n",
-										 i + 1, tiempo);
-									tiempo = 0;
-								}
+							tiempo +=
+								((total_t[corrida_n].tv_sec * 1000) +
+								 (total_t[corrida_n].tv_nsec / 1000000));
+							printf ("Tiempo de ejecución de la corrida");
+							if (args.corridas > 1)
+								printf (" %lu: %ums\n", corrida_n + 1, tiempo);
+							else
+								printf (": %ums\n", tiempo);
 						}
 
 					/* Si no encuentra solución imprime como quedó la poblacion final */
