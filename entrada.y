@@ -83,9 +83,9 @@ expresion:
 
 operando:
 	OPERANDO {
-		a_minusculas($OPERANDO);
-		if (procesar_letras ($OPERANDO, letras)) {
-			guardar_operando ($OPERANDO, operandos, cantidad_operandos);
+		a_minusculas($1);
+		if (procesar_letras ($1, letras)) {
+			guardar_operando ($1, operandos, cantidad_operandos);
 			free (yylval.cadena);
 			aux = realloc (aux, strlen (aux) + 2);
 			strcat(aux, "1");
