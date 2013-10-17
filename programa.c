@@ -1011,7 +1011,7 @@ main (int argc, char **argv)
 							mpq_clear (total_aptitud);
 							mpq_clear (media_aptitud);
 							mpq_clear (aptitudes);
-							recortar++;
+							/* recortar++; */
 						}
 					/* ============================================================= */
 					/*              FIN CICLO ALGORITMO GENÉTICO                     */
